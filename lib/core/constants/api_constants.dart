@@ -1,5 +1,14 @@
+import 'package:flutter/foundation.dart';
+
 class ApiConstants {
-  static const String baseUrl = 'http://192.168.137.1/api'; // Thay IP máy chủ của bạn
-  static const String login = '/login';
-  static const String checkIn = '/check-in';
+  static const int port = 5068;
+
+  static String get baseUrl {
+    final host = !kIsWeb && defaultTargetPlatform == TargetPlatform.android
+        ? '10.0.2.2'
+        : 'localhost';
+    return 'http://$host:$port/api';
+  }
+
+  static const String login = '/auth/login';
 }
