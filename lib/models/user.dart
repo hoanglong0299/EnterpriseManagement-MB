@@ -1,20 +1,31 @@
-class UserModel {
-  final String id;
-  final String name;
+class AuthSession {
   final String token;
+  final String username;
+  final String? employeeCode;
+  final List<String> roles;
 
-  UserModel({
-    required this.id,
-    required this.name,
+  AuthSession({
     required this.token,
+    required this.username,
+    this.employeeCode,
+    required this.roles,
   });
 
-  factory UserModel.fromJson(Map<String, dynamic> json) {
-    return UserModel(
-      // Ép mọi giá trị id về String an toàn
-      id: json['id']?.toString() ?? json['user_id']?.toString() ?? '', 
-      name: json['name']?.toString() ?? json['username']?.toString() ?? '',
-      token: json['token']?.toString() ?? json['access_token']?.toString() ?? '',
+  factory AuthSession.fromJson(Map<String, dynamic> json) {
+    return AuthSession(
+      token: json['token'] as String,
+      username: json['username'] as String,
+      employeeCode: json['employeeCode'] as String?,
+      roles: List<String>.from(json['roles'] as List),
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'token': token,
+      'username': username,
+      'employeeCode': employeeCode,
+      'roles': roles,
+    };
   }
 }

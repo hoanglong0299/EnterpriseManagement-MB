@@ -1,38 +1,25 @@
 import 'package:dio/dio.dart';
-import '../core/constants/api_constants.dart';
+
 import '../core/network/api_client.dart';
 import '../models/user.dart';
 
 class AuthService {
-  final ApiClient _apiClient = ApiClient();
+  final ApiClient _apiClient;
 
-  Future<UserModel> login(String username, String password) async {
+  AuthService(this._apiClient);
+
+  Future<AuthSession> login(String username, String password) async {
     try {
-      final response = await _apiClient.client.post(
-        ApiConstants.login,
-        data: {
-          'username': username,
-          'password': password,
-        },
+      final response = await _apiClient.dio.post(
+        '/auth/login',
+        data: {'username': username, 'password': password},
       );
-
-      print('==== DỮ LIỆU API TRẢ VỀ ====');
-      print(response.data);
-      print('=============================');
-
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        // Backend cần trả về dữ liệu có chứa token và thông tin user
-        return UserModel.fromJson(response.data);
-      } else {
-        throw Exception('Đăng nhập thất bại từ phía máy chủ');
-      }
+      return AuthSession.fromJson(response.data as Map<String, dynamic>);
     } on DioException catch (e) {
-      String errorMessage = 'Kết nối tới máy chủ thất bại';
-      if (e.response != null && e.response?.data != null) {
-        // Lấy thông báo lỗi từ phía Backend trả về (nếu có)
-        errorMessage = e.response?.data['message'] ?? 'Tài khoản hoặc mật khẩu không chính xác';
-      }
-      throw Exception(errorMessage);
+      final message = e.response?.data is Map
+          ? (e.response?.data['message'] as String? ?? 'Đăng nhập thất bại.')
+          : 'Đăng nhập thất bại.';
+      throw Exception(message);
     }
   }
 }
