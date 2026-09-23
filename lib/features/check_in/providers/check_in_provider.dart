@@ -1,101 +1,43 @@
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
-import 'package:geocoding/geocoding.dart'; // Import thêm
-import '../../../core/constants/app_constants.dart';
-import '../../../models/check_in_record.dart';
-import '../../../services/check_in_service.dart';
-
+import 'package:intl/intl.dart';
 
 class CheckInProvider extends ChangeNotifier {
-  final CheckInService _service = CheckInService();
-
   bool _isLoading = false;
-  String _statusMessage = 'Đang kiểm tra vị trí...';
-  String _currentAddress = 'Đang tải địa chỉ...'; // Thêm biến lưu địa chỉ
-  Position? _currentPosition; // Lưu trữ tọa độ thực tế
-  double _currentDistance = 0.0;
-  bool _canCheckIn = false;
+  
+  // Trạng thái khóa nút: false = chưa Clock In, true = đã Clock In
+  bool _hasClockedIn = false; 
+  
+  // Lịch sử ảo có sẵn
+  final List<String> _historyRecords = [
+    '17.50 at Singapore Office (OUT)',
+    '08.35 at Singapore Office (IN)',
+  ];
 
   bool get isLoading => _isLoading;
-  String get statusMessage => _statusMessage;
-  String get currentAddress => _currentAddress;
-  Position? get currentPosition => _currentPosition;
-  double get currentDistance => _currentDistance;
-  bool get canCheckIn => _canCheckIn;
+  bool get hasClockedIn => _hasClockedIn;
+  List<String> get historyRecords => _historyRecords;
 
-  Future<void> determinePosition() async {
+  // Xử lý khi bấm nút CLOCK IN hoặc CLOCK OUT
+  Future<void> performAction(String actionType) async {
     _isLoading = true;
-    _statusMessage = 'Đang kiểm tra vị trí...';
-    _currentAddress = 'Đang tải địa chỉ...';
-    _canCheckIn = false;
     notifyListeners();
 
-    try {
-      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-      if (!serviceEnabled) throw Exception('Vui lòng bật GPS.');
-
-      LocationPermission permission = await Geolocator.checkPermission();
-      if (permission == LocationPermission.denied) {
-        permission = await Geolocator.requestPermission();
-        if (permission == LocationPermission.denied) {
-          throw Exception('Bị từ chối quyền lấy vị trí.');
-        }
-      }
-
-      _currentPosition = await Geolocator.getCurrentPosition(
-          desiredAccuracy: LocationAccuracy.high);
-
-      if (_currentPosition!.isMocked) {
-        throw Exception('Phát hiện Fake GPS!');
-      }
-
-      _currentDistance = Geolocator.distanceBetween(
-        _currentPosition!.latitude,
-        _currentPosition!.longitude,
-        AppConstants.officeLat,
-        AppConstants.officeLng,
-      );
-
-      // Dịch tọa độ sang địa chỉ
-      try {
-        List<Placemark> placemarks = await placemarkFromCoordinates(
-            _currentPosition!.latitude, _currentPosition!.longitude);
-        if (placemarks.isNotEmpty) {
-          Placemark place = placemarks[0];
-          _currentAddress = '${place.street}, ${place.subAdministrativeArea}, ${place.administrativeArea}';
-        }
-      } catch (e) {
-        _currentAddress = 'Không thể phân giải địa chỉ';
-      }
-
-      if (_currentDistance <= AppConstants.allowedRadiusMeters) {
-        _statusMessage = 'Vị trí hợp lệ. Có thể chấm công.';
-        _canCheckIn = true;
-      } else {
-        _statusMessage = 'Ngoài phạm vi (${_currentDistance.toStringAsFixed(0)}m)';
-      }
-    } catch (e) {
-      _statusMessage = e.toString().replaceAll('Exception: ', '');
-      _currentAddress = 'Không xác định';
-    } finally {
-      _isLoading = false;
-      notifyListeners();
-    }
-  }
-
-  // Hàm giả lập bấm nút Clock In / Out
-  Future<bool> performAction(String actionType) async {
-    if (!_canCheckIn) return false;
-    _isLoading = true;
-    _statusMessage = 'Đang $actionType...';
-    notifyListeners();
-
-    await Future.delayed(const Duration(seconds: 1)); // Giả lập gọi API
+    // Giả lập thời gian xử lý của hệ thống (1 giây)
+    await Future.delayed(const Duration(seconds: 1));
     
-    _statusMessage = '$actionType thành công!';
-    _canCheckIn = false;
+    // Đảo trạng thái nút bấm
+    if (actionType == 'CLOCK IN') {
+      _hasClockedIn = true; // Khóa nút Clock In, Mở nút Clock Out
+    } else {
+      _hasClockedIn = false; // Mở lại nút Clock In
+    }
+
+    // Lấy giờ hiện tại và thêm vào danh sách lịch sử
+    final currentTime = DateFormat('HH.mm').format(DateTime.now());
+    final type = actionType == 'CLOCK IN' ? 'IN' : 'OUT';
+    _historyRecords.insert(0, '$currentTime at Singapore Office ($type)');
+
     _isLoading = false;
     notifyListeners();
-    return true;
   }
 }

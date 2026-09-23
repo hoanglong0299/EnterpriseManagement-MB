@@ -1,3 +1,4 @@
+import 'package:enterprise_management/features/auth/screens/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'features/auth/providers/auth_provider.dart';
@@ -32,7 +33,7 @@ class MyApp extends StatelessWidget {
         useMaterial3: false,
       ),
       // 2. Thay LoginScreen() thành CheckInScreen()
-      home: const CheckInScreen(), 
+      home: const LoginScreen(), 
     );
   }
 }

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
-import '../../check_in/screens/check_in_screen.dart';
+import '../../dashboard/screens/dashboard_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -45,9 +45,10 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       );
 
+      // Chuyển hướng sang màn hình Dashboard
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const CheckInScreen()),
+        MaterialPageRoute(builder: (context) => const DashboardScreen()),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
