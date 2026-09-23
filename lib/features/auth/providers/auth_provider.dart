@@ -1,39 +1,53 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
+
 import '../../../core/storage/local_storage.dart';
 import '../../../models/user.dart';
 import '../../../services/auth_service.dart';
 
+enum AuthStatus { unknown, loading, authenticated, unauthenticated }
+
 class AuthProvider extends ChangeNotifier {
-  final AuthService _authService = AuthService();
+  final AuthService _authService;
+  final LocalStorage _storage;
 
-  UserModel? _currentUser;
-  bool _isLoading = false;
-  String? _errorMessage;
+  AuthProvider(this._authService, this._storage);
 
-  UserModel? get currentUser => _currentUser;
-  bool get isLoading => _isLoading;
-  String? get errorMessage => _errorMessage;
+  AuthStatus status = AuthStatus.unknown;
+  AuthSession? session;
+  String? errorMessage;
 
-  Future<bool> login(String username, String password) async {
-    _isLoading = true;
-    _errorMessage = null;
+  Future<void> restoreSession() async {
+    final saved = await _storage.readSession();
+    if (saved == null) {
+      status = AuthStatus.unauthenticated;
+    } else {
+      session = AuthSession.fromJson(saved);
+      status = AuthStatus.authenticated;
+    }
+    notifyListeners();
+  }
+
+  Future<void> login(String username, String password) async {
+    status = AuthStatus.loading;
+    errorMessage = null;
     notifyListeners();
 
     try {
-      final user = await _authService.login(username, password);
-      _currentUser = user;
-
-      // Lưu Token vào LocalStorage vừa viết ở Bước 3
-      await LocalStorage.saveToken(user.token);
-
-      _isLoading = false;
-      notifyListeners();
-      return true; // Đăng nhập thành công
+      final result = await _authService.login(username, password);
+      session = result;
+      status = AuthStatus.authenticated;
+      await _storage.saveSession(result.toJson());
     } catch (e) {
-      _isLoading = false;
-      _errorMessage = e.toString().replaceAll('Exception: ', '');
-      notifyListeners();
-      return false; // Đăng nhập thất bại
+      status = AuthStatus.unauthenticated;
+      errorMessage = e.toString().replaceFirst('Exception: ', '');
     }
+    notifyListeners();
+  }
+
+  Future<void> logout() async {
+    await _storage.clear();
+    session = null;
+    status = AuthStatus.unauthenticated;
+    notifyListeners();
   }
 }
