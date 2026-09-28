@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import '../../check_in/screens/check_in_screen.dart';
-import '../../calender/screens/calendar_screen.dart'; // Đã thêm dấu chấm phẩy ở đây
+import '../../calendar/screens/calendar_screen.dart'; // Đảm bảo thư mục của bạn là 'calendar' (chữ a)
+import '../../activity/screens/activity_screen.dart';
+import '../../profile/screens/profile_screen.dart';
+import '../../leave/screens/leave_record_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -16,10 +19,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget build(BuildContext context) {
     // 1. Khai báo danh sách các màn hình tương ứng với 4 tab
     final List<Widget> screens = [
-      _buildHomeBody(), // Index 0: Tab Home (Nội dung cũ)
-      const Center(child: Text('Activity Screen')), // Index 1: Tab Activity
+      _buildHomeBody(), // Index 0: Tab Home
+      const ActivityScreen(), // Index 1: Tab Activity
       const CalendarScreen(), // Index 2: Tab Calendar
-      const Center(child: Text('Me Screen')), // Index 3: Tab Me
+      const ProfileScreen(), // Index 3: Tab Profile (Me)
     ];
 
     return Scaffold(
@@ -156,22 +159,33 @@ class _DashboardScreenState extends State<DashboardScreen> {
   // --- WIDGET GRID MENU (6 NÚT CHỨC NĂNG) ---
   Widget _buildQuickMenu(BuildContext context) {
     final List<Map<String, dynamic>> menuItems = [
-      {'title': 'Leave Record', 'icon': Icons.flight_takeoff, 'color': const Color(0xFF2FA2B1), 'onTap': null},
-      {'title': 'Claim Record', 'icon': Icons.receipt_long, 'color': const Color(0xFFD9534F), 'onTap': null},
+      {
+        'title': 'Leave Record', 
+        'icon': Icons.flight_takeoff, 
+        'color': const Color(0xFF2FA2B1), 
+        'onTap': () {
+          // Chuyển hướng sang màn hình Lịch sử xin nghỉ
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const LeaveRecordScreen()),
+          );
+        }
+      },
+      
       {
         'title': 'Clock In/Out',
         'icon': Icons.location_on,
         'color': const Color(0xFFE69D35),
         'onTap': () {
-          // Navigating sang màn hình Chấm công
+          // Chuyển hướng sang màn hình Chấm công
           Navigator.push(
             context,
             MaterialPageRoute(builder: (_) => const CheckInScreen()),
           );
         }
       },
-      {'title': 'Payslip', 'icon': Icons.account_balance_wallet, 'color': const Color(0xFF43A047), 'onTap': null},
-      {'title': 'Sp. Allow Record', 'icon': Icons.card_giftcard, 'color': const Color(0xFF3F51B5), 'onTap': null},
+      
+      
       {'title': 'More', 'icon': Icons.grid_view, 'color': const Color(0xFF607D8B), 'onTap': null},
     ];
 
