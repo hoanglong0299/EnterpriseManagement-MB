@@ -105,7 +105,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     onPressed: authProvider.isLoading ? null : _handleLogin,
                     child: authProvider.isLoading
                         ? const CircularProgressIndicator(color: Colors.white)
-                        : const Text('ĐẮNG NHẬP'),
+                        : const Text('ĐĂNG NHẬP'),
                   ),
                 ),
               ],
