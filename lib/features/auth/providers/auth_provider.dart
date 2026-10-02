@@ -34,6 +34,15 @@ class AuthProvider extends ChangeNotifier {
 
     try {
       final result = await _authService.login(username, password);
+
+      // Ứng dụng này là của nhân viên (chấm công, nghỉ phép, hồ sơ cá nhân) nên cần hồ sơ nhân viên.
+      // Tài khoản không có (vd Admin) thì dừng ở đây, không lưu phiên. Kiểm tra theo hồ sơ chứ không theo tên role.
+      if (result.employeeCode == null) {
+        throw Exception(
+          'Tài khoản này không có hồ sơ nhân viên nên không dùng được ứng dụng di động. Vui lòng dùng bản web.',
+        );
+      }
+
       session = result;
       status = AuthStatus.authenticated;
       await _storage.saveSession(result.toJson());
