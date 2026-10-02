@@ -6,8 +6,12 @@ import '../core/storage/local_storage.dart';
 import '../features/auth/providers/auth_provider.dart';
 import '../features/auth/screens/login_screen.dart';
 import '../features/check_in/providers/check_in_provider.dart';
+import '../features/leave/providers/leave_provider.dart';
+import '../features/profile/providers/profile_provider.dart';
 import '../services/attendance_service.dart';
 import '../services/auth_service.dart';
+import '../services/employee_service.dart';
+import '../services/leave_service.dart';
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -18,6 +22,8 @@ class MyApp extends StatelessWidget {
     final apiClient = ApiClient(storage);
     final authService = AuthService(apiClient);
     final attendanceService = AttendanceService(apiClient);
+    final leaveService = LeaveService(apiClient);
+    final employeeService = EmployeeService(apiClient);
 
     return MultiProvider(
       providers: [
@@ -28,6 +34,12 @@ class MyApp extends StatelessWidget {
         // lay duoc dung provider da tao o dong tren (xem giai thich thu tu trong MultiProvider).
         ChangeNotifierProvider(
           create: (context) => CheckInProvider(attendanceService, context.read<AuthProvider>()),
+        ),
+        ChangeNotifierProvider(
+          create: (context) => LeaveProvider(leaveService, context.read<AuthProvider>()),
+        ),
+        ChangeNotifierProvider(
+          create: (context) => ProfileProvider(employeeService, context.read<AuthProvider>()),
         ),
       ],
       child: MaterialApp(
