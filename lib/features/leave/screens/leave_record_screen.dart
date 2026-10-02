@@ -36,6 +36,37 @@ class _LeaveRecordScreenState extends State<LeaveRecordScreen> {
     }
   }
 
+  Future<void> _cancelRequest(int id) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Hủy đơn nghỉ phép'),
+        content: const Text('Bạn có chắc muốn hủy đơn này không?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const Text('Không', style: TextStyle(color: Colors.grey)),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: const Text('Hủy đơn', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+
+    final provider = context.read<LeaveProvider>();
+    final messenger = ScaffoldMessenger.of(context);
+    final success = await provider.cancel(id);
+    messenger.showSnackBar(
+      SnackBar(
+        content: Text(success ? 'Đã hủy đơn nghỉ phép.' : (provider.errorMessage ?? 'Không thể hủy đơn.')),
+        backgroundColor: success ? Colors.green : Colors.red,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final leaveHistory = context.watch<LeaveProvider>().historyForDisplay;
@@ -107,6 +138,15 @@ class _LeaveRecordScreenState extends State<LeaveRecordScreen> {
                                   Text('Thời gian: ${record['time']}'),
                                 const SizedBox(height: 4),
                                 Text('Lý do: ${record['reason']}', style: const TextStyle(color: Colors.black54)),
+                                // Đơn đang chờ duyệt thì nhân viên được hủy (giống bản web)
+                                if (record['status'] == 'Pending')
+                                  Align(
+                                    alignment: Alignment.centerRight,
+                                    child: TextButton(
+                                      onPressed: () => _cancelRequest(int.parse(record['id']!)),
+                                      child: const Text('HỦY ĐƠN', style: TextStyle(color: Colors.red)),
+                                    ),
+                                  ),
                               ],
                             ),
                           ),

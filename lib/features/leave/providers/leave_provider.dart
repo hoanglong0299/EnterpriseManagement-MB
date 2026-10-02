@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 import '../../../models/leave_balance.dart';
 import '../../../models/leave_request.dart';
@@ -41,24 +40,21 @@ class LeaveProvider extends ChangeNotifier {
 
   // Dinh dang Map {type, appliedAt, date, time, reason} la dinh dang the lich su trong LeaveRecordScreen dang doc.
   // Backend khong tra ngay tao don, nen o cho "appliedAt" hien trang thai don.
+  // 'id' va 'status' la 2 khoa them de man hinh biet don nao dang cho duyet va huy dung don do.
   List<Map<String, String>> get historyForDisplay {
-    final dateFormat = DateFormat('dd/MM/yyyy');
     return _requests.map((r) {
-      final sameDay = dateFormat.format(r.startDate) == dateFormat.format(r.endDate);
-      final dateStr = sameDay
-          ? dateFormat.format(r.startDate)
-          : '${dateFormat.format(r.startDate)} - ${dateFormat.format(r.endDate)}';
-
       var reason = r.reason ?? '';
       if (r.status == 'Rejected' && (r.rejectionReason ?? '').isNotEmpty) {
         reason = '$reason (Từ chối: ${r.rejectionReason})';
       }
 
       return {
+        'id': r.id.toString(),
+        'status': r.status,
         'type': r.leaveTypeName,
-        'appliedAt': _statusLabel(r.status),
-        'date': dateStr,
-        'time': _timeLabel(r),
+        'appliedAt': r.statusLabel,
+        'date': r.dateLabel,
+        'time': r.timeLabel,
         'reason': reason,
       };
     }).toList();
@@ -144,6 +140,20 @@ class LeaveProvider extends ChangeNotifier {
     return true;
   }
 
+  // Chi huy duoc don cua chinh minh khi con "Cho duyet" (backend kiem tra, sai thi tra loi kem message).
+  Future<bool> cancel(int id) async {
+    errorMessage = null;
+    try {
+      await _leaveService.cancel(id);
+    } catch (e) {
+      errorMessage = e.toString().replaceFirst('Exception: ', '');
+      notifyListeners();
+      return false;
+    }
+    await load();
+    return true;
+  }
+
   // Dung khi dang xuat de nguoi dang nhap ke tiep khong thay du lieu cua nguoi truoc.
   void clear() {
     _types = [];
@@ -163,35 +173,6 @@ class LeaveProvider extends ChangeNotifier {
     if (endMinutes <= 12 * 60) return 'Morning';
     if (startMinutes >= 13 * 60) return 'Afternoon';
     return 'FullDay';
-  }
-
-  String _timeLabel(LeaveRequest r) {
-    switch (r.session) {
-      case 'Morning':
-        return 'Buổi sáng';
-      case 'Afternoon':
-        return 'Buổi chiều';
-      case 'FullDay':
-        return 'Cả ngày';
-      default:
-        final time = DateFormat('HH:mm');
-        return '${time.format(r.startDate)} - ${time.format(r.endDate)}';
-    }
-  }
-
-  String _statusLabel(String status) {
-    switch (status) {
-      case 'Pending':
-        return 'Chờ duyệt';
-      case 'Approved':
-        return 'Đã duyệt';
-      case 'Rejected':
-        return 'Từ chối';
-      case 'Cancelled':
-        return 'Đã hủy';
-      default:
-        return status;
-    }
   }
 
   String _trimNumber(double value) {
