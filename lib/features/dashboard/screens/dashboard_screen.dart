@@ -1,6 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../check_in/screens/check_in_screen.dart';
-import '../../calender/screens/calendar_screen.dart'; // Đã thêm dấu chấm phẩy ở đây
+import '../../calendar/screens/calendar_screen.dart';
+import '../../activity/screens/activity_screen.dart';
+import '../../leave/providers/leave_provider.dart';
+import '../../profile/providers/profile_provider.dart';
+import '../../profile/screens/profile_screen.dart';
+import '../../leave/screens/leave_record_screen.dart';
+import '../../leave/screens/leave_status_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -13,23 +20,29 @@ class _DashboardScreenState extends State<DashboardScreen> {
   int _currentIndex = 0;
 
   @override
+  void initState() {
+    super.initState();
+    // Dashboard la man hinh dau tien sau khi dang nhap: tai ho so va so du nghi phep that tai day.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<ProfileProvider>().load();
+      context.read<LeaveProvider>().load();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    // 1. Khai báo danh sách các màn hình tương ứng với 4 tab
     final List<Widget> screens = [
-      _buildHomeBody(), // Index 0: Tab Home (Nội dung cũ)
-      const Center(child: Text('Activity Screen')), // Index 1: Tab Activity
-      const CalendarScreen(), // Index 2: Tab Calendar
-      const Center(child: Text('Me Screen')), // Index 3: Tab Me
+      _buildHomeBody(), 
+      const ActivityScreen(), 
+      const CalendarScreen(), 
+      const ProfileScreen(), 
     ];
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
       body: SafeArea(
-        // 2. Nội dung thay đổi động dựa vào biến _currentIndex
         child: screens[_currentIndex],
       ),
-
-      // Thanh Bottom Navigation Bar
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         onTap: (index) {
@@ -50,34 +63,45 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  // --- HÀM TÁCH GIAO DIỆN HOME CŨ ---
+  // --- HÀM TÁCH GIAO DIỆN HOME ---
   Widget _buildHomeBody() {
+    final leaveStatusData = context.watch<LeaveProvider>().leaveStatusList;
+
     return SingleChildScrollView(
       child: Column(
         children: [
-          // 1. Header (Appbar tùy chỉnh với Thanh tìm kiếm & Avatar)
           _buildHeader(),
-
-          // 2. Lưới nút bấm Menu chức năng (Quick Actions)
           _buildQuickMenu(context),
-
           const SizedBox(height: 10),
 
-          // 3. Thẻ "Leave Status" (Trạng thái nghỉ phép)
-          _buildCard(
-            title: 'Leave Status',
-            child: Column(
-              children: [
-                _buildStatusRow('Annual Leave', '7 Days'),
-                const Divider(height: 1),
-                _buildStatusRow('Sick Leave', '12 Days'),
-                const Divider(height: 1),
-                _buildStatusRow('Extended Child Care Leave', '0 Day'),
-              ],
+          // 3. Thẻ "Leave Status" (Giữ nguyên khung tổng hợp bên ngoài)
+          // Khi bấm vào thẻ hoặc nút mũi tên sẽ chuyển sang màn hình danh sách chi tiết
+          InkWell(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => LeaveStatusScreen(leaveStatusList: leaveStatusData),
+                ),
+              );
+            },
+            child: AbsorbPointer(
+              // Dùng AbsorbPointer để giữ nguyên giao diện hiển thị khung thẻ thu gọn nhưng vẫn bắt sự kiện InkWell tổng
+              child: _buildCard(
+                title: 'Leave Status',
+                child: Column(
+                  children: [
+                    // Hiển thị tối đa 3 mục tiêu biểu ngoài Dashboard
+                    for (var i = 0; i < leaveStatusData.length && i < 3; i++) ...[
+                      if (i > 0) const Divider(height: 1),
+                      _buildStatusRow(leaveStatusData[i]['title'], leaveStatusData[i]['value']),
+                    ],
+                  ],
+                ),
+              ),
             ),
           ),
 
-          // 4. Thẻ "Company Notice" (Thông báo công ty)
           _buildCard(
             title: 'Company Notice',
             child: const Padding(
@@ -89,7 +113,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
           ),
 
-          // 5. Thẻ "Useful Link" (Liên kết hữu ích)
           _buildCard(
             title: 'Useful Link',
             child: Column(
@@ -99,10 +122,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   onTap: () {},
                   child: const Padding(
                     padding: EdgeInsets.symmetric(vertical: 8.0),
-                    child: Text(
-                      'EMS Service Website',
-                      style: TextStyle(color: Colors.black54, fontSize: 13),
-                    ),
+                    child: Text('EMS Service Website', style: TextStyle(color: Colors.black54, fontSize: 13)),
                   ),
                 ),
                 const Divider(height: 1),
@@ -110,23 +130,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   onTap: () {},
                   child: const Padding(
                     padding: EdgeInsets.symmetric(vertical: 8.0),
-                    child: Text(
-                      'Insurance Policy',
-                      style: TextStyle(color: Colors.black54, fontSize: 13),
-                    ),
+                    child: Text('Insurance Policy', style: TextStyle(color: Colors.black54, fontSize: 13)),
                   ),
                 ),
               ],
             ),
           ),
-
           const SizedBox(height: 20),
         ],
       ),
     );
   }
 
-  // --- WIDGET HEADERS ---
   Widget _buildHeader() {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
@@ -138,9 +153,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
             onPressed: () {},
           ),
           const Spacer(),
-          const Text(
-            'Nguyễn Văn A',
-            style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600),
+          Text(
+            context.watch<ProfileProvider>().displayName,
+            style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600),
           ),
           const SizedBox(width: 12),
           const CircleAvatar(
@@ -153,26 +168,31 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  // --- WIDGET GRID MENU (6 NÚT CHỨC NĂNG) ---
   Widget _buildQuickMenu(BuildContext context) {
     final List<Map<String, dynamic>> menuItems = [
-      {'title': 'Leave Record', 'icon': Icons.flight_takeoff, 'color': const Color(0xFF2FA2B1), 'onTap': null},
-      {'title': 'Claim Record', 'icon': Icons.receipt_long, 'color': const Color(0xFFD9534F), 'onTap': null},
+      {
+        'title': 'Leave Record', 
+        'icon': Icons.flight_takeoff, 
+        'color': const Color(0xFF2FA2B1), 
+        'onTap': () async {
+          // Chuyển hướng sang LeaveRecordScreen và có thể nhận dữ liệu cập nhật ngày nghỉ nếu cần
+          await Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const LeaveRecordScreen()),
+          );
+        }
+      },
       {
         'title': 'Clock In/Out',
         'icon': Icons.location_on,
         'color': const Color(0xFFE69D35),
         'onTap': () {
-          // Navigating sang màn hình Chấm công
           Navigator.push(
             context,
             MaterialPageRoute(builder: (_) => const CheckInScreen()),
           );
         }
       },
-      {'title': 'Payslip', 'icon': Icons.account_balance_wallet, 'color': const Color(0xFF43A047), 'onTap': null},
-      {'title': 'Sp. Allow Record', 'icon': Icons.card_giftcard, 'color': const Color(0xFF3F51B5), 'onTap': null},
-      {'title': 'More', 'icon': Icons.grid_view, 'color': const Color(0xFF607D8B), 'onTap': null},
     ];
 
     return Container(
@@ -222,7 +242,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  // --- WIDGET KHUNG THẺ KHỐI DƯỚI ---
   Widget _buildCard({required String title, required Widget child}) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -252,7 +271,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  // --- HELPER DÒNG TRẠNG THÁI NGHỈ PHÉP ---
   Widget _buildStatusRow(String label, String value) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 10.0),
@@ -273,7 +291,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 }
 
-// Custom Helper Class cho Bottom Navigation
 class BottomNavigationBarColor extends BottomNavigationBarItem {
   BottomNavigationBarColor({
     required super.icon,
