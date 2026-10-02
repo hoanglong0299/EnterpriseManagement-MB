@@ -49,12 +49,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Đăng xuất'),
-        content: const Text('Bạn có chắc chắn muốn đăng xuất khỏi ứng dụng?'),
+        title: const Text('Logging Out'),
+        content: const Text('Are you sure you want to log out of the application?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Hủy', style: TextStyle(color: Colors.grey)),
+            child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
           ),
           TextButton(
             onPressed: () {
@@ -261,8 +261,8 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
       body: ListView(
         children: [
           SwitchListTile(
-            title: const Text('Cho phép nhận thông báo'),
-            subtitle: const Text('Nhận thông báo về chấm công, xin nghỉ, OT...'),
+            title: const Text('Allow Notifications'),
+            subtitle: const Text('Receive notifications about attendance, leave requests, OT...'),
             value: _isOn,
             activeColor: const Color(0xFF2A5CAA),
             onChanged: (value) {
