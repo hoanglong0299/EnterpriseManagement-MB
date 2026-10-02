@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import '../../check_in/screens/check_in_screen.dart';
-import '../../calendar/screens/calendar_screen.dart'; // Đảm bảo thư mục của bạn là 'calendar' (chữ a)
+import '../../calendar/screens/calendar_screen.dart'; 
 import '../../activity/screens/activity_screen.dart';
 import '../../profile/screens/profile_screen.dart';
 import '../../leave/screens/leave_record_screen.dart';
+import '../../leave/screens/leave_status_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -15,24 +16,29 @@ class DashboardScreen extends StatefulWidget {
 class _DashboardScreenState extends State<DashboardScreen> {
   int _currentIndex = 0;
 
+  // Dữ liệu mẫu cho trạng thái nghỉ phép (Có thể liên kết và cập nhật từ Leave Record)
+  final List<Map<String, dynamic>> _leaveStatusData = [
+    {'title': 'Annual Leave', 'value': '7 Days', 'category': 'Nghỉ có lương'},
+    {'title': 'Sick Leave', 'value': '12 Days', 'category': 'Nghỉ có lương'},
+    {'title': 'Extended Child Care Leave', 'value': '0 Day', 'category': 'Nghỉ chế độ'},
+    {'title': 'Marriage Leave (Kết hôn)', 'value': '3 Days', 'category': 'Nghỉ chế độ'},
+    {'title': 'Bereavement Leave (Tang chế)', 'value': '3 Days', 'category': 'Nghỉ chế độ'},
+  ];
+
   @override
   Widget build(BuildContext context) {
-    // 1. Khai báo danh sách các màn hình tương ứng với 4 tab
     final List<Widget> screens = [
-      _buildHomeBody(), // Index 0: Tab Home
-      const ActivityScreen(), // Index 1: Tab Activity
-      const CalendarScreen(), // Index 2: Tab Calendar
-      const ProfileScreen(), // Index 3: Tab Profile (Me)
+      _buildHomeBody(), 
+      const ActivityScreen(), 
+      const CalendarScreen(), 
+      const ProfileScreen(), 
     ];
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
       body: SafeArea(
-        // 2. Nội dung thay đổi động dựa vào biến _currentIndex
         child: screens[_currentIndex],
       ),
-
-      // Thanh Bottom Navigation Bar
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         onTap: (index) {
@@ -53,34 +59,44 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  // --- HÀM TÁCH GIAO DIỆN HOME CŨ ---
+  // --- HÀM TÁCH GIAO DIỆN HOME ---
   Widget _buildHomeBody() {
     return SingleChildScrollView(
       child: Column(
         children: [
-          // 1. Header (Appbar tùy chỉnh với Thanh tìm kiếm & Avatar)
           _buildHeader(),
-
-          // 2. Lưới nút bấm Menu chức năng (Quick Actions)
           _buildQuickMenu(context),
-
           const SizedBox(height: 10),
 
-          // 3. Thẻ "Leave Status" (Trạng thái nghỉ phép)
-          _buildCard(
-            title: 'Leave Status',
-            child: Column(
-              children: [
-                _buildStatusRow('Annual Leave', '7 Days'),
-                const Divider(height: 1),
-                _buildStatusRow('Sick Leave', '12 Days'),
-                const Divider(height: 1),
-                _buildStatusRow('Extended Child Care Leave', '0 Day'),
-              ],
+          // 3. Thẻ "Leave Status" (Giữ nguyên khung tổng hợp bên ngoài)
+          // Khi bấm vào thẻ hoặc nút mũi tên sẽ chuyển sang màn hình danh sách chi tiết
+          InkWell(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => LeaveStatusScreen(leaveStatusList: _leaveStatusData),
+                ),
+              );
+            },
+            child: AbsorbPointer(
+              // Dùng AbsorbPointer để giữ nguyên giao diện hiển thị khung thẻ thu gọn nhưng vẫn bắt sự kiện InkWell tổng
+              child: _buildCard(
+                title: 'Leave Status',
+                child: Column(
+                  children: [
+                    // Hiển thị 3 mục tiêu biểu ngoài Dashboard
+                    _buildStatusRow(_leaveStatusData[0]['title'], _leaveStatusData[0]['value']),
+                    const Divider(height: 1),
+                    _buildStatusRow(_leaveStatusData[1]['title'], _leaveStatusData[1]['value']),
+                    const Divider(height: 1),
+                    _buildStatusRow(_leaveStatusData[2]['title'], _leaveStatusData[2]['value']),
+                  ],
+                ),
+              ),
             ),
           ),
 
-          // 4. Thẻ "Company Notice" (Thông báo công ty)
           _buildCard(
             title: 'Company Notice',
             child: const Padding(
@@ -92,7 +108,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
           ),
 
-          // 5. Thẻ "Useful Link" (Liên kết hữu ích)
           _buildCard(
             title: 'Useful Link',
             child: Column(
@@ -102,10 +117,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   onTap: () {},
                   child: const Padding(
                     padding: EdgeInsets.symmetric(vertical: 8.0),
-                    child: Text(
-                      'EMS Service Website',
-                      style: TextStyle(color: Colors.black54, fontSize: 13),
-                    ),
+                    child: Text('EMS Service Website', style: TextStyle(color: Colors.black54, fontSize: 13)),
                   ),
                 ),
                 const Divider(height: 1),
@@ -113,23 +125,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   onTap: () {},
                   child: const Padding(
                     padding: EdgeInsets.symmetric(vertical: 8.0),
-                    child: Text(
-                      'Insurance Policy',
-                      style: TextStyle(color: Colors.black54, fontSize: 13),
-                    ),
+                    child: Text('Insurance Policy', style: TextStyle(color: Colors.black54, fontSize: 13)),
                   ),
                 ),
               ],
             ),
           ),
-
           const SizedBox(height: 20),
         ],
       ),
     );
   }
 
-  // --- WIDGET HEADERS ---
   Widget _buildHeader() {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
@@ -156,37 +163,31 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  // --- WIDGET GRID MENU (6 NÚT CHỨC NĂNG) ---
   Widget _buildQuickMenu(BuildContext context) {
     final List<Map<String, dynamic>> menuItems = [
       {
         'title': 'Leave Record', 
         'icon': Icons.flight_takeoff, 
         'color': const Color(0xFF2FA2B1), 
-        'onTap': () {
-          // Chuyển hướng sang màn hình Lịch sử xin nghỉ
-          Navigator.push(
+        'onTap': () async {
+          // Chuyển hướng sang LeaveRecordScreen và có thể nhận dữ liệu cập nhật ngày nghỉ nếu cần
+          await Navigator.push(
             context,
             MaterialPageRoute(builder: (_) => const LeaveRecordScreen()),
           );
         }
       },
-      
       {
         'title': 'Clock In/Out',
         'icon': Icons.location_on,
         'color': const Color(0xFFE69D35),
         'onTap': () {
-          // Chuyển hướng sang màn hình Chấm công
           Navigator.push(
             context,
             MaterialPageRoute(builder: (_) => const CheckInScreen()),
           );
         }
       },
-      
-      
-      {'title': 'More', 'icon': Icons.grid_view, 'color': const Color(0xFF607D8B), 'onTap': null},
     ];
 
     return Container(
@@ -236,7 +237,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  // --- WIDGET KHUNG THẺ KHỐI DƯỚI ---
   Widget _buildCard({required String title, required Widget child}) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -266,7 +266,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  // --- HELPER DÒNG TRẠNG THÁI NGHỈ PHÉP ---
   Widget _buildStatusRow(String label, String value) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 10.0),
@@ -287,7 +286,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 }
 
-// Custom Helper Class cho Bottom Navigation
 class BottomNavigationBarColor extends BottomNavigationBarItem {
   BottomNavigationBarColor({
     required super.icon,

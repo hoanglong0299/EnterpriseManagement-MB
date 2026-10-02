@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../auth/screens/login_screen.dart';
-
+import 'privacy_statement_screen.dart';
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
 
@@ -167,7 +167,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 _buildMenuItem(
                   icon: Icons.description_outlined,
                   title: 'Privacy Statement',
-                  onTap: () {},
+                  onTap: () {
+                    // Chuyển hướng sang màn hình Privacy Statement
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const PrivacyStatementScreen(),
+                      ),
+                    );
+                  },
                 ),
                 _buildMenuItem(
                   icon: Icons.logout,
