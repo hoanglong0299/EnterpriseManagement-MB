@@ -6,12 +6,15 @@ import '../core/storage/local_storage.dart';
 import '../features/auth/providers/auth_provider.dart';
 import '../features/auth/screens/login_screen.dart';
 import '../features/check_in/providers/check_in_provider.dart';
+import '../features/dashboard/providers/menu_provider.dart';
+import '../features/leave/providers/leave_approval_provider.dart';
 import '../features/leave/providers/leave_provider.dart';
 import '../features/profile/providers/profile_provider.dart';
 import '../services/attendance_service.dart';
 import '../services/auth_service.dart';
 import '../services/employee_service.dart';
 import '../services/leave_service.dart';
+import '../services/menu_service.dart';
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -24,6 +27,7 @@ class MyApp extends StatelessWidget {
     final attendanceService = AttendanceService(apiClient);
     final leaveService = LeaveService(apiClient);
     final employeeService = EmployeeService(apiClient);
+    final menuService = MenuService(apiClient);
 
     return MultiProvider(
       providers: [
@@ -41,6 +45,8 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(
           create: (context) => ProfileProvider(employeeService, context.read<AuthProvider>()),
         ),
+        ChangeNotifierProvider(create: (_) => MenuProvider(menuService)),
+        ChangeNotifierProvider(create: (_) => LeaveApprovalProvider(leaveService)),
       ],
       child: MaterialApp(
         title: 'EMS',

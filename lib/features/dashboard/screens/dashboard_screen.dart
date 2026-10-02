@@ -4,8 +4,10 @@ import '../../check_in/screens/check_in_screen.dart';
 import '../../calendar/screens/calendar_screen.dart';
 import '../../activity/screens/activity_screen.dart';
 import '../../leave/providers/leave_provider.dart';
+import '../providers/menu_provider.dart';
 import '../../profile/providers/profile_provider.dart';
 import '../../profile/screens/profile_screen.dart';
+import '../../leave/screens/leave_approval_screen.dart';
 import '../../leave/screens/leave_record_screen.dart';
 import '../../leave/screens/leave_status_screen.dart';
 
@@ -26,6 +28,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<ProfileProvider>().load();
       context.read<LeaveProvider>().load();
+      context.read<MenuProvider>().load();
     });
   }
 
@@ -169,30 +172,48 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Widget _buildQuickMenu(BuildContext context) {
+    // Mỗi chức năng chỉ hiện khi tài khoản được cấp trang tương ứng trong menu backend (giống bản web),
+    // không dựa vào tên role: Admin đổi quyền trên web thì app tự đổi theo.
+    final menu = context.watch<MenuProvider>();
+
     final List<Map<String, dynamic>> menuItems = [
-      {
-        'title': 'Leave Record', 
-        'icon': Icons.flight_takeoff, 
-        'color': const Color(0xFF2FA2B1), 
-        'onTap': () async {
-          // Chuyển hướng sang LeaveRecordScreen và có thể nhận dữ liệu cập nhật ngày nghỉ nếu cần
-          await Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => const LeaveRecordScreen()),
-          );
-        }
-      },
-      {
-        'title': 'Clock In/Out',
-        'icon': Icons.location_on,
-        'color': const Color(0xFFE69D35),
-        'onTap': () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => const CheckInScreen()),
-          );
-        }
-      },
+      if (menu.hasRoute('/employee/leave'))
+        {
+          'title': 'Leave Record',
+          'icon': Icons.flight_takeoff,
+          'color': const Color(0xFF2FA2B1),
+          'onTap': () async {
+            // Chuyển hướng sang LeaveRecordScreen và có thể nhận dữ liệu cập nhật ngày nghỉ nếu cần
+            await Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const LeaveRecordScreen()),
+            );
+          }
+        },
+      if (menu.hasRoute('/employee/attendance'))
+        {
+          'title': 'Clock In/Out',
+          'icon': Icons.location_on,
+          'color': const Color(0xFFE69D35),
+          'onTap': () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const CheckInScreen()),
+            );
+          }
+        },
+      if (menu.hasRoute('/manager/leave'))
+        {
+          'title': 'Leave Approval',
+          'icon': Icons.fact_check,
+          'color': const Color(0xFF3F51B5),
+          'onTap': () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const LeaveApprovalScreen()),
+            );
+          }
+        },
     ];
 
     return Container(
