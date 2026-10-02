@@ -17,9 +17,9 @@ class CheckInProvider extends ChangeNotifier {
 
   bool get isLoading => _isLoading;
 
-  // Dang trong ca lam: da check-in nhung chua check-out.
-  bool get hasClockedIn =>
-      _today?.checkInTime != null && _today?.checkOutTime == null;
+  // Da check-in hom nay (backend chi co 1 cap vao/ra moi ngay): CLOCK IN bi khoa,
+  // CLOCK OUT luon bam duoc, bam lai se ghi de gio ra (lan cuoi la gio ra chinh thuc).
+  bool get hasClockedIn => _today?.checkInTime != null;
 
   // Man hinh chi hien thi List<String>, nen tu day chuyen AttendanceRecord
   // cua hom nay thanh danh sach chuoi, moi nhat hien truoc (giong du lieu gia truoc day).
@@ -69,5 +69,13 @@ class CheckInProvider extends ChangeNotifier {
       _isLoading = false;
       notifyListeners();
     }
+  }
+
+  // Dung khi dang xuat de nguoi dang nhap ke tiep khong thay du lieu cham cong cua nguoi truoc.
+  void clear() {
+    _today = null;
+    errorMessage = null;
+    _isLoading = false;
+    notifyListeners();
   }
 }
