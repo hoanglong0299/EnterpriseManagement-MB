@@ -29,9 +29,5 @@ class AttendanceService {
     }
   }
 
-  String _message(DioException e) {
-    return e.response?.data is Map
-        ? (e.response?.data['message'] as String? ?? 'Khong the cham cong.')
-        : 'Khong the cham cong.';
-  }
+  String _message(DioException e) => apiErrorMessage(e, 'Không thể xử lý yêu cầu chấm công.');
 }
