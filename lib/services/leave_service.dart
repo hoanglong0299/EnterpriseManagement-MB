@@ -70,6 +70,52 @@ class LeaveService {
     }
   }
 
+  Future<LeaveRequest> cancel(int id) async {
+    try {
+      final response = await _apiClient.dio.put('/leave-requests/$id/cancel');
+      return LeaveRequest.fromJson(response.data as Map<String, dynamic>);
+    } on DioException catch (e) {
+      throw Exception(_message(e));
+    }
+  }
+
+  // Cac API duoi day chi quan ly (hoac admin) goi duoc, nhan vien thuong se bi 403.
+  Future<List<LeaveRequest>> getPending() => _getList('/leave-requests/pending');
+
+  Future<List<LeaveRequest>> getHistory() => _getList('/leave-requests/history');
+
+  Future<LeaveRequest> approve(int id) async {
+    try {
+      final response = await _apiClient.dio.put('/leave-requests/$id/approve');
+      return LeaveRequest.fromJson(response.data as Map<String, dynamic>);
+    } on DioException catch (e) {
+      throw Exception(_message(e));
+    }
+  }
+
+  Future<LeaveRequest> reject(int id, String? rejectionReason) async {
+    try {
+      final response = await _apiClient.dio.put(
+        '/leave-requests/$id/reject',
+        data: {'rejectionReason': rejectionReason},
+      );
+      return LeaveRequest.fromJson(response.data as Map<String, dynamic>);
+    } on DioException catch (e) {
+      throw Exception(_message(e));
+    }
+  }
+
+  Future<List<LeaveRequest>> _getList(String path) async {
+    try {
+      final response = await _apiClient.dio.get(path);
+      return (response.data as List)
+          .map((item) => LeaveRequest.fromJson(item as Map<String, dynamic>))
+          .toList();
+    } on DioException catch (e) {
+      throw Exception(_message(e));
+    }
+  }
+
   // Backend chi dung phan ngay cua gia tri nay (gio duoc gan theo buoi nghi), nen gui 00:00:00.
   String _dateOnly(DateTime value) {
     final month = value.month.toString().padLeft(2, '0');
@@ -77,9 +123,5 @@ class LeaveService {
     return '${value.year}-$month-${day}T00:00:00';
   }
 
-  String _message(DioException e) {
-    return e.response?.data is Map
-        ? (e.response?.data['message'] as String? ?? 'Khong the xu ly yeu cau nghi phep.')
-        : 'Khong the xu ly yeu cau nghi phep.';
-  }
+  String _message(DioException e) => apiErrorMessage(e, 'Không thể xử lý yêu cầu nghỉ phép.');
 }
