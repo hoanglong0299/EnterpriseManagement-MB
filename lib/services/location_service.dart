@@ -40,19 +40,37 @@ class LocationService {
       throw DeviceException('Cần cấp quyền vị trí để chấm công.');
     }
 
-    try {
-      final position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
-        timeLimit: const Duration(seconds: 15),
-      );
-      return LocationReading(
-        latitude: position.latitude,
-        longitude: position.longitude,
-        isMocked: position.isMocked,
-      );
-    } on TimeoutException {
-      throw DeviceException('Không lấy được vị trí. Vui lòng ra nơi thoáng và thử lại.');
+    final position = await _readPosition();
+    return LocationReading(
+      latitude: position.latitude,
+      longitude: position.longitude,
+      isMocked: position.isMocked,
+    );
+  }
+
+  // GPS độ chính xác cao cần bắt được vệ tinh nên trong nhà thường hết giờ chờ. Thử lần lượt:
+  // GPS cao -> độ chính xác trung bình (Wi-Fi/mạng, đủ cho bán kính 100 m) -> vị trí gần nhất (còn mới).
+  // Server vẫn tự kiểm tra khoảng cách nên việc nới cách lấy vị trí không làm lỏng quy tắc chấm công.
+  Future<Position> _readPosition() async {
+    for (final accuracy in [LocationAccuracy.high, LocationAccuracy.medium]) {
+      try {
+        return await Geolocator.getCurrentPosition(
+          desiredAccuracy: accuracy,
+          timeLimit: const Duration(seconds: 10),
+        );
+      } on TimeoutException {
+        // Thử mức tiếp theo.
+      }
     }
+
+    final last = await Geolocator.getLastKnownPosition();
+    if (last != null && DateTime.now().difference(last.timestamp) < const Duration(minutes: 5)) {
+      return last;
+    }
+
+    throw DeviceException(
+      'Không lấy được vị trí. Hãy bật Wi-Fi, ra nơi thoáng rồi thử lại.',
+    );
   }
 
   Future<void> openLocationSettings() => Geolocator.openLocationSettings();
