@@ -11,7 +11,7 @@ class CalendarScreen extends StatefulWidget {
 }
 
 class _CalendarScreenState extends State<CalendarScreen> {
-  DateTime _selectedDate = DateTime.now();
+  DateTime? _selectedDate = DateTime.now();
   DateTime _focusedMonth = DateTime.now();
 
   final List<String> _weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -25,7 +25,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: _selectedDate,
+      initialDate: _selectedDate ?? DateTime.now(),
       firstDate: DateTime(2000), 
       lastDate: DateTime(2100),  
       builder: (context, child) {
@@ -57,12 +57,12 @@ class _CalendarScreenState extends State<CalendarScreen> {
     int daysInMonth = DateTime(_focusedMonth.year, _focusedMonth.month + 1, 0).day;
     int firstDayOffset = DateTime(_focusedMonth.year, _focusedMonth.month, 1).weekday % 7;
     
-    bool isTodaySelected = _selectedDate.year == DateTime.now().year && 
-                           _selectedDate.month == DateTime.now().month && 
-                           _selectedDate.day == DateTime.now().day;
+    bool isTodaySelected = _selectedDate != null && 
+                           _selectedDate!.year == DateTime.now().year && 
+                           _selectedDate!.month == DateTime.now().month && 
+                           _selectedDate!.day == DateTime.now().day;
 
-    // Kiểm tra xem ngày đang được chọn có phải là Chủ nhật không
-    bool isSelectedSunday = _selectedDate.weekday == DateTime.sunday;
+    bool isSelectedSunday = _selectedDate != null && _selectedDate!.weekday == DateTime.sunday;
 
     return Container(
       color: Colors.white,
@@ -104,7 +104,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
           ),
           const SizedBox(height: 10),
 
-          // 3. Thứ trong tuần (Sun -> Sat)
+          // 3. Thứ trong tuần
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Row(
@@ -114,7 +114,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                   child: Text(
                     day, 
                     style: TextStyle(
-                      color: day == 'Sun' ? Colors.red.shade300 : Colors.grey, // Chữ Sun màu đỏ nhạt
+                      color: day == 'Sun' ? Colors.red : Colors.grey, 
                       fontSize: 13,
                       fontWeight: day == 'Sun' ? FontWeight.bold : FontWeight.normal,
                     ),
@@ -153,35 +153,38 @@ class _CalendarScreenState extends State<CalendarScreen> {
                       int day = index - firstDayOffset + 1;
                       DateTime currentDate = DateTime(_focusedMonth.year, _focusedMonth.month, day);
                       
-                      bool isSelected = _selectedDate.year == currentDate.year && 
-                                        _selectedDate.month == currentDate.month && 
-                                        _selectedDate.day == currentDate.day;
+                      bool isSelected = _selectedDate != null && 
+                                        _selectedDate!.year == currentDate.year && 
+                                        _selectedDate!.month == currentDate.month && 
+                                        _selectedDate!.day == currentDate.day;
                                         
                       bool isSunday = currentDate.weekday == DateTime.sunday;
 
                       return GestureDetector(
                         onTap: () {
                           setState(() {
-                            _selectedDate = currentDate;
+                            if (isSelected) {
+                              _selectedDate = null; // Bấm lại để bỏ chọn
+                            } else {
+                              _selectedDate = currentDate; // Gán ngày mới
+                            }
                           });
                         },
                         child: Container(
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            // Nếu được chọn -> Màu xanh. Nếu là CN chưa chọn -> Nền xám mờ. Còn lại -> Trong suốt
+                            // Chọn -> Xanh. Chủ nhật (chưa chọn) -> Nền Đỏ nhạt. Bình thường -> Trong suốt
                             color: isSelected 
                                 ? const Color(0xFF2A5CAA) 
-                                : (isSunday ? Colors.grey.shade200 : Colors.transparent),
+                                : (isSunday ? Colors.red.shade100 : Colors.transparent),
                           ),
                           child: Center(
                             child: Text(
                               day.toString(),
                               style: TextStyle(
                                 fontSize: 15,
-                                // Chọn -> Trắng. Chủ nhật -> Đỏ nhạt. Bình thường -> Đen
-                                color: isSelected 
-                                    ? Colors.white 
-                                    : (isSunday ? Colors.red.shade400 : Colors.black87),
+                                // Chọn -> Trắng. Còn lại (cả Chủ nhật và ngày thường) -> Đen
+                                color: isSelected ? Colors.white : Colors.black87,
                                 fontWeight: isSelected || isSunday ? FontWeight.bold : FontWeight.normal,
                               ),
                             ),
@@ -206,53 +209,62 @@ class _CalendarScreenState extends State<CalendarScreen> {
               ),
               child: SingleChildScrollView(
                 physics: const BouncingScrollPhysics(),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      DateFormat('dd/MM/yyyy (EEE)').format(_selectedDate),
-                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87),
-                    ),
-                    const SizedBox(height: 16),
-                    
-                    // XỬ LÝ LOGIC HIỂN THỊ NỘI DUNG NGÀY
-                    if (isSelectedSunday)
-                      const Row(
-                        children: [
-                          Icon(Icons.weekend, size: 20, color: Colors.orange), // Icon nghỉ ngơi
-                          SizedBox(width: 12),
-                          Text(
-                            'DAY-OFF', 
-                            style: TextStyle(
-                              fontSize: 15, 
-                              color: Colors.black87, 
-                              fontWeight: FontWeight.bold,
-                              letterSpacing: 1.0,
-                            ),
+                child: _selectedDate == null
+                    ? const Padding(
+                        padding: EdgeInsets.only(top: 20),
+                        child: Center(
+                          child: Text(
+                            'Vui lòng chọn một ngày để xem lịch trình',
+                            style: TextStyle(color: Colors.grey, fontSize: 15),
                           ),
-                        ],
-                      )
-                    else if (isTodaySelected && provider.historyRecords.isNotEmpty)
-                      ...provider.historyRecords.map((record) => Padding(
-                        padding: const EdgeInsets.only(bottom: 12.0),
-                        child: Row(
-                          children: [
-                            const Icon(Icons.circle, size: 8, color: Colors.lightBlueAccent),
-                            const SizedBox(width: 12),
-                            Text(record, style: const TextStyle(fontSize: 14, color: Colors.black87)),
-                          ],
                         ),
-                      ))
-                    else
-                      const Row(
-                        children: [
-                          Icon(Icons.circle, size: 8, color: Colors.lightBlueAccent),
-                          SizedBox(width: 12),
-                          Text('S0900_1800 - 09:00 to 18:00', style: TextStyle(fontSize: 14, color: Colors.black87)),
-                        ],
                       )
-                  ],
-                ),
+                    : Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            DateFormat('dd/MM/yyyy (EEE)').format(_selectedDate!),
+                            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87),
+                          ),
+                          const SizedBox(height: 16),
+                          
+                          if (isSelectedSunday)
+                            const Row(
+                              children: [
+                                Icon(Icons.weekend, size: 20, color: Colors.orange),
+                                SizedBox(width: 12),
+                                Text(
+                                  'DAY-OFF', 
+                                  style: TextStyle(
+                                    fontSize: 15, 
+                                    color: Colors.black87, 
+                                    fontWeight: FontWeight.bold,
+                                    letterSpacing: 1.0,
+                                  ),
+                                ),
+                              ],
+                            )
+                          else if (isTodaySelected && provider.historyRecords.isNotEmpty)
+                            ...provider.historyRecords.map((record) => Padding(
+                              padding: const EdgeInsets.only(bottom: 12.0),
+                              child: Row(
+                                children: [
+                                  const Icon(Icons.circle, size: 8, color: Colors.lightBlueAccent),
+                                  const SizedBox(width: 12),
+                                  Text(record, style: const TextStyle(fontSize: 14, color: Colors.black87)),
+                                ],
+                              ),
+                            ))
+                          else
+                            const Row(
+                              children: [
+                                Icon(Icons.circle, size: 8, color: Colors.lightBlueAccent),
+                                SizedBox(width: 12),
+                                Text('S0900_1800 - 09:00 to 18:00', style: TextStyle(fontSize: 14, color: Colors.black87)),
+                              ],
+                            )
+                        ],
+                      ),
               ),
             ),
           ),
