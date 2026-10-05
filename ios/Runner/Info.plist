@@ -14,6 +14,10 @@
 	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Ứng dụng cần camera để chụp ảnh làm bằng chứng khi chấm công.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Ứng dụng cần vị trí để kiểm tra bạn đang ở công ty khi chấm công.</string>
 	<key>CFBundleName</key>
 	<string>enterprise_management</string>
 	<key>CFBundlePackageType</key>

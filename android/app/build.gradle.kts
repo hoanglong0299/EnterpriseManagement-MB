@@ -6,7 +6,7 @@ plugins {
 
 android {
     namespace = "com.example.enterprise_management"
-    compileSdk = flutter.compileSdkVersion
+    compileSdk = 37
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
