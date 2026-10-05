@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../check_in/screens/check_in_screen.dart';
+import '../../../app/feature_registry.dart';
 import '../../calendar/screens/calendar_screen.dart';
 import '../../activity/screens/activity_screen.dart';
 import '../../leave/providers/leave_provider.dart';
 import '../providers/menu_provider.dart';
 import '../../profile/providers/profile_provider.dart';
 import '../../profile/screens/profile_screen.dart';
-import '../../leave/screens/leave_approval_screen.dart';
-import '../../leave/screens/leave_record_screen.dart';
 import '../../leave/screens/leave_status_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
@@ -176,44 +174,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
     // không dựa vào tên role: Admin đổi quyền trên web thì app tự đổi theo.
     final menu = context.watch<MenuProvider>();
 
+    // Icon trên Home sinh từ registry: chỉ hiện chức năng mà menu backend cấp cho tài khoản, tên lấy từ menu.
     final List<Map<String, dynamic>> menuItems = [
-      if (menu.hasRoute('/employee/leave'))
-        {
-          'title': 'Leave Record',
-          'icon': Icons.flight_takeoff,
-          'color': const Color(0xFF2FA2B1),
-          'onTap': () async {
-            // Chuyển hướng sang LeaveRecordScreen và có thể nhận dữ liệu cập nhật ngày nghỉ nếu cần
-            await Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const LeaveRecordScreen()),
-            );
-          }
-        },
-      if (menu.hasRoute('/employee/attendance'))
-        {
-          'title': 'Clock In/Out',
-          'icon': Icons.location_on,
-          'color': const Color(0xFFE69D35),
-          'onTap': () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const CheckInScreen()),
-            );
-          }
-        },
-      if (menu.hasRoute('/manager/leave'))
-        {
-          'title': 'Leave Approval',
-          'icon': Icons.fact_check,
-          'color': const Color(0xFF3F51B5),
-          'onTap': () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const LeaveApprovalScreen()),
-            );
-          }
-        },
+      for (final feature in appFeatures)
+        if (menu.hasRoute(feature.route))
+          {
+            'title': menu.titleOf(feature.route) ?? feature.fallbackTitle,
+            'icon': feature.icon,
+            'color': feature.color,
+            'onTap': () {
+              Navigator.push(context, MaterialPageRoute(builder: feature.builder));
+            }
+          },
     ];
 
     return Container(

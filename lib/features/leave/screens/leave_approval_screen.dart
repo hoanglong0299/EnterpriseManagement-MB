@@ -2,7 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../models/leave_request.dart';
+import '../../../shared/widgets/permission_gate.dart';
+import '../../../shared/widgets/state_views.dart';
+import '../../auth/providers/auth_provider.dart';
 import '../providers/leave_approval_provider.dart';
+import '../widgets/leave_ui.dart';
 
 // Màn hình duyệt đơn nghỉ phép của quản lý (tương ứng trang "Duyệt đơn xin nghỉ" bên web).
 class LeaveApprovalScreen extends StatefulWidget {
@@ -13,6 +17,9 @@ class LeaveApprovalScreen extends StatefulWidget {
 }
 
 class _LeaveApprovalScreenState extends State<LeaveApprovalScreen> {
+  String _query = ''; // tìm theo tên/mã nhân viên
+  String? _historyStatus; // lọc trạng thái ở tab Lịch sử (null = tất cả)
+
   @override
   void initState() {
     super.initState();
@@ -69,6 +76,18 @@ class _LeaveApprovalScreenState extends State<LeaveApprovalScreen> {
   Widget build(BuildContext context) {
     final provider = context.watch<LeaveApprovalProvider>();
 
+    // Xem danh sách đơn cần leave.request.view (backend chặn 403 nếu thiếu).
+    if (!context.watch<AuthProvider>().can('leave.request.view')) {
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text('Duyệt đơn xin nghỉ'),
+          backgroundColor: const Color(0xFF2A5CAA),
+          foregroundColor: Colors.white,
+        ),
+        body: const EmptyView(message: 'Bạn không có quyền xem đơn nghỉ phép của nhân viên.', icon: Icons.lock_outline),
+      );
+    }
+
     return DefaultTabController(
       length: 2,
       child: Scaffold(
@@ -102,26 +121,59 @@ class _LeaveApprovalScreenState extends State<LeaveApprovalScreen> {
       return const Center(child: CircularProgressIndicator());
     }
 
-    return RefreshIndicator(
-      onRefresh: provider.load,
-      child: items.isEmpty
-          ? ListView(
-              children: [
-                const SizedBox(height: 120),
-                Center(
-                  child: Text(
-                    provider.errorMessage ?? (pending ? 'Không có đơn chờ duyệt' : 'Chưa có lịch sử'),
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(color: Colors.grey, fontSize: 16, fontStyle: FontStyle.italic),
-                  ),
-                ),
-              ],
-            )
-          : ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: items.length,
-              itemBuilder: (context, index) => _buildCard(provider, items[index], pending: pending),
+    final query = _query.trim().toLowerCase();
+    final filtered = items.where((r) {
+      if (!pending && _historyStatus != null && r.status != _historyStatus) return false;
+      if (query.isEmpty) return true;
+      return r.employeeName.toLowerCase().contains(query) || r.employeeCode.toLowerCase().contains(query);
+    }).toList();
+
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(12, 12, 12, 4),
+          child: TextField(
+            onChanged: (v) => setState(() => _query = v),
+            decoration: const InputDecoration(
+              hintText: 'Tìm theo tên / mã nhân viên',
+              prefixIcon: Icon(Icons.search),
+              isDense: true,
+              filled: true,
+              fillColor: Colors.white,
+              border: OutlineInputBorder(),
             ),
+          ),
+        ),
+        if (!pending)
+          Padding(
+            padding: const EdgeInsets.only(top: 4),
+            child: LeaveStatusFilterBar(selected: _historyStatus, onChanged: (v) => setState(() => _historyStatus = v)),
+          ),
+        Expanded(
+          child: RefreshIndicator(
+            onRefresh: provider.load,
+            child: filtered.isEmpty
+                ? ListView(
+                    children: [
+                      const SizedBox(height: 100),
+                      provider.errorMessage != null
+                          ? ErrorView(message: provider.errorMessage!, onRetry: provider.load)
+                          : EmptyView(
+                              message: items.isNotEmpty
+                                  ? 'Không có đơn phù hợp bộ lọc.'
+                                  : (pending ? 'Không có đơn chờ duyệt' : 'Chưa có lịch sử'),
+                              icon: Icons.fact_check_outlined,
+                            ),
+                    ],
+                  )
+                : ListView.builder(
+                    padding: const EdgeInsets.all(16),
+                    itemCount: filtered.length,
+                    itemBuilder: (context, index) => _buildCard(provider, filtered[index], pending: pending),
+                  ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -130,7 +182,10 @@ class _LeaveApprovalScreenState extends State<LeaveApprovalScreen> {
 
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
-      child: Padding(
+      child: InkWell(
+        borderRadius: BorderRadius.circular(12),
+        onTap: () => showLeaveDetail(context, item, showEmployee: true),
+        child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -144,7 +199,7 @@ class _LeaveApprovalScreenState extends State<LeaveApprovalScreen> {
                     style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Color(0xFF2A5CAA)),
                   ),
                 ),
-                Text(item.statusLabel, style: const TextStyle(color: Colors.grey, fontSize: 12)),
+                LeaveStatusChip(item),
               ],
             ),
             const Divider(),
@@ -158,7 +213,10 @@ class _LeaveApprovalScreenState extends State<LeaveApprovalScreen> {
               Text('Lý do từ chối: ${item.rejectionReason}', style: const TextStyle(color: Colors.black54)),
             if (pending) ...[
               const SizedBox(height: 12),
-              Row(
+              // Duyệt/Từ chối cần leave.request.approve (cả 2 endpoint dùng cùng mã).
+              PermissionGate(
+                code: 'leave.request.approve',
+                child: Row(
                 children: [
                   Expanded(
                     child: OutlinedButton(
@@ -181,9 +239,11 @@ class _LeaveApprovalScreenState extends State<LeaveApprovalScreen> {
                     ),
                   ),
                 ],
+                ),
               ),
             ],
           ],
+        ),
         ),
       ),
     );

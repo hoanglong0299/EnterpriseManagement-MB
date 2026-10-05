@@ -17,6 +17,14 @@ class MenuProvider extends ChangeNotifier {
   // con hon la khoa nguoi dung ra ngoai chi vi 1 lan loi mang.
   bool hasRoute(String route) => _loadFailed || _menus.any((m) => m.route == route);
 
+  // Tên menu do Admin đặt trên web, để Home hiển thị đúng tên đó.
+  String? titleOf(String route) {
+    for (final m in _menus) {
+      if (m.route == route) return m.menuName;
+    }
+    return null;
+  }
+
   Future<void> load() async {
     try {
       _menus = await _menuService.getMine();

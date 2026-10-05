@@ -2,6 +2,7 @@ import 'package:intl/intl.dart';
 
 class LeaveRequest {
   final int id;
+  final String employeeCode;
   final String employeeName;
   final String leaveTypeCode;
   final String leaveTypeName;
@@ -14,9 +15,11 @@ class LeaveRequest {
   final String status;
   final String? approverName;
   final String? rejectionReason;
+  final DateTime? approvedAt;
 
   LeaveRequest({
     required this.id,
+    this.employeeCode = '',
     required this.employeeName,
     required this.leaveTypeCode,
     required this.leaveTypeName,
@@ -29,11 +32,13 @@ class LeaveRequest {
     required this.status,
     this.approverName,
     this.rejectionReason,
+    this.approvedAt,
   });
 
   factory LeaveRequest.fromJson(Map<String, dynamic> json) {
     return LeaveRequest(
       id: json['id'] as int,
+      employeeCode: (json['employeeCode'] as String?) ?? '',
       employeeName: json['employeeName'] as String,
       leaveTypeCode: json['leaveTypeCode'] as String,
       leaveTypeName: json['leaveTypeName'] as String,
@@ -46,6 +51,7 @@ class LeaveRequest {
       status: json['status'] as String,
       approverName: json['approverName'] as String?,
       rejectionReason: json['rejectionReason'] as String?,
+      approvedAt: json['approvedAt'] == null ? null : DateTime.parse(json['approvedAt'] as String),
     );
   }
 

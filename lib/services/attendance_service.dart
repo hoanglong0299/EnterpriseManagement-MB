@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:dio/dio.dart';
 
 import '../core/network/api_client.dart';
+import '../models/attendance_adjustment.dart';
 import '../models/attendance_record.dart';
 import '../models/office_location.dart';
 
@@ -56,6 +57,38 @@ class AttendanceService {
       return list
           .map((item) => AttendanceRecord.fromJson(item as Map<String, dynamic>))
           .toList();
+    } on DioException catch (e) {
+      throw Exception(_message(e));
+    }
+  }
+
+  // Danh sách yêu cầu điều chỉnh công của chính mình (cần attendance.adjustment.self).
+  Future<List<AttendanceAdjustment>> getMyAdjustments() async {
+    try {
+      final response = await _apiClient.dio.get('/attendance/adjustments/mine');
+      return (response.data as List)
+          .map((item) => AttendanceAdjustment.fromJson(item as Map<String, dynamic>))
+          .toList();
+    } on DioException catch (e) {
+      throw Exception(_message(e));
+    }
+  }
+
+  // Giờ mới gửi dạng "yyyy-MM-ddTHH:mm:ss"; bỏ trống giờ nào thì backend giữ nguyên giờ đó.
+  Future<AttendanceAdjustment> submitAdjustment({
+    required String attendanceDate,
+    required String reason,
+    String? newCheckInTime,
+    String? newCheckOutTime,
+  }) async {
+    try {
+      final response = await _apiClient.dio.post('/attendance/adjustments', data: {
+        'attendanceDate': attendanceDate,
+        'reason': reason,
+        'newCheckInTime': ?newCheckInTime,
+        'newCheckOutTime': ?newCheckOutTime,
+      });
+      return AttendanceAdjustment.fromJson(response.data as Map<String, dynamic>);
     } on DioException catch (e) {
       throw Exception(_message(e));
     }
