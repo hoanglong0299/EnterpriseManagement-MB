@@ -14,7 +14,9 @@ import '../services/attendance_service.dart';
 import '../services/auth_service.dart';
 import '../services/employee_service.dart';
 import '../services/leave_service.dart';
+import '../services/location_service.dart';
 import '../services/menu_service.dart';
+import '../services/photo_service.dart';
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -37,7 +39,12 @@ class MyApp extends StatelessWidget {
         // Dat sau AuthProvider trong danh sach de context.read<AuthProvider>() o day
         // lay duoc dung provider da tao o dong tren (xem giai thich thu tu trong MultiProvider).
         ChangeNotifierProvider(
-          create: (context) => CheckInProvider(attendanceService, context.read<AuthProvider>()),
+          create: (context) => CheckInProvider(
+            attendanceService,
+            LocationService(),
+            PhotoService(),
+            context.read<AuthProvider>(),
+          ),
         ),
         ChangeNotifierProvider(
           create: (context) => LeaveProvider(leaveService, context.read<AuthProvider>()),
