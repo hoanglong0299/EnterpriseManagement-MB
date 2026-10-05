@@ -33,6 +33,9 @@ class CheckInProvider extends ChangeNotifier {
 
   bool get isLoading => _isLoading;
 
+  // Vị trí công ty lấy từ backend (null khi chưa tải được), để màn hình hiển thị đúng nơi được phép chấm công.
+  OfficeLocation? get office => _office;
+
   // Da check-in hom nay (backend chi co 1 cap vao/ra moi ngay): CLOCK IN bi khoa,
   // CLOCK OUT luon bam duoc, bam lai se ghi de gio ra (lan cuoi la gio ra chinh thuc).
   bool get hasClockedIn => _today?.checkInTime != null;
@@ -66,6 +69,7 @@ class CheckInProvider extends ChangeNotifier {
       final todayStr = DateFormat('yyyy-MM-dd').format(DateTime.now());
       final matches = history.where((r) => r.attendanceDate == todayStr);
       _today = matches.isEmpty ? null : matches.first;
+      _office ??= await _attendanceService.getOfficeLocation();
     } catch (e) {
       errorMessage = e.toString().replaceFirst('Exception: ', '');
     }

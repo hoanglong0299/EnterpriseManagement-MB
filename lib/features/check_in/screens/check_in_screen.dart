@@ -114,31 +114,37 @@ class _CheckInScreenState extends State<CheckInScreen> {
               
               const SizedBox(height: 30),
 
-              // 2. KHỐI VỊ TRÍ (Hardcode theo mẫu)
+              // 2. KHỐI VỊ TRÍ: nơi được phép chấm công, lấy từ backend (cùng nguồn server dùng để kiểm tra)
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Icon(Icons.location_on, color: Color(0xFF2A5CAA), size: 24),
                   const SizedBox(width: 12),
                   Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: const [
-                        Text(
-                          'Singapore Office',
-                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                        ),
-                        SizedBox(height: 4),
-                        Text(
-                          '160-168 Robinson Rd, Singapore\n(1.277581 , 103.848053)',
-                          style: TextStyle(color: Colors.black87, fontSize: 14, height: 1.4),
-                        ),
-                      ],
-                    ),
+                    child: provider.office == null
+                        ? const Text(
+                            'Đang tải vị trí văn phòng...',
+                            style: TextStyle(color: Colors.black54, fontSize: 14),
+                          )
+                        : Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                provider.office!.name,
+                                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                'Chấm công trong bán kính ${provider.office!.allowedRadiusMeters.round()} m\n'
+                                '(${provider.office!.latitude.toStringAsFixed(6)}, ${provider.office!.longitude.toStringAsFixed(6)})',
+                                style: const TextStyle(color: Colors.black87, fontSize: 14, height: 1.4),
+                              ),
+                            ],
+                          ),
                   ),
                 ],
               ),
-              
+
               const SizedBox(height: 24),
 
               // 3. NÚT CLOCK IN (Xanh) - Khóa khi đã Clock In
