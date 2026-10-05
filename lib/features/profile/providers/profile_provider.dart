@@ -29,6 +29,22 @@ class ProfileProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  // Cap nhat SDT/dia chi (backend chi cho tai khoan co quyen employee.manage). Tra ve true neu thanh cong.
+  Future<bool> updateContact({required String phone, required String address}) async {
+    final current = employee;
+    if (current == null) return false;
+    errorMessage = null;
+    try {
+      employee = await _employeeService.updateContact(current, phone: phone, address: address);
+      notifyListeners();
+      return true;
+    } catch (e) {
+      errorMessage = e.toString().replaceFirst('Exception: ', '');
+      notifyListeners();
+      return false;
+    }
+  }
+
   // Dung khi dang xuat de nguoi dang nhap ke tiep khong thay ho so cua nguoi truoc.
   void clear() {
     employee = null;

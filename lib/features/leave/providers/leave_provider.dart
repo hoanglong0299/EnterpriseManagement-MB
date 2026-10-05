@@ -23,6 +23,9 @@ class LeaveProvider extends ChangeNotifier {
   List<LeaveRequest> _requests = [];
 
   bool get isLoading => _isLoading;
+  List<LeaveType> get types => _types;
+  List<LeaveBalance> get balances => _balances;
+  List<LeaveRequest> get requests => _requests;
 
   // Dinh dang Map {title, value, category} la dinh dang Dashboard va LeaveStatusScreen dang doc.
   List<Map<String, dynamic>> get leaveStatusList {
@@ -112,6 +115,42 @@ class LeaveProvider extends ChangeNotifier {
       session: 'FullDay',
       reason: reason,
     );
+  }
+
+  // Gui don theo loai nghi bat ky (giong form web): nghi ngay/nhieu ngay co buoi nghi.
+  Future<bool> submitLeave({
+    required String leaveTypeCode,
+    required DateTime startDate,
+    required DateTime endDate,
+    required String session,
+    required String reason,
+  }) {
+    return _submit(
+      leaveTypeCode: leaveTypeCode,
+      startDate: startDate,
+      endDate: endDate,
+      session: session,
+      reason: reason,
+    );
+  }
+
+  // Nghi ngan: 1 khung 30 phut trong hom nay.
+  Future<bool> submitShortLeave({
+    required String leaveTypeCode,
+    required DateTime start,
+    required DateTime end,
+    required String reason,
+  }) async {
+    errorMessage = null;
+    try {
+      await _leaveService.submitShort(leaveTypeCode: leaveTypeCode, start: start, end: end, reason: reason);
+    } catch (e) {
+      errorMessage = e.toString().replaceFirst('Exception: ', '');
+      notifyListeners();
+      return false;
+    }
+    await load();
+    return true;
   }
 
   // Tra ve true neu gui thanh cong; neu that bai, errorMessage chua noi dung loi tu backend.

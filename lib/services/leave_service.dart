@@ -70,6 +70,29 @@ class LeaveService {
     }
   }
 
+  // Nghỉ ngắn: gửi nguyên giờ bắt đầu/kết thúc của khung 30 phút (backend chỉ nhận khung hợp lệ trong hôm nay).
+  Future<LeaveRequest> submitShort({
+    required String leaveTypeCode,
+    required DateTime start,
+    required DateTime end,
+    required String reason,
+  }) async {
+    try {
+      final response = await _apiClient.dio.post(
+        '/leave-requests',
+        data: {
+          'leaveTypeCode': leaveTypeCode,
+          'startDate': _dateTime(start),
+          'endDate': _dateTime(end),
+          'reason': reason,
+        },
+      );
+      return LeaveRequest.fromJson(response.data as Map<String, dynamic>);
+    } on DioException catch (e) {
+      throw Exception(_message(e));
+    }
+  }
+
   Future<LeaveRequest> cancel(int id) async {
     try {
       final response = await _apiClient.dio.put('/leave-requests/$id/cancel');
@@ -121,6 +144,11 @@ class LeaveService {
     final month = value.month.toString().padLeft(2, '0');
     final day = value.day.toString().padLeft(2, '0');
     return '${value.year}-$month-${day}T00:00:00';
+  }
+
+  String _dateTime(DateTime value) {
+    String two(int n) => n.toString().padLeft(2, '0');
+    return '${value.year}-${two(value.month)}-${two(value.day)}T${two(value.hour)}:${two(value.minute)}:00';
   }
 
   String _message(DioException e) => apiErrorMessage(e, 'Không thể xử lý yêu cầu nghỉ phép.');

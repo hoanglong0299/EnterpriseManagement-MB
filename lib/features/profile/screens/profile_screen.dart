@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../auth/screens/login_screen.dart';
@@ -8,7 +7,9 @@ import '../../dashboard/providers/menu_provider.dart';
 import '../../leave/providers/leave_approval_provider.dart';
 import '../../leave/providers/leave_provider.dart';
 import '../providers/profile_provider.dart';
+import 'account_settings_screen.dart';
 import 'privacy_statement_screen.dart';
+import 'profile_detail_screen.dart';
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
 
@@ -19,13 +20,7 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   bool _isNotificationOn = true;
 
-  // Email/SĐT người dùng vừa sửa trong Account Settings. Backend chưa có API cho nhân viên tự sửa hồ sơ,
-  // nên giá trị này chỉ giữ trong phiên chạy app; chưa sửa thì dùng dữ liệu thật từ hồ sơ.
-  String? _emailOverride;
-  String? _phoneOverride;
-
-  String get _email => _emailOverride ?? context.read<ProfileProvider>().employee?.email ?? '';
-  String get _phone => _phoneOverride ?? context.read<ProfileProvider>().employee?.phone ?? '';
+  String get _email => context.read<ProfileProvider>().employee?.email ?? '';
 
   // Chuyển sang màn hình Cài đặt thông báo
   void _openNotificationSettings() async {
@@ -42,28 +37,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
-  // Chuyển sang màn hình Cài đặt tài khoản
-  void _openAccountSettings() async {
-    final employee = context.read<ProfileProvider>().employee;
-    final birthDate = employee?.dateOfBirth;
+  // Chuyển sang màn hình Cài đặt tài khoản (thông tin đăng nhập + đổi mật khẩu)
+  void _openAccountSettings() {
+    Navigator.push(context, MaterialPageRoute(builder: (context) => const AccountSettingsScreen()));
+  }
 
-    final result = await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => AccountSettingsScreen(
-          fullName: context.read<ProfileProvider>().displayName,
-          birthDate: birthDate == null ? '' : DateFormat('dd/MM/yyyy').format(birthDate),
-          email: _email,
-          phone: _phone,
-        ),
-      ),
-    );
-    if (result != null) {
-      setState(() {
-        _emailOverride = result['email'];
-        _phoneOverride = result['phone'];
-      });
-    }
+  // Hồ sơ cá nhân đầy đủ như trang "Hồ sơ của tôi" bên web
+  void _openProfileDetail() {
+    Navigator.push(context, MaterialPageRoute(builder: (context) => const ProfileDetailScreen()));
   }
 
   // Đăng xuất
@@ -199,6 +180,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   onTap: _openNotificationSettings,
                 ),
                 _buildMenuItem(
+                  icon: Icons.badge_outlined,
+                  title: 'Hồ sơ cá nhân',
+                  onTap: _openProfileDetail,
+                ),
+                _buildMenuItem(
                   icon: Icons.person_outline,
                   title: 'Account Settings',
                   onTap: _openAccountSettings,
@@ -312,132 +298,6 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
           ),
         ],
       ),
-    );
-  }
-}
-
-// ==========================================
-// MÀN HÌNH CÀI ĐẶT TÀI KHOẢN (ACCOUNT)
-// ==========================================
-class AccountSettingsScreen extends StatefulWidget {
-  final String fullName;
-  final String birthDate;
-  final String email;
-  final String phone;
-  const AccountSettingsScreen({
-    super.key,
-    required this.fullName,
-    required this.birthDate,
-    required this.email,
-    required this.phone,
-  });
-
-  @override
-  State<AccountSettingsScreen> createState() => _AccountSettingsScreenState();
-}
-
-class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
-  late TextEditingController _emailController;
-  late TextEditingController _phoneController;
-
-  @override
-  void initState() {
-    super.initState();
-    _emailController = TextEditingController(text: widget.email);
-    _phoneController = TextEditingController(text: widget.phone);
-  }
-
-  @override
-  void dispose() {
-    _emailController.dispose();
-    _phoneController.dispose();
-    super.dispose();
-  }
-
-  void _saveSettings() {
-    Navigator.pop(context, {
-      'email': _emailController.text,
-      'phone': _phoneController.text,
-    });
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Lưu thông tin thành công!'), backgroundColor: Colors.green),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Account Settings'),
-        backgroundColor: const Color(0xFF2A5CAA),
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Trường chỉ đọc
-            _buildReadOnlyField('Họ và tên', widget.fullName),
-            const SizedBox(height: 16),
-            _buildReadOnlyField('Năm sinh', widget.birthDate),
-            const SizedBox(height: 24),
-            
-            // Trường có thể sửa
-            const Text('Email liên hệ', style: TextStyle(color: Colors.grey, fontSize: 13)),
-            const SizedBox(height: 4),
-            TextField(
-              controller: _emailController,
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-                contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-              ),
-            ),
-            const SizedBox(height: 16),
-            
-            const Text('Số điện thoại', style: TextStyle(color: Colors.grey, fontSize: 13)),
-            const SizedBox(height: 4),
-            TextField(
-              controller: _phoneController,
-              keyboardType: TextInputType.phone,
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-                contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-              ),
-            ),
-            
-            const SizedBox(height: 40),
-            SizedBox(
-              width: double.infinity,
-              height: 48,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF2A5CAA)),
-                onPressed: _saveSettings,
-                child: const Text('LƯU THAY ĐỔI', style: TextStyle(fontSize: 16)),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildReadOnlyField(String label, String value) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label, style: const TextStyle(color: Colors.grey, fontSize: 13)),
-        const SizedBox(height: 4),
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-          decoration: BoxDecoration(
-            color: Colors.grey.shade200,
-            borderRadius: BorderRadius.circular(4),
-            border: Border.all(color: Colors.grey.shade300),
-          ),
-          child: Text(value, style: const TextStyle(fontSize: 15, color: Colors.black54)),
-        ),
-      ],
     );
   }
 }
