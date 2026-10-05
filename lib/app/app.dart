@@ -33,6 +33,8 @@ class MyApp extends StatelessWidget {
 
     return MultiProvider(
       providers: [
+        // Dùng chung cho các màn hình tự tạo service/provider riêng: context.read<ApiClient>().
+        Provider<ApiClient>.value(value: apiClient),
         ChangeNotifierProvider(
           create: (_) => AuthProvider(authService, storage)..restoreSession(),
         ),

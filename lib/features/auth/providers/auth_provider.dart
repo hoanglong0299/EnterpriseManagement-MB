@@ -16,9 +16,19 @@ class AuthProvider extends ChangeNotifier {
   AuthSession? session;
   String? errorMessage;
 
+  // Tài khoản có được làm hành động này không (mã permission, vd 'leave.request.approve').
+  // ADMIN luôn có mọi quyền, giống PermissionAuthorizationHandler ở backend. Backend vẫn là nơi chặn thật.
+  bool can(String permission) {
+    final s = session;
+    if (s == null) return false;
+    return s.roles.contains('ADMIN') || s.permissions.contains(permission);
+  }
+
   Future<void> restoreSession() async {
     final saved = await _storage.readSession();
-    if (saved == null) {
+    // Phiên lưu từ bản cũ chưa có danh sách permission: bắt đăng nhập lại để lấy quyền từng hành động.
+    if (saved == null || saved['permissions'] == null) {
+      if (saved != null) await _storage.clear();
       status = AuthStatus.unauthenticated;
     } else {
       session = AuthSession.fromJson(saved);
@@ -34,14 +44,6 @@ class AuthProvider extends ChangeNotifier {
 
     try {
       final result = await _authService.login(username, password);
-
-      // Ứng dụng này là của nhân viên (chấm công, nghỉ phép, hồ sơ cá nhân) nên cần hồ sơ nhân viên.
-      // Tài khoản không có (vd Admin) thì dừng ở đây, không lưu phiên. Kiểm tra theo hồ sơ chứ không theo tên role.
-      if (result.employeeCode == null) {
-        throw Exception(
-          'Tài khoản này không có hồ sơ nhân viên nên không dùng được ứng dụng di động. Vui lòng dùng bản web.',
-        );
-      }
 
       session = result;
       status = AuthStatus.authenticated;

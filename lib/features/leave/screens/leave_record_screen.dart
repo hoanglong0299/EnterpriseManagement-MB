@@ -74,7 +74,7 @@ class _LeaveRecordScreenState extends State<LeaveRecordScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
       appBar: AppBar(
-        title: const Text('Leave Record'),
+        title: const Text('Leave Request'),
         backgroundColor: const Color(0xFF2A5CAA),
       ),
       body: Padding(
