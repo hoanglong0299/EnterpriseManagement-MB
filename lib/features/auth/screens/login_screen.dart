@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../../core/storage/local_storage.dart';
 import '../providers/auth_provider.dart';
 import '../../dashboard/screens/dashboard_screen.dart';
 
@@ -13,6 +14,26 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _storage = LocalStorage();
+
+  bool _obscurePassword = true;
+  bool _rememberMe = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSavedCredentials();
+  }
+
+  Future<void> _loadSavedCredentials() async {
+    final saved = await _storage.readCredentials();
+    if (saved == null || !mounted) return;
+    setState(() {
+      _usernameController.text = saved.username;
+      _passwordController.text = saved.password;
+      _rememberMe = true;
+    });
+  }
 
   @override
   void dispose() {
@@ -38,6 +59,14 @@ class _LoginScreenState extends State<LoginScreen> {
     if (!mounted) return;
 
     if (authProvider.status == AuthStatus.authenticated) {
+      // Chỉ lưu khi đăng nhập thành công; bỏ tick thì xoá thông tin đã lưu.
+      if (_rememberMe) {
+        await _storage.saveCredentials(username, password);
+      } else {
+        await _storage.clearCredentials();
+      }
+      if (!mounted) return;
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Xin chào ${authProvider.session?.username}! Đăng nhập thành công.'),
@@ -90,14 +119,26 @@ class _LoginScreenState extends State<LoginScreen> {
                 const SizedBox(height: 16),
                 TextField(
                   controller: _passwordController,
-                  obscureText: true,
-                  decoration: const InputDecoration(
+                  obscureText: _obscurePassword,
+                  decoration: InputDecoration(
                     labelText: 'Mật khẩu',
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.lock),
+                    border: const OutlineInputBorder(),
+                    prefixIcon: const Icon(Icons.lock),
+                    suffixIcon: IconButton(
+                      icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility),
+                      tooltip: _obscurePassword ? 'Hiện mật khẩu' : 'Ẩn mật khẩu',
+                      onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                    ),
                   ),
                 ),
-                const SizedBox(height: 24),
+                CheckboxListTile(
+                  value: _rememberMe,
+                  onChanged: (v) => setState(() => _rememberMe = v ?? false),
+                  title: const Text('Lưu mật khẩu'),
+                  controlAffinity: ListTileControlAffinity.leading,
+                  contentPadding: EdgeInsets.zero,
+                ),
+                const SizedBox(height: 8),
                 SizedBox(
                   width: double.infinity,
                   height: 48,
