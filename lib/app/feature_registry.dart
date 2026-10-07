@@ -4,6 +4,7 @@ import '../features/admin/screens/admin_departments_screen.dart';
 import '../features/admin/screens/admin_employees_screen.dart';
 import '../features/admin/screens/admin_positions_screen.dart';
 import '../features/admin/screens/admin_users_screen.dart';
+import '../features/admin_leave_types/screens/admin_leave_types_screen.dart';
 import '../features/admin_system/screens/admin_audit_screen.dart';
 import '../features/admin_system/screens/admin_system_screen.dart';
 import '../features/attendance/screens/employee_attendance_screen.dart';
@@ -54,5 +55,6 @@ final List<AppFeature> appFeatures = [
   AppFeature(route: '/admin/departments', fallbackTitle: 'Phòng ban', icon: Icons.business, color: const Color(0xFF8D6E63), builder: (_) => const AdminDepartmentsScreen()),
   AppFeature(route: '/admin/positions', fallbackTitle: 'Chức vụ', icon: Icons.work_outline, color: const Color(0xFF6D4C41), builder: (_) => const AdminPositionsScreen()),
   AppFeature(route: '/admin/audit', fallbackTitle: 'Audit Log', icon: Icons.history, color: const Color(0xFF546E7A), builder: (_) => const AdminAuditScreen()),
+  AppFeature(route: '/admin/leave-types', fallbackTitle: 'Loại nghỉ phép', icon: Icons.event_note, color: const Color(0xFF00897B), builder: (_) => const AdminLeaveTypesScreen()),
   AppFeature(route: '/admin/system', fallbackTitle: 'System Administration', icon: Icons.settings, color: const Color(0xFF455A64), builder: (_) => const AdminSystemScreen()),
 ];

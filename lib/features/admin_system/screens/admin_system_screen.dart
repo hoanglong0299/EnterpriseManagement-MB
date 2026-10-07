@@ -6,12 +6,12 @@ import '../../../services/system_admin_service.dart';
 import '../../../shared/widgets/state_views.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../providers/system_provider.dart';
-import '../widgets/system_leave_types_tab.dart';
 import '../widgets/system_menus_tab.dart';
 import '../widgets/system_permissions_tab.dart';
 import '../widgets/system_roles_tab.dart';
 
-// System Administration: 4 phần (vai trò, permission, menu, loại nghỉ phép), mỗi phần hiện theo permission *.manage.
+// System Administration: 3 phần (vai trò, permission, menu), mỗi phần hiện theo permission *.manage.
+// Loại nghỉ phép đã tách thành màn hình riêng /admin/leave-types.
 class AdminSystemScreen extends StatelessWidget {
   const AdminSystemScreen({super.key});
 
@@ -22,7 +22,6 @@ class AdminSystemScreen extends StatelessWidget {
       if (auth.can('role.manage')) _SystemTab('Vai trò', (p) => p.loadRoles(), const SystemRolesTab()),
       if (auth.can('permission.manage')) _SystemTab('Permission', (p) => p.loadPermissions(), const SystemPermissionsTab()),
       if (auth.can('menu.manage')) _SystemTab('Menu', (p) => p.loadMenus(), const SystemMenusTab()),
-      if (auth.can('leavetype.manage')) _SystemTab('Loại nghỉ', (p) => p.loadLeaveTypes(), const SystemLeaveTypesTab()),
     ];
 
     if (tabs.isEmpty) {
