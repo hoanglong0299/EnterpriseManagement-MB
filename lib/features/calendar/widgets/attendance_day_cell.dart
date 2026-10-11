@@ -68,7 +68,7 @@ class AttendanceDayCell extends StatelessWidget {
             child: Text(
               '${day.day}',
               style: TextStyle(
-                fontSize: 14,
+                fontSize: 16,
                 fontWeight: (isToday || isSelected) ? FontWeight.w600 : FontWeight.w400,
                 color: textColor,
               ),

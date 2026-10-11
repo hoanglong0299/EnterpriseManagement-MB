@@ -11,6 +11,7 @@ import '../../../shared/widgets/permission_gate.dart';
 import '../../../shared/widgets/state_views.dart';
 import '../../../shared/widgets/status_chip.dart';
 import '../providers/leave_provider.dart';
+import 'leave_return_screen.dart';
 import '../widgets/leave_ui.dart';
 
 String _num(double value) {
@@ -87,6 +88,17 @@ class _LeaveRecordScreenState extends State<LeaveRecordScreen> {
           title: const Text('Xin nghỉ phép'),
           backgroundColor: const Color(0xFF2A5CAA),
           foregroundColor: Colors.white,
+          actions: [
+            // Lối vào "Đi làm lại": chỉ người có quyền tự xin nghỉ.
+            PermissionGate(
+              code: 'leave.request.self',
+              child: TextButton.icon(
+                onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const LeaveReturnScreen())),
+                icon: const Icon(Icons.work_history_outlined, color: Colors.white, size: 18),
+                label: const Text('Đi làm lại', style: TextStyle(color: Colors.white)),
+              ),
+            ),
+          ],
           bottom: const TabBar(
             labelColor: Colors.white,
             unselectedLabelColor: Colors.white70,
@@ -322,6 +334,9 @@ class _LeaveRecordScreenState extends State<LeaveRecordScreen> {
             LinearProgressIndicator(value: ratio, minHeight: 6, borderRadius: BorderRadius.circular(3)),
             const SizedBox(height: 6),
             Text('Đã dùng ${_num(b.usedTime)} $unit', style: const TextStyle(fontSize: 12, color: Colors.black54)),
+            if (b.refundedTime > 0)
+              Text('Đã hoàn ${_num(b.refundedTime)} $unit do đi làm lại',
+                  style: const TextStyle(fontSize: 12, color: StatusChip.success)),
           ],
         ),
       ),

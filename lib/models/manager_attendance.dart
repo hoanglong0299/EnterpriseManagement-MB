@@ -12,6 +12,9 @@ class ManagerAttendanceRecord {
   final DateTime? checkOutTime;
   final double? workingHours;
   final String status;
+  // Trạng thái hiệu lực từng buổi (None, OnTime, Late, Absent, OnLeave).
+  final String morningStatus;
+  final String afternoonStatus;
 
   ManagerAttendanceRecord({
     required this.employeeCode,
@@ -21,6 +24,8 @@ class ManagerAttendanceRecord {
     this.checkOutTime,
     this.workingHours,
     required this.status,
+    this.morningStatus = 'None',
+    this.afternoonStatus = 'None',
   });
 
   factory ManagerAttendanceRecord.fromJson(Map<String, dynamic> json) {
@@ -32,6 +37,8 @@ class ManagerAttendanceRecord {
       checkOutTime: _date(json, 'checkOutTime'),
       workingHours: (json['workingHours'] as num?)?.toDouble(),
       status: json['status'] as String? ?? '',
+      morningStatus: json['morningStatus'] as String? ?? 'None',
+      afternoonStatus: json['afternoonStatus'] as String? ?? 'None',
     );
   }
 }

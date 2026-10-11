@@ -3,13 +3,10 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/network/api_client.dart';
-import '../../../models/attendance_record.dart';
-import '../../../models/leave_request.dart';
-import '../../../services/attendance_service.dart';
-import '../../attendance/widgets/attendance_status.dart';
+import '../../../models/attendance_hr.dart';
+import '../../../services/hr_service.dart';
+import '../../../shared/widgets/state_views.dart';
 import '../../auth/providers/auth_provider.dart';
-import '../../leave/providers/leave_provider.dart';
-import '../../profile/providers/profile_provider.dart';
 import '../widgets/attendance_day_cell.dart';
 
 class CalendarScreen extends StatefulWidget {
@@ -29,30 +26,42 @@ class _CalendarScreenState extends State<CalendarScreen> {
   // Chiều cao 1 hàng ngày: số ngày (30) + khoảng cách + 2 vạch trạng thái, thêm chút đệm.
   static const double _rowHeight = 52;
 
-  // Lịch sử chấm công theo ngày (khoá yyyy-MM-dd).
-  Map<String, AttendanceRecord> _records = {};
-  bool _loadingRecords = false;
+  // Dữ liệu lịch hiệu lực từ backend, cache theo tháng (khoá yyyy-MM) và theo ngày (khoá yyyy-MM-dd).
+  final Map<String, Map<String, AttendanceCalendarDay>> _monthCache = {};
+  bool _loading = false;
+  String? _error;
+
+  static String _monthKey(DateTime m) => DateFormat('yyyy-MM').format(m);
+  static String _dayKey(DateTime d) => DateFormat('yyyy-MM-dd').format(d);
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _loadRecords());
+    WidgetsBinding.instance.addPostFrameCallback((_) => _loadMonth(_focusedMonth, force: true));
   }
 
-  // Tải toàn bộ lịch sử chấm công để tô màu các ngày; đơn nghỉ lấy từ LeaveProvider (đã tải ở Dashboard).
-  Future<void> _loadRecords() async {
+  // Tải lịch của một tháng; tháng đã có trong cache thì bỏ qua trừ khi force.
+  Future<void> _loadMonth(DateTime month, {bool force = false}) async {
+    final key = _monthKey(month);
+    if (!force && _monthCache.containsKey(key)) return;
     final employeeCode = context.read<AuthProvider>().session?.employeeCode;
     if (employeeCode == null) return;
 
-    setState(() => _loadingRecords = true);
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
     try {
-      final history = await AttendanceService(context.read<ApiClient>()).getHistory(employeeCode);
+      final from = DateTime(month.year, month.month, 1);
+      final to = DateTime(month.year, month.month + 1, 0);
+      final days = await HrService(context.read<ApiClient>()).getCalendar(employeeCode, from, to);
       if (!mounted) return;
-      setState(() => _records = {for (final r in history) r.attendanceDate: r});
-    } catch (_) {
-      // Không tải được thì lịch chỉ còn ngày nghỉ phép và cuối tuần.
+      setState(() => _monthCache[key] = {for (final d in days) _dayKey(d.date): d});
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _error = e.toString().replaceFirst('Exception: ', ''));
     } finally {
-      if (mounted) setState(() => _loadingRecords = false);
+      if (mounted) setState(() => _loading = false);
     }
   }
 
@@ -60,6 +69,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
     setState(() {
       _focusedMonth = DateTime(_focusedMonth.year, _focusedMonth.month + offset, 1);
     });
+    _loadMonth(_focusedMonth);
   }
 
   Future<void> _selectDate(BuildContext context) async {
@@ -87,6 +97,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
         _selectedDate = picked;
         _focusedMonth = DateTime(picked.year, picked.month, 1);
       });
+      _loadMonth(_focusedMonth);
     }
   }
 
@@ -94,82 +105,30 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
   static bool _isWeekend(DateTime d) => d.weekday == DateTime.saturday || d.weekday == DateTime.sunday;
 
-  // Đơn nghỉ đã được duyệt có phủ ngày này không (so theo ngày, bỏ giờ).
-  LeaveRequest? _approvedLeaveOn(DateTime date, List<LeaveRequest> requests) {
-    final day = DateTime(date.year, date.month, date.day);
-    for (final r in requests) {
-      if (r.status != 'Approved' && r.status != 'Confirmed' && r.status != 'Completed') continue;
-      final start = DateTime(r.startDate.year, r.startDate.month, r.startDate.day);
-      final end = DateTime(r.endDate.year, r.endDate.month, r.endDate.day);
-      if (!day.isBefore(start) && !day.isAfter(end)) return r;
-    }
-    return null;
+  AttendanceCalendarDay? _dayData(DateTime date) => _monthCache[_monthKey(date)]?[_dayKey(date)];
+
+  // Ánh xạ trạng thái buổi của backend sang vạch màu.
+  static DayPartStatus _part(String s) => switch (s) {
+        'OnTime' => DayPartStatus.onTime,
+        'Late' => DayPartStatus.late,
+        'Absent' => DayPartStatus.absent,
+        'OnLeave' => DayPartStatus.off,
+        _ => DayPartStatus.none,
+      };
+
+  DayAttendance? _attendanceOf(DateTime date) {
+    final d = _dayData(date);
+    if (d == null) return null;
+    return DayAttendance(_part(d.morning), _part(d.afternoon));
   }
 
-  // Ngày làm việc đã qua (không tính hôm nay), tính từ ngày vào làm trở đi.
-  bool _isPastWorkday(DateTime date, DateTime? hireDate) {
-    final today = DateTime.now();
-    final startOfToday = DateTime(today.year, today.month, today.day);
-    final beforeHire = hireDate != null && date.isBefore(DateTime(hireDate.year, hireDate.month, hireDate.day));
-    return date.isBefore(startOfToday) && !beforeHire && !_loadingRecords;
-  }
-
-  AttendanceRecord? _recordOn(DateTime date) => _records[DateFormat('yyyy-MM-dd').format(date)];
-
-  // Trạng thái của buổi đi làm (buổi còn lại khi có nghỉ nửa ngày có phép).
-  DayPartStatus _workedHalf(DateTime date, DateTime? hireDate) {
-    final record = _recordOn(date);
-    if (record == null) return _isPastWorkday(date, hireDate) ? DayPartStatus.absent : DayPartStatus.none;
-
-    switch (record.status) {
-      case 'Present':
-        return DayPartStatus.onTime;
-      case 'Late':
-        return DayPartStatus.late;
-      case 'HalfDay':
-        // Backend đánh dấu HalfDay khi duyệt nghỉ nửa ngày; có check-in thật thì buổi còn lại là đi làm.
-        if (record.checkInTime != null) return DayPartStatus.onTime;
-        return _isPastWorkday(date, hireDate) ? DayPartStatus.absent : DayPartStatus.none;
-      case 'OnLeave':
-        return DayPartStatus.off;
-      default:
-        return DayPartStatus.absent; // Absent, HalfDayAbsent
-    }
-  }
-
-  // Thứ tự ưu tiên: nghỉ phép (cả ngày hoặc nửa ngày) -> bản ghi chấm công
-  // -> ngày làm việc đã qua mà không có bản ghi (vắng không phép). Cuối tuần do ô ngày tự ẩn vạch.
-  DayAttendance _attendanceOf(DateTime date, List<LeaveRequest> requests, DateTime? hireDate) {
-    final leave = _approvedLeaveOn(date, requests);
-    if (leave != null) {
-      if (leave.session == 'Morning') return DayAttendance(DayPartStatus.off, _workedHalf(date, hireDate));
-      if (leave.session == 'Afternoon') return DayAttendance(_workedHalf(date, hireDate), DayPartStatus.off);
-      return const DayAttendance(DayPartStatus.off, DayPartStatus.off); // nghỉ cả ngày
-    }
-
-    final record = _recordOn(date);
-    if (record == null) {
-      final s = _isPastWorkday(date, hireDate) ? DayPartStatus.absent : DayPartStatus.none;
-      return DayAttendance(s, s);
-    }
-
-    switch (record.status) {
-      case 'Present':
-        return const DayAttendance(DayPartStatus.onTime, DayPartStatus.onTime);
-      case 'Late':
-        return const DayAttendance(DayPartStatus.late, DayPartStatus.late);
-      case 'OnLeave':
-        return const DayAttendance(DayPartStatus.off, DayPartStatus.off);
-      case 'HalfDayAbsent':
-        // Vắng buổi sáng không phép, buổi chiều có đi làm.
-        return const DayAttendance(DayPartStatus.absent, DayPartStatus.onTime);
-      case 'HalfDay':
-        // Nghỉ nửa ngày có phép nhưng không tìm thấy đơn để biết buổi nào: mặc định nghỉ sáng.
-        return DayAttendance(DayPartStatus.off, _workedHalf(date, hireDate));
-      default:
-        return const DayAttendance(DayPartStatus.absent, DayPartStatus.absent); // Absent
-    }
-  }
+  static String _partText(String s) => switch (s) {
+        'OnTime' => 'Đúng giờ',
+        'Late' => 'Đi muộn',
+        'Absent' => 'Vắng mặt',
+        'OnLeave' => 'Nghỉ phép',
+        _ => 'Chưa có dữ liệu',
+      };
 
   // Chú thích: vạch màu + nhãn.
   Widget _legendItem(DayPartStatus status, String label) {
@@ -182,76 +141,57 @@ class _CalendarScreenState extends State<CalendarScreen> {
           decoration: BoxDecoration(color: dayPartColor(status), borderRadius: BorderRadius.circular(2)),
         ),
         const SizedBox(width: 6),
-        Text(label, style: const TextStyle(fontSize: 12, color: Colors.black54)),
+        Text(label, style: const TextStyle(fontSize: 14, color: Colors.black54)),
       ],
     );
   }
 
-  static String _sessionText(String? session) {
-    switch (session) {
-      case 'Morning':
-        return 'buổi sáng';
-      case 'Afternoon':
-        return 'buổi chiều';
-      default:
-        return 'cả ngày';
-    }
-  }
+  Widget _detailRow(IconData icon, Color color, String text) => Padding(
+        padding: const EdgeInsets.only(bottom: 12),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(icon, size: 18, color: color),
+            const SizedBox(width: 12),
+            Expanded(child: Text(text, style: const TextStyle(fontSize: 16, color: Colors.black87))),
+          ],
+        ),
+      );
 
-  // Nội dung chi tiết của ngày đang chọn.
-  List<Widget> _detailRows(DateTime date, List<LeaveRequest> requests, DateTime? hireDate) {
-    Widget row(IconData icon, Color color, String text) => Padding(
-          padding: const EdgeInsets.only(bottom: 12),
-          child: Row(
-            children: [
-              Icon(icon, size: 18, color: color),
-              const SizedBox(width: 12),
-              Expanded(child: Text(text, style: const TextStyle(fontSize: 14, color: Colors.black87))),
-            ],
-          ),
-        );
-
-    final off = dayPartColor(DayPartStatus.off)!;
-    if (_isWeekend(date)) {
-      return [row(Icons.weekend, off, 'DAY-OFF (cuối tuần)')];
-    }
-
-    final rows = <Widget>[];
-    final leave = _approvedLeaveOn(date, requests);
-    if (leave != null) {
-      rows.add(row(Icons.beach_access, off, 'Nghỉ phép ${_sessionText(leave.session)}: ${leave.leaveTypeName}'));
-    }
-
-    final record = _recordOn(date);
-    if (record != null) {
-      final att = _attendanceOf(date, requests, hireDate);
-      final dot = dayPartColor(att.afternoon) ?? dayPartColor(att.morning) ?? Colors.grey;
-      rows.add(row(Icons.circle, dot, attendanceLabel(record.status)));
-      final timeFormat = DateFormat('HH:mm');
-      if (record.checkInTime != null) {
-        rows.add(row(Icons.login, Colors.blueGrey, 'Vào: ${timeFormat.format(record.checkInTime!)}'));
-      }
-      if (record.checkOutTime != null) {
-        rows.add(row(Icons.logout, Colors.blueGrey, 'Ra: ${timeFormat.format(record.checkOutTime!)}'));
-      }
-      return rows;
-    }
-
-    if (leave == null) {
-      if (_isPastWorkday(date, hireDate)) {
-        rows.add(row(Icons.circle, dayPartColor(DayPartStatus.absent)!, 'Vắng mặt (không xin phép)'));
-      } else {
-        rows.add(row(Icons.circle_outlined, Colors.grey, 'Chưa có dữ liệu chấm công'));
-      }
+  // Một buổi: trạng thái + loại nghỉ phép / ghi chú HR / xác nhận đi làm lại theo nguồn.
+  List<Widget> _sessionRows(String label, String status, String source, AttendanceCalendarDay d, String? note) {
+    final color = dayPartColor(_part(status)) ?? Colors.grey;
+    final rows = <Widget>[
+      _detailRow(Icons.circle, color, '$label: ${_partText(status)}${status == 'OnLeave' && d.leaveTypeName != null ? ' (${d.leaveTypeName})' : ''}'),
+    ];
+    if (source == 'Note' && note != null && note.isNotEmpty) {
+      rows.add(_detailRow(Icons.sticky_note_2_outlined, Colors.blueGrey, 'Ghi chú của HR: $note'));
+    } else if (source == 'ReturnConfirmed') {
+      rows.add(_detailRow(Icons.verified_outlined, Colors.blueGrey, 'Đã được HR xác nhận (đi làm lại)'));
     }
     return rows;
   }
 
+  // Nội dung chi tiết của ngày đang chọn, lấy từ dữ liệu backend.
+  List<Widget> _detailRows(DateTime date) {
+    final off = dayPartColor(DayPartStatus.off)!;
+    if (_isWeekend(date)) return [_detailRow(Icons.weekend, off, 'DAY-OFF (cuối tuần)')];
+
+    final d = _dayData(date);
+    if (d == null) {
+      return [_detailRow(Icons.circle_outlined, Colors.grey, _loading ? 'Đang tải...' : 'Chưa có dữ liệu chấm công')];
+    }
+    final timeFormat = DateFormat('HH:mm');
+    return [
+      ..._sessionRows('Buổi sáng', d.morning, d.morningSource, d, d.morningNote),
+      ..._sessionRows('Buổi chiều', d.afternoon, d.afternoonSource, d, d.afternoonNote),
+      if (d.checkInTime != null) _detailRow(Icons.login, Colors.blueGrey, 'Vào: ${timeFormat.format(d.checkInTime!.toLocal())}'),
+      if (d.checkOutTime != null) _detailRow(Icons.logout, Colors.blueGrey, 'Ra: ${timeFormat.format(d.checkOutTime!.toLocal())}'),
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
-    final requests = context.watch<LeaveProvider>().requests;
-    final hireDate = context.watch<ProfileProvider>().employee?.hireDate;
-
     int daysInMonth = DateTime(_focusedMonth.year, _focusedMonth.month + 1, 0).day;
     // weekday: Thứ Hai = 1 ... Chủ nhật = 7, nên số ô trống đầu tháng (tuần bắt đầu thứ Hai) là weekday - 1.
     int firstDayOffset = DateTime(_focusedMonth.year, _focusedMonth.month, 1).weekday - 1;
@@ -270,7 +210,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text('Calendar', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFF1E293B))),
+                  const Text('Calendar', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFF1E293B))),
                   IconButton(
                     icon: const Icon(Icons.calendar_month, color: Color(0xFF2A5CAA)),
                     onPressed: () => _selectDate(context),
@@ -288,7 +228,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                   IconButton(icon: const Icon(Icons.chevron_left, color: Color(0xFF2A5CAA)), onPressed: () => _changeMonth(-1)),
                   Text(
                     DateFormat('MMMM yyyy').format(_focusedMonth),
-                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.black87),
+                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.black87),
                   ),
                   IconButton(icon: const Icon(Icons.chevron_right, color: Color(0xFF2A5CAA)), onPressed: () => _changeMonth(1)),
                 ],
@@ -312,11 +252,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
                       _legendItem(DayPartStatus.off, 'Nghỉ phép'),
                     ],
                   ),
-                  const SizedBox(height: 4),
-                  const Text(
-                    'Vạch dưới mỗi ngày: trái là buổi sáng, phải là buổi chiều (cùng trạng thái thì nối thành 1 vạch)',
-                    style: TextStyle(fontSize: 11, color: Colors.black45),
-                  ),
                 ],
               ),
             ),
@@ -333,7 +268,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                               day,
                               style: TextStyle(
                                 color: day == 'Sun' ? Colors.red.shade300 : Colors.grey, // Chữ Sun màu đỏ nhạt
-                                fontSize: 13,
+                                fontSize: 15,
                                 fontWeight: day == 'Sun' ? FontWeight.bold : FontWeight.normal,
                               ),
                             ),
@@ -363,7 +298,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                   final currentDate = DateTime(_focusedMonth.year, _focusedMonth.month, index - firstDayOffset + 1);
                   return AttendanceDayCell(
                     day: currentDate,
-                    attendance: _attendanceOf(currentDate, requests, hireDate),
+                    attendance: _attendanceOf(currentDate),
                     isToday: _sameDay(DateTime.now(), currentDate),
                     isSelected: _sameDay(_selectedDate, currentDate),
                     isWeekend: _isWeekend(currentDate),
@@ -386,10 +321,13 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 children: [
                   Text(
                     DateFormat('dd/MM/yyyy (EEE)').format(_selectedDate),
-                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87),
+                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87),
                   ),
                   const SizedBox(height: 16),
-                  ..._detailRows(_selectedDate, requests, hireDate),
+                  if (_error != null)
+                    ErrorView(message: _error!, onRetry: () => _loadMonth(_focusedMonth, force: true))
+                  else
+                    ..._detailRows(_selectedDate),
                 ],
               ),
             ),

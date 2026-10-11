@@ -5,6 +5,8 @@ class ManagerDashboard {
   final int pendingAttendanceAdjustmentsCount;
   final int teamPresentTodayCount;
   final int teamAbsentTodayCount;
+  // Số người trong team đang nghỉ phép hôm nay; null nếu backend chưa trả.
+  final int? teamOnLeaveTodayCount;
 
   ManagerDashboard({
     required this.teamSize,
@@ -12,6 +14,7 @@ class ManagerDashboard {
     required this.pendingAttendanceAdjustmentsCount,
     required this.teamPresentTodayCount,
     required this.teamAbsentTodayCount,
+    this.teamOnLeaveTodayCount,
   });
 
   factory ManagerDashboard.fromJson(Map<String, dynamic> json) {
@@ -22,6 +25,7 @@ class ManagerDashboard {
       pendingAttendanceAdjustmentsCount: n('pendingAttendanceAdjustmentsCount'),
       teamPresentTodayCount: n('teamPresentTodayCount'),
       teamAbsentTodayCount: n('teamAbsentTodayCount'),
+      teamOnLeaveTodayCount: (json['teamOnLeaveTodayCount'] as num?)?.toInt(),
     );
   }
 }

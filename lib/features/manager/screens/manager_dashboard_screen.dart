@@ -59,6 +59,8 @@ class _ManagerDashboardView extends StatelessWidget {
       _Metric('Có mặt hôm nay', d.teamPresentTodayCount, Icons.how_to_reg, StatusChip.success),
       _Metric('Vắng hôm nay', d.teamAbsentTodayCount, Icons.person_off,
           d.teamAbsentTodayCount > 0 ? StatusChip.danger : StatusChip.success),
+      if (d.teamOnLeaveTodayCount != null)
+        _Metric('Nghỉ phép hôm nay', d.teamOnLeaveTodayCount!, Icons.beach_access, StatusChip.info),
       _Metric('Đơn nghỉ chờ duyệt', d.pendingLeaveRequestsCount, Icons.flight_takeoff,
           d.pendingLeaveRequestsCount > 0 ? StatusChip.warning : StatusChip.success),
       _Metric('Chỉnh sửa công chờ duyệt', d.pendingAttendanceAdjustmentsCount, Icons.edit_calendar,

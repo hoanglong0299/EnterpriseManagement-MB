@@ -10,6 +10,7 @@ const Map<String, String> attendanceLabels = {
   'HalfDayAbsent': 'Vắng nửa buổi sáng',
   'Absent': 'Vắng mặt',
   'OnLeave': 'Nghỉ phép',
+  'None': 'Chưa có dữ liệu',
 };
 
 String attendanceLabel(String status) => attendanceLabels[status] ?? 'Chưa chấm công';

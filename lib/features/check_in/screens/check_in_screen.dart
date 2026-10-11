@@ -32,7 +32,7 @@ class _CheckInScreenState extends State<CheckInScreen> {
         SnackBar(
           content: Text(error ?? '$type thành công!'),
           backgroundColor: error == null ? Colors.green : Colors.red,
-          duration: Duration(seconds: error == null ? 2 : 5),
+          duration: Duration(seconds: error == null ? 2 : 8),
           // Lỗi do chưa cấp quyền / GPS tắt thì cho nút mở thẳng màn hình Cài đặt
           action: provider.settingsTarget == null
               ? null

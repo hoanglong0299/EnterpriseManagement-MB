@@ -10,6 +10,7 @@ import '../../../shared/widgets/permission_gate.dart';
 import '../../../shared/widgets/state_views.dart';
 import '../../../shared/widgets/status_chip.dart';
 import '../../auth/providers/auth_provider.dart';
+import '../../attendance/widgets/attendance_status.dart' show sessionSummaryText, adjustmentLabels;
 import '../manager_helpers.dart';
 import '../providers/manager_attendance_provider.dart';
 
@@ -234,6 +235,9 @@ class _RecordCard extends StatelessWidget {
             Text('${formatDate(r.attendanceDate)} · Vào ${formatTime(r.checkInTime)} · Ra ${formatTime(r.checkOutTime)}',
                 style: const TextStyle(color: Colors.black54, fontSize: 13)),
             Text('Giờ làm: ${r.workingHours ?? '--'}', style: const TextStyle(color: Colors.black54, fontSize: 13)),
+            if (sessionSummaryText(r.morningStatus, r.afternoonStatus) != null)
+              Text(sessionSummaryText(r.morningStatus, r.afternoonStatus)!,
+                  style: const TextStyle(color: Colors.black54, fontSize: 13)),
           ],
         ),
       ),
@@ -249,16 +253,19 @@ class _PendingTab extends StatelessWidget {
     final provider = context.read<ManagerAttendanceProvider>();
     final ok = await confirmDialog(
       context,
-      title: approve ? 'Duyệt yêu cầu' : 'Từ chối yêu cầu',
-      message: '${approve ? 'Duyệt' : 'Từ chối'} yêu cầu chỉnh sửa công ngày ${formatDate(item.attendanceDate)} của ${item.employeeName}?',
-      confirmText: approve ? 'Duyệt' : 'Từ chối',
+      title: approve ? 'Xác nhận yêu cầu' : 'Từ chối yêu cầu',
+      message: approve
+          ? 'Xác nhận ${item.employeeName} có mặt ngày ${formatDate(item.attendanceDate)}?\n\n'
+              'Bước này chỉ xác nhận nhân viên có mặt; HR sẽ áp dụng vào dữ liệu chấm công.'
+          : 'Từ chối yêu cầu chỉnh sửa công ngày ${formatDate(item.attendanceDate)} của ${item.employeeName}?',
+      confirmText: approve ? 'Xác nhận' : 'Từ chối',
       danger: !approve,
     );
     if (!ok || !context.mounted) return;
     final messenger = ScaffoldMessenger.of(context);
     final error = await provider.review(item.id, approve: approve);
     messenger.showSnackBar(SnackBar(
-      content: Text(error ?? (approve ? 'Đã duyệt yêu cầu.' : 'Đã từ chối yêu cầu.')),
+      content: Text(error ?? (approve ? 'Đã xác nhận, chuyển HR xử lý.' : 'Đã từ chối yêu cầu.')),
       backgroundColor: error == null ? Colors.green : Colors.red,
     ));
   }
@@ -314,6 +321,9 @@ class _PendingTab extends StatelessWidget {
                     'Đề xuất: ${formatDateTime(item.newCheckInTime)} - ${formatDateTime(item.newCheckOutTime)}',
                     style: const TextStyle(color: Colors.black54, fontSize: 13),
                   ),
+                  const SizedBox(height: 4),
+                  Text('Trạng thái: ${adjustmentLabels[item.status] ?? item.status}',
+                      style: const TextStyle(color: Colors.black54, fontSize: 13)),
                   PermissionGate(
                     code: 'attendance.adjustment.approve',
                     child: Padding(
@@ -331,7 +341,7 @@ class _PendingTab extends StatelessWidget {
                             style: FilledButton.styleFrom(backgroundColor: managerPrimary),
                             child: busy
                                 ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                                : const Text('Duyệt'),
+                                : const Text('Xác nhận'),
                           ),
                         ],
                       ),

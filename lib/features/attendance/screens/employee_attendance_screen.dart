@@ -328,6 +328,12 @@ class _RecordCard extends StatelessWidget {
                   'Số giờ làm: ${record.workingHours?.toStringAsFixed(2) ?? '--'}',
                   style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
                 ),
+                // Sáng chiều khác nhau thì hiện riêng từng buổi.
+                if (sessionSummaryText(record.morningStatus, record.afternoonStatus) != null)
+                  Text(
+                    sessionSummaryText(record.morningStatus, record.afternoonStatus)!,
+                    style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                  ),
               ],
             ),
           ),
@@ -395,18 +401,31 @@ class _AdjustmentCard extends StatelessWidget {
               Expanded(
                 child: Text(formatDate(DateTime.parse(item.attendanceDate)), style: const TextStyle(fontWeight: FontWeight.w600)),
               ),
-              RequestStatusChip(status: item.status),
+              AdjustmentStatusChip(status: item.status),
             ],
           ),
           const SizedBox(height: 6),
           if (changes.isNotEmpty) Text(changes.trimRight(), style: const TextStyle(fontSize: 13)),
           const SizedBox(height: 4),
           Text('Lý do: ${item.reason}', style: TextStyle(fontSize: 13, color: Colors.grey.shade700)),
+          if (item.status == 'Rejected' && (item.rejectionReason ?? '').isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: Text('Lý do từ chối: ${item.rejectionReason}', style: const TextStyle(fontSize: 13, color: Colors.red)),
+            ),
           if (item.approverName != null)
             Padding(
               padding: const EdgeInsets.only(top: 4),
               child: Text(
-                'Người xử lý: ${item.approverName}${item.approvedAt != null ? ' · ${formatDateTime(item.approvedAt)}' : ''}',
+                'Manager xác nhận: ${item.approverName}${item.approvedAt != null ? ' · ${formatDateTime(item.approvedAt)}' : ''}',
+                style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+              ),
+            ),
+          if (item.processedByName != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 2),
+              child: Text(
+                'HR xử lý: ${item.processedByName}${item.processedAt != null ? ' · ${formatDateTime(item.processedAt)}' : ''}',
                 style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
               ),
             ),

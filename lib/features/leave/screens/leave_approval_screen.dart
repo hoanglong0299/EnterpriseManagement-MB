@@ -6,6 +6,7 @@ import '../../../shared/widgets/permission_gate.dart';
 import '../../../shared/widgets/state_views.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../providers/leave_approval_provider.dart';
+import '../widgets/leave_return_ui.dart';
 import '../widgets/leave_ui.dart';
 
 // Màn hình duyệt đơn nghỉ phép của quản lý (tương ứng trang "Duyệt đơn xin nghỉ" bên web).
@@ -89,7 +90,7 @@ class _LeaveApprovalScreenState extends State<LeaveApprovalScreen> {
     }
 
     return DefaultTabController(
-      length: 2,
+      length: 3,
       child: Scaffold(
         backgroundColor: const Color(0xFFF5F7FA),
         appBar: AppBar(
@@ -103,6 +104,7 @@ class _LeaveApprovalScreenState extends State<LeaveApprovalScreen> {
             tabs: [
               Tab(text: 'Chờ duyệt (${provider.pending.length})'),
               const Tab(text: 'Lịch sử'),
+              const Tab(text: 'Đi làm lại'),
             ],
           ),
         ),
@@ -110,6 +112,7 @@ class _LeaveApprovalScreenState extends State<LeaveApprovalScreen> {
           children: [
             _buildList(provider, provider.pending, pending: true),
             _buildList(provider, provider.history, pending: false),
+            const PendingReturnsTab(),
           ],
         ),
       ),
