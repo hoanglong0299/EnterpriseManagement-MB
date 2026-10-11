@@ -5,6 +5,8 @@ class LeaveBalance {
   final double allocatedTime;
   final double usedTime;
   final double remainingTime;
+  // Phần phép đã hoàn do đi làm lại; usedTime và remainingTime đã tính phần hoàn này.
+  final double refundedTime;
   final int? year;
   // Chỉ có với loại reset theo tháng (nghỉ ngắn).
   final int? month;
@@ -16,6 +18,7 @@ class LeaveBalance {
     required this.allocatedTime,
     required this.usedTime,
     required this.remainingTime,
+    this.refundedTime = 0,
     this.year,
     this.month,
   });
@@ -28,6 +31,7 @@ class LeaveBalance {
       allocatedTime: (json['allocatedTime'] as num).toDouble(),
       usedTime: (json['usedTime'] as num).toDouble(),
       remainingTime: (json['remainingTime'] as num).toDouble(),
+      refundedTime: (json['refundedTime'] as num?)?.toDouble() ?? 0,
       year: json['year'] as int?,
       month: json['month'] as int?,
     );

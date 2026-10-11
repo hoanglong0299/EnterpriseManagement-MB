@@ -10,6 +10,12 @@ class AttendanceAdjustment {
   final String status;
   final String? approverName;
   final DateTime? approvedAt;
+  // Bước xử lý (HR). status: Pending (chờ Manager), PendingHr (chờ xử lý), Approved (đã áp dụng), Rejected.
+  final String? processedByName;
+  final DateTime? processedAt;
+  final String? rejectionReason;
+  final String employeeCode;
+  final String employeeName;
 
   AttendanceAdjustment({
     required this.id,
@@ -22,6 +28,11 @@ class AttendanceAdjustment {
     required this.status,
     this.approverName,
     this.approvedAt,
+    this.processedByName,
+    this.processedAt,
+    this.rejectionReason,
+    this.employeeCode = '',
+    this.employeeName = '',
   });
 
   static DateTime? _date(dynamic v) => v == null ? null : DateTime.parse(v as String);
@@ -38,6 +49,11 @@ class AttendanceAdjustment {
       status: json['status'] as String,
       approverName: json['approverName'] as String?,
       approvedAt: _date(json['approvedAt']),
+      processedByName: json['processedByName'] as String?,
+      processedAt: _date(json['processedAt']),
+      rejectionReason: json['rejectionReason'] as String?,
+      employeeCode: (json['employeeCode'] as String?) ?? '',
+      employeeName: (json['employeeName'] as String?) ?? '',
     );
   }
 }
