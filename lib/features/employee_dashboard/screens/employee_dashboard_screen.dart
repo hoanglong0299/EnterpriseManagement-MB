@@ -84,7 +84,7 @@ class _EmployeeDashboardView extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
       appBar: AppBar(
-        title: const Text('Dashboard'),
+        title: const Text('Tổng quan'),
         backgroundColor: const Color(0xFF2A5CAA),
         foregroundColor: Colors.white,
       ),

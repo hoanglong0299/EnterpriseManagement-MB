@@ -295,7 +295,7 @@ class _LeaveRecordScreenState extends State<LeaveRecordScreen> {
           ? ListView(children: const [
               SizedBox(height: 80),
               EmptyView(
-                message: 'Chưa có số dư. Số dư nghỉ phép sẽ hiển thị sau khi Admin cấu hình.',
+                message: 'Chưa có số dư. Số dư nghỉ phép sẽ hiển thị sau khi quản trị viên cấu hình.',
                 icon: Icons.account_balance_wallet_outlined,
               ),
             ])

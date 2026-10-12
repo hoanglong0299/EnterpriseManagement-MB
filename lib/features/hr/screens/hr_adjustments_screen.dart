@@ -100,7 +100,7 @@ class _View extends StatelessWidget {
                     if (a.approverName != null)
                       Padding(
                         padding: const EdgeInsets.only(top: 4),
-                        child: Text('Manager duyệt: ${a.approverName}${a.approvedAt == null ? '' : ' · ${formatDateTime(a.approvedAt)}'}',
+                        child: Text('Quản lý duyệt: ${a.approverName}${a.approvedAt == null ? '' : ' · ${formatDateTime(a.approvedAt)}'}',
                             style: const TextStyle(color: Colors.black54, fontSize: 12)),
                       ),
                     PermissionGate(

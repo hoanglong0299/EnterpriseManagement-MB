@@ -23,3 +23,11 @@ String formatDateTime(DateTime? value) {
 String isoDate(DateTime value) {
   return DateFormat('yyyy-MM-dd').format(value);
 }
+
+// Nhãn tiếng Việt cho trạng thái làm việc của nhân viên (giá trị gốc từ backend giữ nguyên).
+String employmentStatusLabel(String s) => switch (s) {
+      'Active' => 'Đang làm việc',
+      'Probation' => 'Thử việc',
+      'Terminated' => 'Đã nghỉ việc',
+      _ => s,
+    };

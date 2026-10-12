@@ -24,7 +24,7 @@ const Map<String, String> requestLabels = {
 
 // Nhãn 4 trạng thái yêu cầu điều chỉnh công (2 bước: Manager xác nhận, HR áp dụng).
 const Map<String, String> adjustmentLabels = {
-  'Pending': 'Chờ Manager duyệt',
+  'Pending': 'Chờ quản lý duyệt',
   'PendingHr': 'Chờ HR xử lý',
   'Approved': 'Đã áp dụng',
   'Rejected': 'Từ chối',

@@ -167,7 +167,7 @@ class _DetailSheetState extends State<_DetailSheet> {
             const SizedBox(height: 8),
             Text('Lý do: ${r.reason}'),
             if (r.managerName != null)
-              Text('Manager duyệt: ${r.managerName}${r.managerApprovedAt == null ? '' : ' · ${formatDateTime(r.managerApprovedAt)}'}',
+              Text('Quản lý duyệt: ${r.managerName}${r.managerApprovedAt == null ? '' : ' · ${formatDateTime(r.managerApprovedAt)}'}',
                   style: const TextStyle(color: Colors.black54, fontSize: 12)),
             const SizedBox(height: 16),
             const Text('Các buổi chờ xác nhận', style: TextStyle(fontWeight: FontWeight.w600)),

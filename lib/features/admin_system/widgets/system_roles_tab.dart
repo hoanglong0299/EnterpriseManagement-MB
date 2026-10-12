@@ -31,7 +31,7 @@ class SystemRolesTab extends StatelessWidget {
     return SystemSectionList<SystemRole>(
       state: p.roles,
       onReload: p.loadRoles,
-      emptyMessage: 'Chưa có vai trò. Tạo vai trò để gán permission cho tài khoản.',
+      emptyMessage: 'Chưa có vai trò. Tạo vai trò để gán quyền cho tài khoản.',
       header: PermissionGate(
         code: 'role.manage',
         child: Align(
@@ -110,7 +110,7 @@ class _RoleFormState extends State<_RoleForm> {
 
   Future<void> _save() async {
     if (_code.text.trim().isEmpty || _name.text.trim().isEmpty) {
-      showMessage(context, 'Vui lòng nhập mã role và tên role.', error: true);
+      showMessage(context, 'Vui lòng nhập mã vai trò và tên vai trò.', error: true);
       return;
     }
     setState(() => _saving = true);
@@ -141,13 +141,13 @@ class _RoleFormState extends State<_RoleForm> {
       saving: _saving,
       onSave: _save,
       children: [
-        TextField(controller: _code, enabled: widget.editing == null, decoration: systemInput('Mã role *')),
+        TextField(controller: _code, enabled: widget.editing == null, decoration: systemInput('Mã vai trò *')),
         const SizedBox(height: 12),
-        TextField(controller: _name, decoration: systemInput('Tên role *')),
+        TextField(controller: _name, decoration: systemInput('Tên vai trò *')),
         const SizedBox(height: 12),
         TextField(controller: _desc, maxLines: 2, decoration: systemInput('Mô tả')),
         const SizedBox(height: 16),
-        const Text('Menu & Permission', style: TextStyle(fontWeight: FontWeight.bold)),
+        const Text('Menu & Quyền', style: TextStyle(fontWeight: FontWeight.bold)),
         PermissionPicker(selected: _selected, onChanged: (v) => setState(() => _selected = v)),
       ],
     );

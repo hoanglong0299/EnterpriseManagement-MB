@@ -10,7 +10,7 @@ class LeaveStatusScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
       appBar: AppBar(
-        title: const Text('Leave Status Details'),
+        title: const Text('Chi tiết tình trạng nghỉ phép'),
         backgroundColor: const Color(0xFF2A5CAA),
       ),
       body: ListView.builder(
@@ -53,7 +53,7 @@ class LeaveStatusScreen extends StatelessWidget {
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
-                      item['value'] ?? '0 Days',
+                      item['value'] ?? '0 ngày',
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         color: Color(0xFF2A5CAA),

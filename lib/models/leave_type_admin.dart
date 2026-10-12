@@ -36,7 +36,7 @@ class LeaveTypeAdmin {
   // Tên ngắn của chu kỳ cấp.
   static const Map<String, String> periodLabels = {
     'ProratedYearly': 'Cộng dồn theo tháng',
-    'MonthlyReset': 'Cấp mỗi tháng, hết tháng reset',
+    'MonthlyReset': 'Cấp mỗi tháng, hết tháng đặt lại',
     'FlatYearly': 'Cấp một lần mỗi năm',
   };
 

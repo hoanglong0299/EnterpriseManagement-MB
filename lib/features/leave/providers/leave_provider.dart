@@ -31,7 +31,7 @@ class LeaveProvider extends ChangeNotifier {
   List<Map<String, dynamic>> get leaveStatusList {
     final paidByCode = {for (final t in _types) t.leaveTypeCode: t.isPaid};
     return _balances.map((b) {
-      final unit = b.unit == 'Hours' ? 'Hours' : 'Days';
+      final unit = b.unit == 'Hours' ? 'giờ' : 'ngày';
       final isPaid = paidByCode[b.leaveTypeCode] ?? true;
       return {
         'title': b.leaveTypeName,

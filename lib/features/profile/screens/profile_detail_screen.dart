@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import '../../../core/utils/helpers.dart';
 import 'package:provider/provider.dart';
 
 import '../../../models/employee.dart';
@@ -124,7 +125,7 @@ class _ProfileDetailScreenState extends State<ProfileDetailScreen> {
                       Text('${e.employeeCode} · ${e.positionName}', style: const TextStyle(color: Colors.grey)),
                       if (e.employmentStatus != null) ...[
                         const SizedBox(height: 6),
-                        StatusChip(label: e.employmentStatus!, color: active ? StatusChip.success : StatusChip.danger),
+                        StatusChip(label: employmentStatusLabel(e.employmentStatus!), color: active ? StatusChip.success : StatusChip.danger),
                       ],
                     ],
                   ),
@@ -157,7 +158,7 @@ class _ProfileDetailScreenState extends State<ProfileDetailScreen> {
               child: ListTile(
                 leading: Icon(Icons.info_outline, color: Color(0xFF2A5CAA)),
                 title: Text('Cần thay đổi thông tin?'),
-                subtitle: Text('Hiện chỉ Admin được chỉnh sửa hồ sơ nhân viên. Liên hệ Admin để cập nhật thông tin cá nhân.'),
+                subtitle: Text('Hiện chỉ quản trị viên được chỉnh sửa hồ sơ nhân viên. Liên hệ quản trị viên để cập nhật thông tin cá nhân.'),
               ),
             ),
           ),

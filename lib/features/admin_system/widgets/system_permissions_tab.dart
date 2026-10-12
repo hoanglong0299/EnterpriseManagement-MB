@@ -16,12 +16,12 @@ class SystemPermissionsTab extends StatelessWidget {
     final lock = x.isActive;
     final ok = await confirmDialog(
       context,
-      title: lock ? 'Khoá permission?' : 'Mở permission?',
-      message: '${lock ? 'Khoá' : 'Mở'} permission "${x.permissionCode}"?',
+      title: lock ? 'Khoá quyền?' : 'Mở quyền?',
+      message: '${lock ? 'Khoá' : 'Mở'} quyền "${x.permissionCode}"?',
       danger: lock,
     );
     if (!ok || !context.mounted) return;
-    await runWrite(context, () => context.read<SystemProvider>().setPermissionActive(x, !x.isActive), lock ? 'Đã khoá permission.' : 'Đã mở permission.');
+    await runWrite(context, () => context.read<SystemProvider>().setPermissionActive(x, !x.isActive), lock ? 'Đã khoá quyền.' : 'Đã mở quyền.');
   }
 
   @override
@@ -30,7 +30,7 @@ class SystemPermissionsTab extends StatelessWidget {
     return SystemSectionList<SystemPermission>(
       state: p.permissions,
       onReload: p.loadPermissions,
-      emptyMessage: 'Chưa có permission. Tạo permission theo dạng module.action.',
+      emptyMessage: 'Chưa có quyền. Tạo quyền theo dạng module.action.',
       header: PermissionGate(
         code: 'permission.manage',
         child: Align(
@@ -38,7 +38,7 @@ class SystemPermissionsTab extends StatelessWidget {
           child: FilledButton.icon(
             onPressed: () => showFormSheet(context, (_) => const _PermissionForm()),
             icon: const Icon(Icons.add),
-            label: const Text('Tạo permission'),
+            label: const Text('Tạo quyền'),
             style: FilledButton.styleFrom(backgroundColor: systemPrimary),
           ),
         ),
@@ -53,7 +53,7 @@ class SystemPermissionsTab extends StatelessWidget {
             ]),
             const SizedBox(height: 4),
             Text(x.permissionCode, style: const TextStyle(fontSize: 13)),
-            Text('Module: ${x.module}', style: TextStyle(fontSize: 13, color: Colors.grey.shade700)),
+            Text('Phân hệ: ${x.module}', style: TextStyle(fontSize: 13, color: Colors.grey.shade700)),
             if ((x.description ?? '').isNotEmpty) Text(x.description!, style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
             PermissionGate(
               code: 'permission.manage',
@@ -105,11 +105,11 @@ class _PermissionFormState extends State<_PermissionForm> {
     final editing = widget.editing;
     // Giống web: mã phải có dạng module.action (chỉ chữ cái, ngăn cách bằng dấu chấm).
     if (editing == null && !RegExp(r'^[a-z]+(\.[a-z]+)+$', caseSensitive: false).hasMatch(_code.text.trim())) {
-      showMessage(context, 'Permission code cần có dạng module.action.', error: true);
+      showMessage(context, 'Mã quyền cần có dạng phân_hệ.hành_động (vd: report.view).', error: true);
       return;
     }
     if (_name.text.trim().isEmpty || _module.text.trim().isEmpty) {
-      showMessage(context, 'Vui lòng nhập tên permission và module.', error: true);
+      showMessage(context, 'Vui lòng nhập tên quyền và phân hệ.', error: true);
       return;
     }
     setState(() => _saving = true);
@@ -122,7 +122,7 @@ class _PermissionFormState extends State<_PermissionForm> {
             module: _module.text.trim(),
             description: _desc.text.trim().isEmpty ? null : _desc.text.trim(),
           ),
-      editing == null ? 'Đã tạo permission.' : 'Đã cập nhật permission.',
+      editing == null ? 'Đã tạo quyền.' : 'Đã cập nhật quyền.',
     );
     if (!mounted) return;
     if (ok) {
@@ -135,15 +135,15 @@ class _PermissionFormState extends State<_PermissionForm> {
   @override
   Widget build(BuildContext context) {
     return SystemFormFrame(
-      title: widget.editing == null ? 'Tạo permission' : 'Sửa permission',
+      title: widget.editing == null ? 'Tạo quyền' : 'Sửa permission',
       saving: _saving,
       onSave: _save,
       children: [
-        TextField(controller: _code, enabled: widget.editing == null, decoration: systemInput('Permission code *', hint: 'vd: report.view')),
+        TextField(controller: _code, enabled: widget.editing == null, decoration: systemInput('Mã quyền *', hint: 'vd: report.view')),
         const SizedBox(height: 12),
-        TextField(controller: _name, decoration: systemInput('Tên permission *')),
+        TextField(controller: _name, decoration: systemInput('Tên quyền *')),
         const SizedBox(height: 12),
-        TextField(controller: _module, decoration: systemInput('Module *')),
+        TextField(controller: _module, decoration: systemInput('Phân hệ *')),
         const SizedBox(height: 12),
         TextField(controller: _desc, maxLines: 2, decoration: systemInput('Mô tả')),
       ],

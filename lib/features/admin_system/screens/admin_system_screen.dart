@@ -10,7 +10,7 @@ import '../widgets/system_menus_tab.dart';
 import '../widgets/system_permissions_tab.dart';
 import '../widgets/system_roles_tab.dart';
 
-// System Administration: 3 phần (vai trò, permission, menu), mỗi phần hiện theo permission *.manage.
+// Quản trị hệ thống: 3 phần (vai trò, permission, menu), mỗi phần hiện theo permission *.manage.
 // Loại nghỉ phép đã tách thành màn hình riêng /admin/leave-types.
 class AdminSystemScreen extends StatelessWidget {
   const AdminSystemScreen({super.key});
@@ -20,13 +20,13 @@ class AdminSystemScreen extends StatelessWidget {
     final auth = context.watch<AuthProvider>();
     final tabs = <_SystemTab>[
       if (auth.can('role.manage')) _SystemTab('Vai trò', (p) => p.loadRoles(), const SystemRolesTab()),
-      if (auth.can('permission.manage')) _SystemTab('Permission', (p) => p.loadPermissions(), const SystemPermissionsTab()),
+      if (auth.can('permission.manage')) _SystemTab('Quyền', (p) => p.loadPermissions(), const SystemPermissionsTab()),
       if (auth.can('menu.manage')) _SystemTab('Menu', (p) => p.loadMenus(), const SystemMenusTab()),
     ];
 
     if (tabs.isEmpty) {
       return Scaffold(
-        appBar: AppBar(title: const Text('System Administration'), backgroundColor: const Color(0xFF2A5CAA), foregroundColor: Colors.white),
+        appBar: AppBar(title: const Text('Quản trị hệ thống'), backgroundColor: const Color(0xFF2A5CAA), foregroundColor: Colors.white),
         body: const EmptyView(message: 'Bạn không có quyền quản trị hệ thống.', icon: Icons.lock_outline),
       );
     }
@@ -45,7 +45,7 @@ class AdminSystemScreen extends StatelessWidget {
         child: Scaffold(
           backgroundColor: const Color(0xFFF5F7FA),
           appBar: AppBar(
-            title: const Text('System Administration'),
+            title: const Text('Quản trị hệ thống'),
             backgroundColor: const Color(0xFF2A5CAA),
             foregroundColor: Colors.white,
             bottom: TabBar(

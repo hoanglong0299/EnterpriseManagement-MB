@@ -19,7 +19,7 @@ class TodayAttendanceCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final t = today;
     // Lần chấm đầu trong ngày là Check-in, các lần sau là Check-out (khớp backend).
-    final nextAction = t?.checkInTime == null ? 'Check-in' : 'Check-out';
+    final nextAction = t?.checkInTime == null ? 'Chấm công vào' : 'Chấm công ra';
 
     return Container(
       padding: const EdgeInsets.all(16),

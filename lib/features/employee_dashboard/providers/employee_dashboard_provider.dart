@@ -17,7 +17,7 @@ class EmployeeDashboardProvider extends ChangeNotifier {
   Future<void> load() async {
     final code = _auth.session?.employeeCode;
     if (code == null) {
-      errorMessage = 'Tài khoản chưa gắn hồ sơ nhân viên. Liên hệ Admin để được liên kết.';
+      errorMessage = 'Tài khoản chưa gắn hồ sơ nhân viên. Liên hệ quản trị viên để được liên kết.';
       notifyListeners();
       return;
     }

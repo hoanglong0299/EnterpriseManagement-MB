@@ -44,8 +44,8 @@ class SystemMenusTab extends StatelessWidget {
             ]),
             const SizedBox(height: 4),
             Text('Mã: ${m.menuCode}', style: const TextStyle(fontSize: 13)),
-            Text('Route: ${m.route}', style: const TextStyle(fontSize: 13)),
-            Text('Permission: ${m.permissions.isEmpty ? '--' : m.permissions.join(', ')}', style: TextStyle(fontSize: 12, color: Colors.grey.shade700)),
+            Text('Đường dẫn: ${m.route}', style: const TextStyle(fontSize: 13)),
+            Text('Quyền: ${m.permissions.isEmpty ? '--' : m.permissions.join(', ')}', style: TextStyle(fontSize: 12, color: Colors.grey.shade700)),
             const SizedBox(height: 6),
             Wrap(spacing: 8, children: [
               StatusChip(label: m.isVisible ? 'Hiện' : 'Ẩn', color: m.isVisible ? StatusChip.info : StatusChip.neutral),
@@ -124,11 +124,11 @@ class _MenuFormState extends State<_MenuForm> {
 
   Future<void> _save() async {
     if (_code.text.trim().isEmpty || _name.text.trim().isEmpty || _route.text.trim().isEmpty) {
-      showMessage(context, 'Vui lòng nhập mã menu, tên menu và route.', error: true);
+      showMessage(context, 'Vui lòng nhập mã menu, tên menu và đường dẫn.', error: true);
       return;
     }
     if (_route.text.trim() == SystemProvider.hiddenMenuRoute) {
-      showMessage(context, 'Không cấu hình URL đăng nhập admin ẩn trong menu.', error: true);
+      showMessage(context, 'Không cấu hình URL đăng nhập quản trị ẩn trong menu.', error: true);
       return;
     }
     final order = int.tryParse(_order.text.trim());
@@ -170,10 +170,10 @@ class _MenuFormState extends State<_MenuForm> {
         const SizedBox(height: 12),
         TextField(controller: _name, decoration: systemInput('Tên menu *')),
         const SizedBox(height: 12),
-        TextField(controller: _route, decoration: systemInput('Route *', hint: 'vd: /admin/users')),
+        TextField(controller: _route, decoration: systemInput('Đường dẫn *', hint: 'vd: /admin/users')),
         const SizedBox(height: 12),
         Row(children: [
-          Expanded(child: TextField(controller: _icon, decoration: systemInput('Icon'))),
+          Expanded(child: TextField(controller: _icon, decoration: systemInput('Biểu tượng'))),
           const SizedBox(width: 12),
           SizedBox(
             width: 100,
@@ -181,7 +181,7 @@ class _MenuFormState extends State<_MenuForm> {
           ),
         ]),
         const SizedBox(height: 16),
-        const Text('Permission được thấy menu này', style: TextStyle(fontWeight: FontWeight.bold)),
+        const Text('Quyền được thấy menu này', style: TextStyle(fontWeight: FontWeight.bold)),
         PermissionPicker(selected: _selected, onChanged: (v) => setState(() => _selected = v)),
       ],
     );

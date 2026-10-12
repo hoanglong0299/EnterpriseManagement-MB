@@ -12,14 +12,14 @@ import '../../../shared/widgets/status_chip.dart';
 
 // Nhãn và màu cho yêu cầu đi làm lại, dùng chung giữa màn nhân viên và màn Manager.
 const Map<String, String> returnStatusLabels = {
-  'PendingManager': 'Chờ Manager duyệt',
+  'PendingManager': 'Chờ quản lý duyệt',
   'PendingHr': 'Chờ xác nhận',
   'Completed': 'Hoàn tất',
   'Rejected': 'Từ chối',
 };
 
 const Map<String, String> returnSessionStateLabels = {
-  'Pending': 'Chờ Manager duyệt',
+  'Pending': 'Chờ quản lý duyệt',
   'AwaitingHr': 'Chờ xác nhận',
   'Active': 'Đã có hiệu lực',
   'Rejected': 'Từ chối',
@@ -125,7 +125,7 @@ class ReturnRequestCard extends StatelessWidget {
               Text('Lý do từ chối: ${r.rejectionReason}', style: const TextStyle(color: StatusChip.danger)),
             ],
             if ((r.managerName ?? '').isNotEmpty)
-              Text('Manager: ${r.managerName}', style: const TextStyle(color: Colors.grey, fontSize: 12)),
+              Text('Quản lý: ${r.managerName}', style: const TextStyle(color: Colors.grey, fontSize: 12)),
             if ((r.processedByName ?? '').isNotEmpty)
               Text('Người xác nhận: ${r.processedByName}', style: const TextStyle(color: Colors.grey, fontSize: 12)),
             if (actions != null) ...[const SizedBox(height: 12), actions!],

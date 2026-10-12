@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import '../../../core/utils/vi_date.dart';
 import '../providers/check_in_provider.dart';
 
 class CheckInScreen extends StatefulWidget {
@@ -30,7 +31,7 @@ class _CheckInScreenState extends State<CheckInScreen> {
       final error = provider.errorMessage;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(error ?? '$type thành công!'),
+          content: Text(error ?? (type == 'CLOCK IN' ? 'Chấm công vào thành công!' : 'Chấm công ra thành công!')),
           backgroundColor: error == null ? Colors.green : Colors.red,
           duration: Duration(seconds: error == null ? 2 : 8),
           // Lỗi do chưa cấp quyền / GPS tắt thì cho nút mở thẳng màn hình Cài đặt
@@ -60,7 +61,7 @@ class _CheckInScreenState extends State<CheckInScreen> {
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text(
-          'Clock In/Out',
+          'Chấm công vào/ra',
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.normal),
         ),
       ),
@@ -90,7 +91,7 @@ class _CheckInScreenState extends State<CheckInScreen> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
-                            DateFormat('EEEE').format(now),
+                            viWeekdayFull(now.weekday),
                             style: const TextStyle(color: Colors.white70, fontSize: 16),
                           ),
                           Text(
@@ -102,7 +103,7 @@ class _CheckInScreenState extends State<CheckInScreen> {
                             ),
                           ),
                           Text(
-                            DateFormat('MMMM dd, yyyy').format(now),
+                            viLongDate(now),
                             style: const TextStyle(color: Colors.white70, fontSize: 14),
                           ),
                         ],
@@ -164,7 +165,7 @@ class _CheckInScreenState extends State<CheckInScreen> {
                         child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
                       )
                     : const Text(
-                        'CLOCK IN', 
+                        'CHẤM CÔNG VÀO', 
                         style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
                       ),
               ),
@@ -190,7 +191,7 @@ class _CheckInScreenState extends State<CheckInScreen> {
                         child: CircularProgressIndicator(color: Color(0xFF2A5CAA), strokeWidth: 2),
                       )
                     : Text(
-                        'CLOCK OUT', 
+                        'CHẤM CÔNG RA', 
                         style: TextStyle(
                           color: provider.hasClockedIn ? Colors.black87 : Colors.grey, 
                           fontWeight: FontWeight.bold, 
@@ -205,12 +206,12 @@ class _CheckInScreenState extends State<CheckInScreen> {
 
               // 5. KHỐI LỊCH SỬ CHẤM CÔNG
               const Text(
-                'History',
+                'Lịch sử',
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
               Text(
-                DateFormat('EEEE, MMMM dd, yyyy').format(DateTime.now()),
+                '${viWeekdayFull(DateTime.now().weekday)}, ${viLongDate(DateTime.now())}',
                 style: const TextStyle(color: Colors.grey, fontSize: 14),
               ),
               const SizedBox(height: 12),

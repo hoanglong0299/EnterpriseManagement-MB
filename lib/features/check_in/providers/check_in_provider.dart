@@ -49,12 +49,12 @@ class CheckInProvider extends ChangeNotifier {
     final list = <String>[];
     if (record.checkOutTime != null) {
       list.add(
-        '${DateFormat('HH.mm').format(record.checkOutTime!)} at Company (OUT)',
+        '${DateFormat('HH.mm').format(record.checkOutTime!)} tại công ty (RA)',
       );
     }
     if (record.checkInTime != null) {
       list.add(
-        '${DateFormat('HH.mm').format(record.checkInTime!)} at Company (IN)',
+        '${DateFormat('HH.mm').format(record.checkInTime!)} tại công ty (VÀO)',
       );
     }
     return list;

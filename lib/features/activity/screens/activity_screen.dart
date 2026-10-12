@@ -12,37 +12,37 @@ class _ActivityScreenState extends State<ActivityScreen> {
   final List<Map<String, dynamic>> _inboxItems = [
     {
       'name': 'Justin James',
-      'action': 'has submitted a leave application for approval',
+      'action': 'đã gửi đơn xin nghỉ phép chờ duyệt',
       'type': 'Leave',
-      'time': '28/09/2023 (Thu) 16:09',
+      'time': '28/09/2023 (T5) 16:09',
       'isRead': false,
     },
     {
       'name': 'Justin James',
-      'action': 'has submitted a leave application for approval',
+      'action': 'đã gửi đơn xin nghỉ phép chờ duyệt',
       'type': 'Leave',
-      'time': '25/09/2023 (Mon) 10:32',
+      'time': '25/09/2023 (T2) 10:32',
       'isRead': false,
     },
     {
       'name': 'Justin James',
-      'action': 'has submitted an OT application for approval',
+      'action': 'đã gửi đơn làm thêm giờ chờ duyệt',
       'type': 'OT',
-      'time': '22/09/2023 (Fri) 17:54',
+      'time': '22/09/2023 (T6) 17:54',
       'isRead': false,
     },
     {
       'name': 'Wayne Lim',
-      'action': 'An OT authorisation for Wayne Lim has been approved by Wanda Ong',
+      'action': 'Đơn làm thêm giờ của Wayne Lim đã được Wanda Ong duyệt',
       'type': 'OT',
-      'time': '22/09/2023 (Fri) 17:53',
+      'time': '22/09/2023 (T6) 17:53',
       'isRead': true,
     },
     {
       'name': 'Wayne Lim',
-      'action': 'An OT authorisation for Wayne Lim has been approved by Wanda Ong',
+      'action': 'Đơn làm thêm giờ của Wayne Lim đã được Wanda Ong duyệt',
       'type': 'OT',
-      'time': '22/09/2023 (Fri) 17:52',
+      'time': '22/09/2023 (T6) 17:52',
       'isRead': true,
     },
   ];
@@ -57,7 +57,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
           backgroundColor: Colors.white,
           elevation: 0,
           title: const Text(
-            'Activity',
+            'Hoạt động',
             style: TextStyle(
               color: Color(0xFF2A5CAA),
               fontWeight: FontWeight.bold,
@@ -74,7 +74,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text('Tasks'),
+                    Text('Công việc'),
                     SizedBox(width: 8),
                     CircleAvatar(
                       radius: 12,
@@ -88,7 +88,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text('Inbox'),
+                    Text('Hộp thư'),
                     SizedBox(width: 8),
                     CircleAvatar(
                       radius: 12,
@@ -103,12 +103,12 @@ class _ActivityScreenState extends State<ActivityScreen> {
         ),
         body: TabBarView(
           children: [
-            // Tab Tasks (hiện tại để trống)
+            // Tab Công việc (hiện tại để trống)
             const Center(
-              child: Text('No tasks available', style: TextStyle(color: Colors.grey)),
+              child: Text('Không có công việc nào', style: TextStyle(color: Colors.grey)),
             ),
             
-            // Tab Inbox
+            // Tab Hộp thư
             Column(
               children: [
                 // Toolbar (Đánh dấu đã đọc, Lọc)
@@ -174,7 +174,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
                   text: TextSpan(
                     style: const TextStyle(color: Colors.black87, fontSize: 14, height: 1.4),
                     children: [
-                      if (!item['action'].toString().startsWith('An OT'))
+                      if (!item['action'].toString().startsWith('Đơn làm thêm giờ'))
                         TextSpan(
                           text: '${item['name']} ',
                           style: const TextStyle(fontWeight: FontWeight.bold),
@@ -193,7 +193,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(
-                        item['type'],
+                        item['type'] == 'Leave' ? 'Nghỉ phép' : 'Làm thêm giờ',
                         style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
                       ),
                     ),

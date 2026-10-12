@@ -103,7 +103,7 @@ class _AuditViewState extends State<_AuditView> {
             const SizedBox(height: 12),
             _detailRow('Thời gian', _dateTimeFormat.format(log.createdAt)),
             _detailRow('Người dùng', log.username ?? '--'),
-            _detailRow('Module', log.module),
+            _detailRow('Phân hệ', log.module),
             _detailRow('Hành động', log.action),
             _detailRow('Đối tượng', log.target ?? '--'),
             _detailRow('Địa chỉ IP', log.ipAddress ?? '--'),
@@ -130,7 +130,7 @@ class _AuditViewState extends State<_AuditView> {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
       appBar: AppBar(
-        title: const Text('Audit Log'),
+        title: const Text('Nhật ký hệ thống'),
         backgroundColor: const Color(0xFF2A5CAA),
         foregroundColor: Colors.white,
         actions: [
@@ -157,13 +157,13 @@ class _AuditViewState extends State<_AuditView> {
       child: Column(
         children: [
           Row(children: [
-            Expanded(child: _field(_userCtrl, 'User')),
+            Expanded(child: _field(_userCtrl, 'Người dùng')),
             const SizedBox(width: 8),
-            Expanded(child: _field(_moduleCtrl, 'Module')),
+            Expanded(child: _field(_moduleCtrl, 'Phân hệ')),
           ]),
           const SizedBox(height: 8),
           Row(children: [
-            Expanded(child: _field(_actionCtrl, 'Action')),
+            Expanded(child: _field(_actionCtrl, 'Hành động')),
             const SizedBox(width: 8),
             Expanded(
               child: InkWell(
@@ -260,8 +260,8 @@ class _AuditViewState extends State<_AuditView> {
                 Text(_dateTimeFormat.format(log.createdAt), style: TextStyle(color: Colors.grey.shade600, fontSize: 12)),
               ]),
               const SizedBox(height: 6),
-              Text('User: ${log.username ?? '--'}', style: const TextStyle(fontSize: 13)),
-              Text('Target: ${log.target ?? '--'}', style: const TextStyle(fontSize: 13)),
+              Text('Người dùng: ${log.username ?? '--'}', style: const TextStyle(fontSize: 13)),
+              Text('Đối tượng: ${log.target ?? '--'}', style: const TextStyle(fontSize: 13)),
               Text('IP: ${log.ipAddress ?? '--'}', style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
             ],
           ),

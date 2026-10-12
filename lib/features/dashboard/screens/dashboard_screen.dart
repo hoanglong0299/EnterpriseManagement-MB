@@ -55,10 +55,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
         selectedItemColor: const Color(0xFF2A5CAA),
         unselectedItemColor: Colors.grey,
         items: [
-          BottomNavigationBarColor(icon: const Icon(Icons.home_outlined), activeIcon: const Icon(Icons.home), label: 'Home'),
-          BottomNavigationBarColor(icon: const Icon(Icons.assignment_outlined), activeIcon: const Icon(Icons.assignment), label: 'Activity'),
-          BottomNavigationBarColor(icon: const Icon(Icons.calendar_month_outlined), activeIcon: const Icon(Icons.calendar_month), label: 'Calendar'),
-          BottomNavigationBarColor(icon: const Icon(Icons.person_outline), activeIcon: const Icon(Icons.person), label: 'Me'),
+          BottomNavigationBarColor(icon: const Icon(Icons.home_outlined), activeIcon: const Icon(Icons.home), label: 'Trang chủ'),
+          BottomNavigationBarColor(icon: const Icon(Icons.assignment_outlined), activeIcon: const Icon(Icons.assignment), label: 'Hoạt động'),
+          BottomNavigationBarColor(icon: const Icon(Icons.calendar_month_outlined), activeIcon: const Icon(Icons.calendar_month), label: 'Lịch'),
+          BottomNavigationBarColor(icon: const Icon(Icons.person_outline), activeIcon: const Icon(Icons.person), label: 'Cá nhân'),
         ],
       ),
     );
@@ -89,7 +89,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             child: AbsorbPointer(
               // Dùng AbsorbPointer để giữ nguyên giao diện hiển thị khung thẻ thu gọn nhưng vẫn bắt sự kiện InkWell tổng
               child: _buildCard(
-                title: 'Leave Status',
+                title: 'Tình trạng nghỉ phép',
                 child: Column(
                   children: [
                     // Hiển thị tối đa 3 mục tiêu biểu ngoài Dashboard
@@ -104,18 +104,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
 
           _buildCard(
-            title: 'Company Notice',
+            title: 'Thông báo công ty',
             child: const Padding(
               padding: EdgeInsets.symmetric(vertical: 8.0),
               child: Text(
-                'Mobile Apps on Google Play and Apple AppStore. Search for "EMS Service".',
+                'Ứng dụng di động có trên Google Play và Apple AppStore. Hãy tìm "EMS Service".',
                 style: TextStyle(color: Colors.black87, fontSize: 13),
               ),
             ),
           ),
 
           _buildCard(
-            title: 'Useful Link',
+            title: 'Liên kết hữu ích',
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -123,7 +123,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   onTap: () {},
                   child: const Padding(
                     padding: EdgeInsets.symmetric(vertical: 8.0),
-                    child: Text('EMS Service Website', style: TextStyle(color: Colors.black54, fontSize: 13)),
+                    child: Text('Trang web EMS Service', style: TextStyle(color: Colors.black54, fontSize: 13)),
                   ),
                 ),
                 const Divider(height: 1),
@@ -131,7 +131,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   onTap: () {},
                   child: const Padding(
                     padding: EdgeInsets.symmetric(vertical: 8.0),
-                    child: Text('Insurance Policy', style: TextStyle(color: Colors.black54, fontSize: 13)),
+                    child: Text('Chính sách bảo hiểm', style: TextStyle(color: Colors.black54, fontSize: 13)),
                   ),
                 ),
               ],

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 
 import '../core/network/api_client.dart';
@@ -60,6 +61,14 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         title: 'EMS',
         debugShowCheckedModeBanner: false,
+        // Tiếng Việt cho các thành phần có sẵn của Flutter (hộp chọn ngày, nút OK/Huỷ, tooltip...).
+        locale: const Locale('vi', 'VN'),
+        supportedLocales: const [Locale('vi', 'VN')],
+        localizationsDelegates: const [
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
         home: const LoginScreen(),
       ),
     );

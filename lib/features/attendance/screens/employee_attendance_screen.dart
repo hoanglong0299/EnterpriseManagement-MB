@@ -417,7 +417,7 @@ class _AdjustmentCard extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.only(top: 4),
               child: Text(
-                'Manager xác nhận: ${item.approverName}${item.approvedAt != null ? ' · ${formatDateTime(item.approvedAt)}' : ''}',
+                'Quản lý xác nhận: ${item.approverName}${item.approvedAt != null ? ' · ${formatDateTime(item.approvedAt)}' : ''}',
                 style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
               ),
             ),
@@ -553,7 +553,7 @@ class _AdjustmentFormState extends State<_AdjustmentForm> {
             ]),
             const SizedBox(height: 4),
             Text(
-              'Bỏ trống giờ vào nếu quên check-out, bỏ trống giờ ra nếu quên check-in.',
+              'Bỏ trống giờ vào nếu quên chấm công ra, bỏ trống giờ ra nếu quên chấm công vào.',
               style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
             ),
             const SizedBox(height: 12),

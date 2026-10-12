@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/network/api_client.dart';
+import '../../../core/utils/vi_date.dart';
 import '../../../models/attendance_hr.dart';
 import '../../../services/hr_service.dart';
 import '../../../shared/widgets/state_views.dart';
@@ -21,7 +22,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
   DateTime _focusedMonth = DateTime.now();
 
   // Tuần bắt đầu từ thứ Hai, kết thúc Chủ nhật.
-  final List<String> _weekDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  final List<String> _weekDays = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
 
   // Chiều cao 1 hàng ngày: số ngày (30) + khoảng cách + 2 vạch trạng thái, thêm chút đệm.
   static const double _rowHeight = 52;
@@ -175,7 +176,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
   // Nội dung chi tiết của ngày đang chọn, lấy từ dữ liệu backend.
   List<Widget> _detailRows(DateTime date) {
     final off = dayPartColor(DayPartStatus.off)!;
-    if (_isWeekend(date)) return [_detailRow(Icons.weekend, off, 'DAY-OFF (cuối tuần)')];
+    if (_isWeekend(date)) return [_detailRow(Icons.weekend, off, 'NGÀY NGHỈ (cuối tuần)')];
 
     final d = _dayData(date);
     if (d == null) {
@@ -210,7 +211,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text('Calendar', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFF1E293B))),
+                  const Text('Lịch', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFF1E293B))),
                   IconButton(
                     icon: const Icon(Icons.calendar_month, color: Color(0xFF2A5CAA)),
                     onPressed: () => _selectDate(context),
@@ -227,7 +228,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 children: [
                   IconButton(icon: const Icon(Icons.chevron_left, color: Color(0xFF2A5CAA)), onPressed: () => _changeMonth(-1)),
                   Text(
-                    DateFormat('MMMM yyyy').format(_focusedMonth),
+                    viMonthYear(_focusedMonth),
                     style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.black87),
                   ),
                   IconButton(icon: const Icon(Icons.chevron_right, color: Color(0xFF2A5CAA)), onPressed: () => _changeMonth(1)),
@@ -257,7 +258,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
             ),
             const SizedBox(height: 10),
 
-            // 3. Thứ trong tuần (Mon -> Sun)
+            // 3. Thứ trong tuần (T2 -> CN)
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: Row(
@@ -267,9 +268,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
                             child: Text(
                               day,
                               style: TextStyle(
-                                color: day == 'Sun' ? Colors.red.shade300 : Colors.grey, // Chữ Sun màu đỏ nhạt
+                                color: day == 'CN' ? Colors.red.shade300 : Colors.grey, // Chữ CN màu đỏ nhạt
                                 fontSize: 15,
-                                fontWeight: day == 'Sun' ? FontWeight.bold : FontWeight.normal,
+                                fontWeight: day == 'CN' ? FontWeight.bold : FontWeight.normal,
                               ),
                             ),
                           ),
@@ -320,7 +321,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    DateFormat('dd/MM/yyyy (EEE)').format(_selectedDate),
+                    '${DateFormat('dd/MM/yyyy').format(_selectedDate)} (${viWeekdayShort(_selectedDate.weekday)})',
                     style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87),
                   ),
                   const SizedBox(height: 16),

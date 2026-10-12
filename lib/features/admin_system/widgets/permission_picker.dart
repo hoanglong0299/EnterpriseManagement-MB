@@ -6,17 +6,17 @@ import '../providers/system_provider.dart';
 
 // Nhãn nhóm giống bản web; module lạ thì hiện nguyên mã module.
 const Map<String, String> _groupLabels = {
-  'dashboard': 'Dashboard',
+  'dashboard': 'Tổng quan',
   'attendance': 'Chấm công',
   'leave': 'Nghỉ phép',
   'organization': 'Phòng ban & chức vụ',
   'employee': 'Nhân viên',
   'users': 'Tài khoản đăng nhập',
-  'audit': 'Audit Log',
-  'system': 'System Administration',
+  'audit': 'Nhật ký hệ thống',
+  'system': 'Quản trị hệ thống',
 };
 
-const Map<String, String> _scopeLabels = {'employee': 'Nhân viên', 'manager': 'Manager', 'admin': 'Admin'};
+const Map<String, String> _scopeLabels = {'employee': 'Nhân viên', 'manager': 'Quản lý', 'admin': 'Quản trị'};
 
 class _Group {
   final String key;
@@ -65,11 +65,11 @@ class PermissionPicker extends StatelessWidget {
     if (state.error != null && !state.loaded) {
       return Padding(
         padding: const EdgeInsets.all(8),
-        child: Text('Không tải được danh sách permission: ${state.error}', style: const TextStyle(color: Colors.red)),
+        child: Text('Không tải được danh sách quyền: ${state.error}', style: const TextStyle(color: Colors.red)),
       );
     }
     final groups = _buildGroups(state.items);
-    if (groups.isEmpty) return const Padding(padding: EdgeInsets.all(8), child: Text('Chưa có permission nào.'));
+    if (groups.isEmpty) return const Padding(padding: EdgeInsets.all(8), child: Text('Chưa có quyền nào.'));
 
     void toggle(String code, bool on) {
       final next = {...selected};

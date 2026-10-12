@@ -52,12 +52,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Logging Out'),
-        content: const Text('Are you sure you want to log out of the application?'),
+        title: const Text('Đăng xuất'),
+        content: const Text('Bạn có chắc muốn đăng xuất khỏi ứng dụng?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
+            child: const Text('Huỷ', style: TextStyle(color: Colors.grey)),
           ),
           TextButton(
             onPressed: () async {
@@ -175,8 +175,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
               children: [
                 _buildMenuItem(
                   icon: Icons.notifications_none,
-                  title: 'Notification Settings',
-                  trailingText: _isNotificationOn ? 'On' : 'Off',
+                  title: 'Cài đặt thông báo',
+                  trailingText: _isNotificationOn ? 'Bật' : 'Tắt',
                   onTap: _openNotificationSettings,
                 ),
                 _buildMenuItem(
@@ -186,12 +186,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
                 _buildMenuItem(
                   icon: Icons.person_outline,
-                  title: 'Account Settings',
+                  title: 'Cài đặt tài khoản',
                   onTap: _openAccountSettings,
                 ),
                 _buildMenuItem(
                   icon: Icons.description_outlined,
-                  title: 'Privacy Statement',
+                  title: 'Chính sách quyền riêng tư',
                   onTap: () {
                     // Chuyển hướng sang màn hình Privacy Statement
                     Navigator.push(
@@ -204,7 +204,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
                 _buildMenuItem(
                   icon: Icons.logout,
-                  title: 'Logout',
+                  title: 'Đăng xuất',
                   hideBorder: true,
                   onTap: _handleLogout,
                 ),
@@ -276,7 +276,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Notification Settings'),
+        title: const Text('Cài đặt thông báo'),
         backgroundColor: const Color(0xFF2A5CAA),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
@@ -286,8 +286,8 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
       body: ListView(
         children: [
           SwitchListTile(
-            title: const Text('Allow Notifications'),
-            subtitle: const Text('Receive notifications about attendance, leave requests, OT...'),
+            title: const Text('Cho phép thông báo'),
+            subtitle: const Text('Nhận thông báo về chấm công, đơn nghỉ phép, làm thêm giờ...'),
             value: _isOn,
             activeColor: const Color(0xFF2A5CAA),
             onChanged: (value) {

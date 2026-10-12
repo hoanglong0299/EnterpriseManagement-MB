@@ -6,36 +6,36 @@ class PrivacyStatementScreen extends StatelessWidget {
   // Tách biệt dữ liệu văn bản thành một List cố định để code UI không bị rác
   static const List<Map<String, String>> _privacySections = [
     {
-      'title': '1. Scope of Data Collection',
-      'content': 'To ensure the accuracy of the time-tracking function, the application will collect the following information upon receiving your permission:\n\n'
-                 '• Location Data (GPS): Collected only at the exact moment you press the "Check-in/Check-out" button to verify that you are at the designated workplace.\n'
-                 '• Biometric Data (Facial/Fingerprint): Images or fingerprint scans are collected to authenticate your identity and prevent proxy attendance (buddy punching).\n'
-                 '• Device and System Data: Information regarding your device type (Device ID), operating system, IP address, and access time is collected to record system logs and secure your account.',
+      'title': '1. Phạm vi thu thập dữ liệu',
+      'content': 'Để đảm bảo chức năng chấm công chính xác, ứng dụng sẽ thu thập các thông tin sau khi nhận được sự cho phép của bạn:\n\n'
+                 '• Dữ liệu vị trí (GPS): Chỉ thu thập đúng thời điểm bạn bấm nút "Chấm công vào/ra" để xác minh bạn đang ở nơi làm việc quy định.\n'
+                 '• Dữ liệu sinh trắc học (khuôn mặt/vân tay): Hình ảnh hoặc dấu vân tay được thu thập để xác thực danh tính và ngăn chặn chấm công hộ.\n'
+                 '• Dữ liệu thiết bị và hệ thống: Thông tin về loại thiết bị (Device ID), hệ điều hành, địa chỉ IP và thời gian truy cập được thu thập để ghi nhật ký hệ thống và bảo vệ tài khoản của bạn.',
     },
     {
-      'title': '2. Purpose of Data Use',
-      'content': 'All data collected from users is used exclusively for internal business purposes, including:\n\n'
-                 '• Verifying the identity, location, and actual working hours of employees.\n'
-                 '• Providing an accurate database for the Human Resources Department to calculate salaries, bonuses, and manage shifts.\n'
-                 '• Preventing fraudulent activities, location spoofing, or device tampering during the attendance tracking process.',
+      'title': '2. Mục đích sử dụng dữ liệu',
+      'content': 'Toàn bộ dữ liệu thu thập từ người dùng chỉ được sử dụng cho mục đích nội bộ của doanh nghiệp, bao gồm:\n\n'
+                 '• Xác minh danh tính, vị trí và thời gian làm việc thực tế của nhân viên.\n'
+                 '• Cung cấp cơ sở dữ liệu chính xác cho phòng Nhân sự để tính lương, thưởng và quản lý ca làm việc.\n'
+                 '• Ngăn chặn hành vi gian lận, giả mạo vị trí hoặc can thiệp vào thiết bị trong quá trình chấm công.',
     },
     {
-      'title': '3. Non-Disclosure Commitment',
-      'content': 'We strictly commit not to sell, exchange, rent, or provide your personal data, location data, and biometric data to any third party for commercial purposes. Your data is only shared within the following scope:\n\n'
-                 '• Managers, System Administrators (Admins), or the Human Resources Department of the company/organization directly managing you.\n'
-                 '• Cloud server infrastructure partners who have signed a strict Non-Disclosure Agreement (NDA) with us.',
+      'title': '3. Cam kết không tiết lộ',
+      'content': 'Chúng tôi cam kết tuyệt đối không bán, trao đổi, cho thuê hoặc cung cấp dữ liệu cá nhân, dữ liệu vị trí và dữ liệu sinh trắc học của bạn cho bất kỳ bên thứ ba nào vì mục đích thương mại. Dữ liệu của bạn chỉ được chia sẻ trong phạm vi sau:\n\n'
+                 '• Quản lý, Quản trị viên hệ thống (Admin) hoặc phòng Nhân sự của công ty/tổ chức trực tiếp quản lý bạn.\n'
+                 '• Các đối tác hạ tầng máy chủ đám mây đã ký thỏa thuận bảo mật (NDA) nghiêm ngặt với chúng tôi.',
     },
     {
-      'title': '4. Security and Encryption Measures',
-      'content': 'The application applies the most advanced digital security standards available. All personal information, especially biometric and location data, is safeguarded using End-to-End Encryption during transmission and storage on our servers. We utilize firewalls and strict security protocols to prevent any unauthorized access, alteration, or destruction of data from external sources.',
+      'title': '4. Biện pháp bảo mật và mã hóa',
+      'content': 'Ứng dụng áp dụng các tiêu chuẩn bảo mật kỹ thuật số tiên tiến nhất hiện có. Mọi thông tin cá nhân, đặc biệt là dữ liệu sinh trắc học và vị trí, được bảo vệ bằng mã hóa đầu cuối trong quá trình truyền tải và lưu trữ trên máy chủ. Chúng tôi sử dụng tường lửa và các giao thức bảo mật chặt chẽ để ngăn chặn mọi truy cập, thay đổi hoặc phá hủy dữ liệu trái phép từ bên ngoài.',
     },
     {
-      'title': '5. Data Retention Period',
-      'content': 'Your attendance data and personal profile will be retained in the system for as long as you maintain your employment status with the company. Upon termination of your employment contract, your biometric data and account will be deactivated, archived, or permanently deleted in accordance with your company\'s personnel records management policies and applicable local laws.',
+      'title': '5. Thời gian lưu trữ dữ liệu',
+      'content': 'Dữ liệu chấm công và hồ sơ cá nhân của bạn sẽ được lưu trong hệ thống chừng nào bạn còn làm việc tại công ty. Khi hợp đồng lao động chấm dứt, dữ liệu sinh trắc học và tài khoản của bạn sẽ bị vô hiệu hóa, lưu trữ hoặc xóa vĩnh viễn theo chính sách quản lý hồ sơ nhân sự của công ty và quy định pháp luật hiện hành.',
     },
     {
-      'title': '6. User Control Rights',
-      'content': 'Users are granted access to review their complete attendance history, including recorded times and locations, directly within the application. In the event you discover inaccurate information or wish to request the correction/deletion of your facial/fingerprint data, you have the right to submit a request directly to the System Administrator or your company\'s Human Resources Department for resolution according to their authority.',
+      'title': '6. Quyền kiểm soát của người dùng',
+      'content': 'Người dùng được quyền xem lại toàn bộ lịch sử chấm công, gồm thời gian và vị trí đã ghi nhận, ngay trong ứng dụng. Nếu phát hiện thông tin không chính xác hoặc muốn yêu cầu chỉnh sửa/xóa dữ liệu khuôn mặt/vân tay, bạn có quyền gửi yêu cầu trực tiếp đến Quản trị viên hệ thống hoặc phòng Nhân sự của công ty để được giải quyết theo thẩm quyền.',
     },
   ];
 
@@ -44,7 +44,7 @@ class PrivacyStatementScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text('Privacy Statement'),
+        title: const Text('Chính sách quyền riêng tư'),
         backgroundColor: const Color(0xFF2A5CAA),
         elevation: 0,
       ),
