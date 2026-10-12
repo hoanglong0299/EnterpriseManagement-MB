@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../app/feature_registry.dart';
 import '../../calendar/screens/calendar_screen.dart';
-import '../../activity/screens/activity_screen.dart';
+import '../../../services/push_service.dart';
+import '../../notifications/providers/notification_provider.dart';
+import '../../notifications/screens/notifications_screen.dart';
 import '../../leave/providers/leave_provider.dart';
 import '../providers/menu_provider.dart';
 import '../../profile/providers/profile_provider.dart';
@@ -18,26 +20,46 @@ class DashboardScreen extends StatefulWidget {
 
 class _DashboardScreenState extends State<DashboardScreen> {
   int _currentIndex = 0;
+  late final PushService _push;
+
+  // Bấm thông báo hệ thống: chuyển sang tab Thông báo.
+  void _openNotificationsTab() {
+    _push.pendingOpenTab = false;
+    if (mounted) setState(() => _currentIndex = 1);
+  }
 
   @override
   void initState() {
     super.initState();
+    _push = context.read<PushService>();
+    _push.openTabRequests.addListener(_openNotificationsTab);
+    if (_push.pendingOpenTab) _currentIndex = 1;
     // Dashboard la man hinh dau tien sau khi dang nhap: tai ho so va so du nghi phep that tai day.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<ProfileProvider>().load();
       context.read<LeaveProvider>().load();
       context.read<MenuProvider>().load();
+      context.read<NotificationProvider>().startPolling();
+      _push.start();
     });
+  }
+
+  @override
+  void dispose() {
+    _push.openTabRequests.removeListener(_openNotificationsTab);
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final List<Widget> screens = [
       _buildHomeBody(), 
-      const ActivityScreen(), 
+      const NotificationsScreen(), 
       const CalendarScreen(), 
       const ProfileScreen(), 
     ];
+
+    final unread = context.watch<NotificationProvider>().unreadCount;
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
@@ -56,11 +78,24 @@ class _DashboardScreenState extends State<DashboardScreen> {
         unselectedItemColor: Colors.grey,
         items: [
           BottomNavigationBarColor(icon: const Icon(Icons.home_outlined), activeIcon: const Icon(Icons.home), label: 'Trang chủ'),
-          BottomNavigationBarColor(icon: const Icon(Icons.assignment_outlined), activeIcon: const Icon(Icons.assignment), label: 'Hoạt động'),
+          BottomNavigationBarColor(
+            icon: _bellIcon(Icons.notifications_none, unread),
+            activeIcon: _bellIcon(Icons.notifications, unread),
+            label: 'Thông báo',
+          ),
           BottomNavigationBarColor(icon: const Icon(Icons.calendar_month_outlined), activeIcon: const Icon(Icons.calendar_month), label: 'Lịch'),
           BottomNavigationBarColor(icon: const Icon(Icons.person_outline), activeIcon: const Icon(Icons.person), label: 'Cá nhân'),
         ],
       ),
+    );
+  }
+
+  // Icon chuông kèm huy hiệu số chưa đọc (ẩn khi 0, "9+" khi lớn hơn 9).
+  Widget _bellIcon(IconData icon, int unread) {
+    return Badge(
+      isLabelVisible: unread > 0,
+      label: Text(unread > 9 ? '9+' : '$unread'),
+      child: Icon(icon),
     );
   }
 

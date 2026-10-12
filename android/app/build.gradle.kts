@@ -47,3 +47,8 @@ kotlin {
 flutter {
     source = "../.."
 }
+
+// Chỉ bật Firebase khi đã đặt google-services.json; thiếu file thì vẫn build được (thông báo đẩy bị tắt).
+if (file("google-services.json").exists()) {
+    apply(plugin = "com.google.gms.google-services")
+}

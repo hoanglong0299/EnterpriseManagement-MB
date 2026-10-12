@@ -6,6 +6,8 @@ import '../../check_in/providers/check_in_provider.dart';
 import '../../dashboard/providers/menu_provider.dart';
 import '../../leave/providers/leave_approval_provider.dart';
 import '../../leave/providers/leave_provider.dart';
+import '../../notifications/providers/notification_provider.dart';
+import '../../../services/push_service.dart';
 import '../providers/profile_provider.dart';
 import 'account_settings_screen.dart';
 import 'privacy_statement_screen.dart';
@@ -68,6 +70,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
               final profile = context.read<ProfileProvider>();
               final menu = context.read<MenuProvider>();
               final approval = context.read<LeaveApprovalProvider>();
+              final notifications = context.read<NotificationProvider>();
+              final push = context.read<PushService>();
+
+              // Gỡ token thiết bị khi còn phiên đăng nhập (cần token để gọi API), rồi mới xoá phiên.
+              await push.stop();
 
               // Xóa phiên đăng nhập (token) và dữ liệu đã tải của người dùng này
               await auth.logout();
@@ -76,6 +83,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               profile.clear();
               menu.clear();
               approval.clear();
+              notifications.clear();
 
               // Xóa toàn bộ stack màn hình hiện tại và quay về Login
               navigator.pushAndRemoveUntil(

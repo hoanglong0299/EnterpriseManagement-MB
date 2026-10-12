@@ -18,6 +18,9 @@ import '../services/leave_service.dart';
 import '../services/location_service.dart';
 import '../services/menu_service.dart';
 import '../services/photo_service.dart';
+import '../features/notifications/providers/notification_provider.dart';
+import '../services/notification_service.dart';
+import '../services/push_service.dart';
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -31,6 +34,10 @@ class MyApp extends StatelessWidget {
     final leaveService = LeaveService(apiClient);
     final employeeService = EmployeeService(apiClient);
     final menuService = MenuService(apiClient);
+    final notificationService = NotificationService(apiClient);
+    final notificationProvider = NotificationProvider(notificationService);
+    final messengerKey = GlobalKey<ScaffoldMessengerState>();
+    final pushService = PushService(notificationService, notificationProvider, messengerKey);
 
     return MultiProvider(
       providers: [
@@ -57,8 +64,11 @@ class MyApp extends StatelessWidget {
         ),
         ChangeNotifierProvider(create: (_) => MenuProvider(menuService)),
         ChangeNotifierProvider(create: (_) => LeaveApprovalProvider(leaveService)),
+        ChangeNotifierProvider.value(value: notificationProvider),
+        Provider<PushService>.value(value: pushService),
       ],
       child: MaterialApp(
+        scaffoldMessengerKey: messengerKey,
         title: 'EMS',
         debugShowCheckedModeBanner: false,
         // Tiếng Việt cho các thành phần có sẵn của Flutter (hộp chọn ngày, nút OK/Huỷ, tooltip...).
