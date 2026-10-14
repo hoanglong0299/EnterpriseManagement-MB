@@ -109,7 +109,7 @@ class ReturnRequestCard extends StatelessWidget {
                 Expanded(
                   child: Text(
                     showEmployee ? r.employeeName : 'Đi làm lại từ ${_dayText(r.fromDate)} (${sessionName(r.fromSession)})',
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Color(0xFF2A5CAA)),
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Color(0xFF5A3FD8)),
                   ),
                 ),
                 StatusChip(label: returnStatusLabels[r.status] ?? r.status, color: returnStatusColor(r.status)),
@@ -269,7 +269,7 @@ class _PendingReturnsTabState extends State<PendingReturnsTab> {
                         const SizedBox(width: 12),
                         Expanded(
                           child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF2A5CAA)),
+                            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF5A3FD8)),
                             onPressed: busy ? null : () => _approve(r),
                             child: busy
                                 ? const SizedBox(

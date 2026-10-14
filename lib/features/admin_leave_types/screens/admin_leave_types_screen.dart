@@ -11,7 +11,7 @@ import '../../../shared/widgets/status_chip.dart';
 import '../providers/admin_leave_types_provider.dart';
 import '../widgets/leave_type_form_sheet.dart';
 
-const Color _primary = Color(0xFF2A5CAA);
+const Color _primary = Color(0xFF5A3FD8);
 
 // Admin: quản lý loại nghỉ phép (route /admin/leave-types). Mọi nút ghi cần permission leavetype.manage.
 class AdminLeaveTypesScreen extends StatelessWidget {
@@ -33,7 +33,7 @@ class _Body extends StatelessWidget {
   Widget build(BuildContext context) {
     final p = context.watch<AdminLeaveTypesProvider>();
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
+      backgroundColor: const Color(0xFFF6F4FC),
       appBar: AppBar(title: const Text('Loại nghỉ phép'), backgroundColor: _primary, foregroundColor: Colors.white),
       floatingActionButton: PermissionGate(
         code: 'leavetype.manage',

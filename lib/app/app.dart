@@ -3,6 +3,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 
 import '../core/network/api_client.dart';
+import 'theme.dart';
 import '../core/storage/local_storage.dart';
 import '../features/auth/providers/auth_provider.dart';
 import '../features/auth/screens/login_screen.dart';
@@ -71,6 +72,7 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         scaffoldMessengerKey: messengerKey,
         title: 'EMS',
+        theme: buildAppTheme(),
         debugShowCheckedModeBanner: false,
         // Tiếng Việt cho các thành phần có sẵn của Flutter (hộp chọn ngày, nút OK/Huỷ, tooltip...).
         locale: const Locale('vi', 'VN'),

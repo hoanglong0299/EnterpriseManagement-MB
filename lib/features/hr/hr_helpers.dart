@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import '../../shared/widgets/status_chip.dart';
 
 // Màu/nhãn dùng chung cho các màn hình HR (cùng phong cách màn hình manager).
-const Color hrPrimary = Color(0xFF2A5CAA);
-const Color hrBackground = Color(0xFFF5F7FA);
+const Color hrPrimary = Color(0xFF5A3FD8);
+const Color hrBackground = Color(0xFFF6F4FC);
 const Color hrAmber = Color(0xFFF9A825);
 const Color hrGrey = Color(0xFF757575);
 

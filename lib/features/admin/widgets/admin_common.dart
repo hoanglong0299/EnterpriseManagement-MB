@@ -5,8 +5,8 @@ import '../../../models/admin_user.dart';
 import '../../../shared/widgets/confirm_dialog.dart';
 import '../../../shared/widgets/status_chip.dart';
 
-const Color adminPrimary = Color(0xFF2A5CAA);
-const Color adminBackground = Color(0xFFF5F7FA);
+const Color adminPrimary = Color(0xFF5A3FD8);
+const Color adminBackground = Color(0xFFF6F4FC);
 
 String errText(Object e) => e.toString().replaceFirst('Exception: ', '');
 

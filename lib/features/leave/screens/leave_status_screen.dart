@@ -8,10 +8,10 @@ class LeaveStatusScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
+      backgroundColor: const Color(0xFFF6F4FC),
       appBar: AppBar(
         title: const Text('Chi tiết tình trạng nghỉ phép'),
-        backgroundColor: const Color(0xFF2A5CAA),
+        backgroundColor: const Color(0xFF5A3FD8),
       ),
       body: ListView.builder(
         padding: const EdgeInsets.all(16.0),
@@ -49,14 +49,14 @@ class LeaveStatusScreen extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF2A5CAA).withOpacity(0.1),
+                      color: const Color(0xFF5A3FD8).withOpacity(0.1),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
                       item['value'] ?? '0 ngày',
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
-                        color: Color(0xFF2A5CAA),
+                        color: Color(0xFF5A3FD8),
                       ),
                     ),
                   ),

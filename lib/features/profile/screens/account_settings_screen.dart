@@ -68,10 +68,10 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
     final session = context.watch<AuthProvider>().session;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
+      backgroundColor: const Color(0xFFF6F4FC),
       appBar: AppBar(
         title: const Text('Cài đặt tài khoản'),
-        backgroundColor: const Color(0xFF2A5CAA),
+        backgroundColor: const Color(0xFF5A3FD8),
         foregroundColor: Colors.white,
       ),
       body: ListView(
@@ -116,7 +116,7 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
                 SizedBox(
                   height: 48,
                   child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF2A5CAA), foregroundColor: Colors.white),
+                    style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF5A3FD8), foregroundColor: Colors.white),
                     onPressed: _sending ? null : _submit,
                     child: _sending
                         ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
@@ -138,7 +138,7 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF2A5CAA))),
+            Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF5A3FD8))),
             const Divider(height: 24),
             child,
           ],

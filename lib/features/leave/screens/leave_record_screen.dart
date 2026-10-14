@@ -83,10 +83,10 @@ class _LeaveRecordScreenState extends State<LeaveRecordScreen> {
     return DefaultTabController(
       length: 3,
       child: Scaffold(
-        backgroundColor: const Color(0xFFF5F7FA),
+        backgroundColor: const Color(0xFFF6F4FC),
         appBar: AppBar(
           title: const Text('Xin nghỉ phép'),
-          backgroundColor: const Color(0xFF2A5CAA),
+          backgroundColor: const Color(0xFF5A3FD8),
           foregroundColor: Colors.white,
           actions: [
             // Lối vào "Đi làm lại": chỉ người có quyền tự xin nghỉ.
@@ -110,7 +110,7 @@ class _LeaveRecordScreenState extends State<LeaveRecordScreen> {
           code: 'leave.request.self',
           child: FloatingActionButton.extended(
             onPressed: _navigateToApplyScreen,
-            backgroundColor: const Color(0xFF2A5CAA),
+            backgroundColor: const Color(0xFF5A3FD8),
             foregroundColor: Colors.white,
             icon: const Icon(Icons.add),
             label: const Text('Tạo đơn'),
@@ -168,12 +168,12 @@ class _LeaveRecordScreenState extends State<LeaveRecordScreen> {
       padding: const EdgeInsets.fromLTRB(12, 12, 12, 4),
       child: Row(
         children: [
-          tile('Ngày phép còn lại', '${_num(days)} ngày', const Color(0xFF2A5CAA)),
+          tile('Ngày phép còn lại', '${_num(days)} ngày', const Color(0xFF5A3FD8)),
           const SizedBox(width: 8),
           tile(
             'Nghỉ ngắn tháng này',
             shorts.isEmpty ? '--' : '${_num(shorts.first.remainingTime)} giờ',
-            const Color(0xFF2A5CAA),
+            const Color(0xFF5A3FD8),
           ),
           const SizedBox(width: 8),
           tile('Đang chờ duyệt', '$pending', pending > 0 ? StatusChip.warning : StatusChip.success),
@@ -254,7 +254,7 @@ class _LeaveRecordScreenState extends State<LeaveRecordScreen> {
                   Expanded(
                     child: Text(
                       r.leaveTypeName,
-                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Color(0xFF2A5CAA)),
+                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Color(0xFF5A3FD8)),
                     ),
                   ),
                   LeaveStatusChip(r),
@@ -324,7 +324,7 @@ class _LeaveRecordScreenState extends State<LeaveRecordScreen> {
                 ),
                 Text(
                   '${_num(b.remainingTime)} / ${_num(b.allocatedTime)} $unit',
-                  style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF2A5CAA)),
+                  style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF5A3FD8)),
                 ),
               ],
             ),
@@ -375,7 +375,7 @@ class _LeaveRecordScreenState extends State<LeaveRecordScreen> {
             }),
             onPageChanged: (focused) => _focusedDay = focused,
             calendarStyle: const CalendarStyle(
-              selectedDecoration: BoxDecoration(color: Color(0xFF2A5CAA), shape: BoxShape.circle),
+              selectedDecoration: BoxDecoration(color: Color(0xFF5A3FD8), shape: BoxShape.circle),
               todayDecoration: BoxDecoration(color: Color(0x662A5CAA), shape: BoxShape.circle),
               markerDecoration: BoxDecoration(color: StatusChip.warning, shape: BoxShape.circle),
             ),
@@ -574,7 +574,7 @@ class _LeaveApplicationScreenState extends State<LeaveApplicationScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Tạo đơn nghỉ phép'),
-        backgroundColor: const Color(0xFF2A5CAA),
+        backgroundColor: const Color(0xFF5A3FD8),
         foregroundColor: Colors.white,
       ),
       body: SingleChildScrollView(
@@ -657,7 +657,7 @@ class _LeaveApplicationScreenState extends State<LeaveApplicationScreen> {
               width: double.infinity,
               height: 50,
               child: ElevatedButton(
-                style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF2A5CAA), foregroundColor: Colors.white),
+                style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF5A3FD8), foregroundColor: Colors.white),
                 onPressed: _submitting ? null : _submit,
                 child: _submitting
                     ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))

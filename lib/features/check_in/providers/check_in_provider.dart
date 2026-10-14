@@ -40,6 +40,9 @@ class CheckInProvider extends ChangeNotifier {
   // CLOCK OUT luon bam duoc, bam lai se ghi de gio ra (lan cuoi la gio ra chinh thuc).
   bool get hasClockedIn => _today?.checkInTime != null;
 
+  // Bản ghi chấm công hôm nay (null khi chưa chấm công hoặc chưa tải xong).
+  AttendanceRecord? get today => _today;
+
   // Man hinh chi hien thi List<String>, nen tu day chuyen AttendanceRecord
   // cua hom nay thanh danh sach chuoi, moi nhat hien truoc (giong du lieu gia truoc day).
   List<String> get historyRecords {

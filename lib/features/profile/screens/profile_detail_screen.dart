@@ -66,10 +66,10 @@ class _ProfileDetailScreenState extends State<ProfileDetailScreen> {
     final e = provider.employee;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
+      backgroundColor: const Color(0xFFF6F4FC),
       appBar: AppBar(
         title: const Text('Hồ sơ của tôi'),
-        backgroundColor: const Color(0xFF2A5CAA),
+        backgroundColor: const Color(0xFF5A3FD8),
         foregroundColor: Colors.white,
         actions: [
           if (e != null)
@@ -156,7 +156,7 @@ class _ProfileDetailScreenState extends State<ProfileDetailScreen> {
             padding: EdgeInsets.only(top: 12),
             child: Card(
               child: ListTile(
-                leading: Icon(Icons.info_outline, color: Color(0xFF2A5CAA)),
+                leading: Icon(Icons.info_outline, color: Color(0xFF5A3FD8)),
                 title: Text('Cần thay đổi thông tin?'),
                 subtitle: Text('Hiện chỉ quản trị viên được chỉnh sửa hồ sơ nhân viên. Liên hệ quản trị viên để cập nhật thông tin cá nhân.'),
               ),
@@ -186,7 +186,7 @@ class _ProfileDetailScreenState extends State<ProfileDetailScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF2A5CAA))),
+            Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF5A3FD8))),
             const Divider(height: 24),
             ...children,
           ],

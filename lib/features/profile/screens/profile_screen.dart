@@ -115,7 +115,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 // Nền xanh
                 Container(
                   height: 180,
-                  color: const Color(0xFF2A5CAA),
+                  color: const Color(0xFF5A3FD8),
                 ),
                 // Avatar và Camera icon
                 Positioned(
@@ -147,7 +147,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               child: Container(
                                 padding: const EdgeInsets.all(6),
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFF2A5CAA),
+                                  color: const Color(0xFF5A3FD8),
                                   shape: BoxShape.circle,
                                   border: Border.all(color: Colors.white, width: 2),
                                 ),
@@ -240,7 +240,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
         child: Row(
           children: [
-            Icon(icon, color: const Color(0xFF2A5CAA), size: 24),
+            Icon(icon, color: const Color(0xFF5A3FD8), size: 24),
             const SizedBox(width: 16),
             Expanded(
               child: Text(
@@ -285,7 +285,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
     return Scaffold(
       appBar: AppBar(
         title: const Text('Cài đặt thông báo'),
-        backgroundColor: const Color(0xFF2A5CAA),
+        backgroundColor: const Color(0xFF5A3FD8),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context, _isOn), // Trả về trạng thái mới
@@ -297,7 +297,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
             title: const Text('Cho phép thông báo'),
             subtitle: const Text('Nhận thông báo về chấm công, đơn nghỉ phép, làm thêm giờ...'),
             value: _isOn,
-            activeColor: const Color(0xFF2A5CAA),
+            activeColor: const Color(0xFF5A3FD8),
             onChanged: (value) {
               setState(() {
                 _isOn = value;

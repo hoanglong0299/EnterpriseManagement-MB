@@ -54,7 +54,7 @@ class _CheckInScreenState extends State<CheckInScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF2A5CAA),
+        backgroundColor: const Color(0xFF5A3FD8),
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
@@ -80,8 +80,8 @@ class _CheckInScreenState extends State<CheckInScreen> {
                   height: 200,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: const Color(0xFF2A5CAA),
-                    border: Border.all(color: const Color(0xFFD6E4F5), width: 12),
+                    color: const Color(0xFF5A3FD8),
+                    border: Border.all(color: const Color(0xFFDCD3FA), width: 12),
                   ),
                   child: StreamBuilder(
                     stream: Stream.periodic(const Duration(seconds: 1)),
@@ -119,7 +119,7 @@ class _CheckInScreenState extends State<CheckInScreen> {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Icon(Icons.location_on, color: Color(0xFF2A5CAA), size: 24),
+                  const Icon(Icons.location_on, color: Color(0xFF5A3FD8), size: 24),
                   const SizedBox(width: 12),
                   Expanded(
                     child: provider.office == null
@@ -154,7 +154,7 @@ class _CheckInScreenState extends State<CheckInScreen> {
                     ? () => _handleAction('CLOCK IN') 
                     : null,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF2A5CAA),
+                  backgroundColor: const Color(0xFF5A3FD8),
                   disabledBackgroundColor: Colors.grey.shade300,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
@@ -180,7 +180,7 @@ class _CheckInScreenState extends State<CheckInScreen> {
                 style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   side: BorderSide(
-                    color: provider.hasClockedIn ? const Color(0xFF2A5CAA) : Colors.grey.shade300, 
+                    color: provider.hasClockedIn ? const Color(0xFF5A3FD8) : Colors.grey.shade300, 
                     width: 1.5
                   ),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
@@ -188,7 +188,7 @@ class _CheckInScreenState extends State<CheckInScreen> {
                 child: (provider.isLoading && provider.hasClockedIn)
                     ? const SizedBox(
                         height: 20, width: 20,
-                        child: CircularProgressIndicator(color: Color(0xFF2A5CAA), strokeWidth: 2),
+                        child: CircularProgressIndicator(color: Color(0xFF5A3FD8), strokeWidth: 2),
                       )
                     : Text(
                         'CHẤM CÔNG RA', 

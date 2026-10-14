@@ -83,7 +83,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: const ColorScheme.light(
-              primary: Color(0xFF2A5CAA),
+              primary: Color(0xFF5A3FD8),
               onPrimary: Colors.white,
               onSurface: Colors.black,
             ),
@@ -213,7 +213,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 children: [
                   const Text('Lịch', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFF1E293B))),
                   IconButton(
-                    icon: const Icon(Icons.calendar_month, color: Color(0xFF2A5CAA)),
+                    icon: const Icon(Icons.calendar_month, color: Color(0xFF5A3FD8)),
                     onPressed: () => _selectDate(context),
                   ),
                 ],
@@ -226,12 +226,12 @@ class _CalendarScreenState extends State<CalendarScreen> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  IconButton(icon: const Icon(Icons.chevron_left, color: Color(0xFF2A5CAA)), onPressed: () => _changeMonth(-1)),
+                  IconButton(icon: const Icon(Icons.chevron_left, color: Color(0xFF5A3FD8)), onPressed: () => _changeMonth(-1)),
                   Text(
                     viMonthYear(_focusedMonth),
                     style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.black87),
                   ),
-                  IconButton(icon: const Icon(Icons.chevron_right, color: Color(0xFF2A5CAA)), onPressed: () => _changeMonth(1)),
+                  IconButton(icon: const Icon(Icons.chevron_right, color: Color(0xFF5A3FD8)), onPressed: () => _changeMonth(1)),
                 ],
               ),
             ),

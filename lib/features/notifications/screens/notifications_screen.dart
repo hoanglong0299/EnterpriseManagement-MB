@@ -10,7 +10,7 @@ import '../providers/notification_provider.dart';
 
 // Icon + màu theo loại thông báo.
 ({IconData icon, Color color}) _styleOf(String type) {
-  const blue = Color(0xFF2A5CAA);
+  const blue = Color(0xFF5A3FD8);
   const green = Color(0xFF2E7D32);
   const red = Color(0xFFC62828);
   const orange = Color(0xFFE69D35);
@@ -113,7 +113,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     return Column(
       children: [
         Container(
-          color: const Color(0xFF2A5CAA),
+          color: const Color(0xFF5A3FD8),
           padding: const EdgeInsets.fromLTRB(16, 12, 8, 12),
           child: Row(
             children: [
@@ -210,9 +210,9 @@ class _NotificationCard extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(top: 8),
       decoration: BoxDecoration(
-        color: unread ? const Color(0xFFEAF1FB) : Colors.white,
+        color: unread ? const Color(0xFFEFEBFF) : Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: unread ? const Color(0xFFBFD3F0) : Colors.black12),
+        border: Border.all(color: unread ? const Color(0xFFC9BEF5) : Colors.black12),
       ),
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
@@ -249,7 +249,7 @@ class _NotificationCard extends StatelessWidget {
                             width: 10,
                             height: 10,
                             margin: const EdgeInsets.only(left: 8),
-                            decoration: const BoxDecoration(color: Color(0xFF2A5CAA), shape: BoxShape.circle),
+                            decoration: const BoxDecoration(color: Color(0xFF5A3FD8), shape: BoxShape.circle),
                           ),
                       ],
                     ),

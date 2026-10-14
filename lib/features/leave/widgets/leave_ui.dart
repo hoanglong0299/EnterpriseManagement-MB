@@ -96,7 +96,7 @@ void showLeaveDetail(BuildContext context, LeaveRequest r, {bool showEmployee = 
               children: [
                 const Expanded(
                   child: Text('Chi tiết đơn nghỉ',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF2A5CAA))),
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF5A3FD8))),
                 ),
                 LeaveStatusChip(r),
               ],

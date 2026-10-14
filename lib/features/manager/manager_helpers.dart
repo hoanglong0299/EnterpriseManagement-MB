@@ -32,8 +32,8 @@ Color attendanceColor(String status) {
   }
 }
 
-const Color managerPrimary = Color(0xFF2A5CAA);
-const Color managerBackground = Color(0xFFF5F7FA);
+const Color managerPrimary = Color(0xFF5A3FD8);
+const Color managerBackground = Color(0xFFF6F4FC);
 
 // Khung Scaffold chung: AppBar xanh đúng phong cách các màn hình khác.
 AppBar managerAppBar(String title, {List<Widget>? actions, PreferredSizeWidget? bottom}) => AppBar(

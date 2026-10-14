@@ -60,7 +60,7 @@ class _EmployeeDashboardView extends StatelessWidget {
               icon: Icons.beach_access_outlined,
               label: 'Phép còn lại',
               value: '${_trim(data.totalRemainingLeaveDays)} ngày',
-              color: const Color(0xFF2A5CAA),
+              color: const Color(0xFF5A3FD8),
             ),
             const SizedBox(height: 12),
             _MetricCard(
@@ -82,10 +82,10 @@ class _EmployeeDashboardView extends StatelessWidget {
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
+      backgroundColor: const Color(0xFFF6F4FC),
       appBar: AppBar(
         title: const Text('Tổng quan'),
-        backgroundColor: const Color(0xFF2A5CAA),
+        backgroundColor: const Color(0xFF5A3FD8),
         foregroundColor: Colors.white,
       ),
       body: body,

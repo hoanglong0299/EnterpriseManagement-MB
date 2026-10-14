@@ -6,7 +6,7 @@ import '../../../models/leave_type_admin.dart';
 import '../../../shared/widgets/confirm_dialog.dart';
 import '../providers/admin_leave_types_provider.dart';
 
-const Color _primary = Color(0xFF2A5CAA);
+const Color _primary = Color(0xFF5A3FD8);
 
 // Mở form tạo/sửa dạng bottom sheet. Sheet nằm ngoài cây màn hình nên truyền lại provider vào.
 Future<void> showLeaveTypeForm(BuildContext context, {LeaveTypeAdmin? editing}) {

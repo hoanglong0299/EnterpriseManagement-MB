@@ -128,10 +128,10 @@ class _AuditViewState extends State<_AuditView> {
   Widget build(BuildContext context) {
     final p = context.watch<AuditProvider>();
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
+      backgroundColor: const Color(0xFFF6F4FC),
       appBar: AppBar(
         title: const Text('Nhật ký hệ thống'),
-        backgroundColor: const Color(0xFF2A5CAA),
+        backgroundColor: const Color(0xFF5A3FD8),
         foregroundColor: Colors.white,
         actions: [
           IconButton(
@@ -192,7 +192,7 @@ class _AuditViewState extends State<_AuditView> {
             Expanded(
               child: FilledButton(
                 onPressed: _apply,
-                style: FilledButton.styleFrom(backgroundColor: const Color(0xFF2A5CAA)),
+                style: FilledButton.styleFrom(backgroundColor: const Color(0xFF5A3FD8)),
                 child: const Text('Lọc'),
               ),
             ),

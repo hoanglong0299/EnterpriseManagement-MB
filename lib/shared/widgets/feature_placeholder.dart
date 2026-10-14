@@ -9,7 +9,7 @@ class FeaturePlaceholder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(title), backgroundColor: const Color(0xFF2A5CAA), foregroundColor: Colors.white),
+      appBar: AppBar(title: Text(title), backgroundColor: const Color(0xFF5A3FD8), foregroundColor: Colors.white),
       body: const Center(child: Text('Chức năng đang được xây dựng')),
     );
   }

@@ -82,7 +82,7 @@ class _LeaveApprovalScreenState extends State<LeaveApprovalScreen> {
       return Scaffold(
         appBar: AppBar(
           title: const Text('Duyệt đơn xin nghỉ'),
-          backgroundColor: const Color(0xFF2A5CAA),
+          backgroundColor: const Color(0xFF5A3FD8),
           foregroundColor: Colors.white,
         ),
         body: const EmptyView(message: 'Bạn không có quyền xem đơn nghỉ phép của nhân viên.', icon: Icons.lock_outline),
@@ -92,10 +92,10 @@ class _LeaveApprovalScreenState extends State<LeaveApprovalScreen> {
     return DefaultTabController(
       length: 3,
       child: Scaffold(
-        backgroundColor: const Color(0xFFF5F7FA),
+        backgroundColor: const Color(0xFFF6F4FC),
         appBar: AppBar(
           title: const Text('Duyệt đơn xin nghỉ'),
-          backgroundColor: const Color(0xFF2A5CAA),
+          backgroundColor: const Color(0xFF5A3FD8),
           foregroundColor: Colors.white,
           bottom: TabBar(
             labelColor: Colors.white,
@@ -199,7 +199,7 @@ class _LeaveApprovalScreenState extends State<LeaveApprovalScreen> {
                 Expanded(
                   child: Text(
                     item.employeeName,
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Color(0xFF2A5CAA)),
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Color(0xFF5A3FD8)),
                   ),
                 ),
                 LeaveStatusChip(item),
@@ -230,7 +230,7 @@ class _LeaveApprovalScreenState extends State<LeaveApprovalScreen> {
                   const SizedBox(width: 12),
                   Expanded(
                     child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF2A5CAA)),
+                      style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF5A3FD8)),
                       onPressed: busy ? null : () => _approve(item),
                       child: busy
                           ? const SizedBox(

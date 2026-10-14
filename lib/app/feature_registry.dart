@@ -54,7 +54,7 @@ final List<AppFeature> appFeatures = [
   AppFeature(route: '/manager/organization', fallbackTitle: 'Phòng ban & chức vụ', icon: Icons.apartment, color: const Color(0xFF8D6E63), builder: (_) => const ManagerOrganizationScreen()),
   AppFeature(route: '/manager/org-tree', fallbackTitle: 'Cây tổ chức', icon: Icons.account_tree, color: const Color(0xFF7E57C2), builder: (_) => const ManagerOrgTreeScreen()),
   // HR (permission gán cho role tuỳ ý)
-  AppFeature(route: '/hr/attendance', fallbackTitle: 'Chấm công toàn công ty', icon: Icons.table_chart, color: const Color(0xFF2A5CAA), builder: (_) => const HrAttendanceScreen()),
+  AppFeature(route: '/hr/attendance', fallbackTitle: 'Chấm công toàn công ty', icon: Icons.table_chart, color: const Color(0xFF5A3FD8), builder: (_) => const HrAttendanceScreen()),
   AppFeature(route: '/hr/attendance-notes', fallbackTitle: 'Ghi nhận chấm công', icon: Icons.edit_note, color: const Color(0xFF00897B), builder: (_) => const HrAttendanceNotesScreen()),
   AppFeature(route: '/hr/adjustments', fallbackTitle: 'Xử lý điều chỉnh công', icon: Icons.rule, color: const Color(0xFFE69D35), builder: (_) => const HrAdjustmentsScreen()),
   AppFeature(route: '/hr/leave-returns', fallbackTitle: 'Xử lý đi làm lại', icon: Icons.assignment_return, color: const Color(0xFF7E57C2), builder: (_) => const HrLeaveReturnsScreen()),

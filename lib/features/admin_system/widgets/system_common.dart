@@ -5,7 +5,7 @@ import '../../../shared/widgets/confirm_dialog.dart';
 import '../../../shared/widgets/state_views.dart';
 import '../providers/system_provider.dart';
 
-const Color systemPrimary = Color(0xFF2A5CAA);
+const Color systemPrimary = Color(0xFF5A3FD8);
 
 // Khung chung của 1 tab: trạng thái tải/lỗi/rỗng, kéo để tải lại, nút tạo mới (đã gác quyền) ở đầu danh sách.
 class SystemSectionList<T> extends StatelessWidget {

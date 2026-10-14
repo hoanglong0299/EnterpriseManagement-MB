@@ -21,7 +21,7 @@ Color? dayPartColor(DayPartStatus s) => switch (s) {
 /// Ô 1 ngày: số ngày + 2 vạch nhỏ bên dưới (trái = sáng, phải = chiều); cùng trạng thái thì nối thành 1 vạch.
 /// Hôm nay có vòng viền; ngày đang chọn có nền xanh nhạt; cuối tuần chữ xám và không có vạch.
 class AttendanceDayCell extends StatelessWidget {
-  static const Color accent = Color(0xFF2A5CAA);
+  static const Color accent = Color(0xFF5A3FD8);
   static const double _barWidth = 10;
   static const double _barGap = 3;
 

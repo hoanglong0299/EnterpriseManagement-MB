@@ -45,7 +45,7 @@ class PrivacyStatementScreen extends StatelessWidget {
       backgroundColor: Colors.white,
       appBar: AppBar(
         title: const Text('Chính sách quyền riêng tư'),
-        backgroundColor: const Color(0xFF2A5CAA),
+        backgroundColor: const Color(0xFF5A3FD8),
         elevation: 0,
       ),
       body: ListView.builder(
@@ -63,7 +63,7 @@ class PrivacyStatementScreen extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF2A5CAA),
+                    color: Color(0xFF5A3FD8),
                   ),
                 ),
                 const SizedBox(height: 8),

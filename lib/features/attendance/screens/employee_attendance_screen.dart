@@ -62,10 +62,10 @@ class _AttendanceView extends StatelessWidget {
     return DefaultTabController(
       length: 2,
       child: Scaffold(
-        backgroundColor: const Color(0xFFF5F7FA),
+        backgroundColor: const Color(0xFFF6F4FC),
         appBar: AppBar(
           title: const Text('Chấm công của tôi'),
-          backgroundColor: const Color(0xFF2A5CAA),
+          backgroundColor: const Color(0xFF5A3FD8),
           foregroundColor: Colors.white,
           bottom: const TabBar(
             indicatorColor: Colors.white,
@@ -78,7 +78,7 @@ class _AttendanceView extends StatelessWidget {
         floatingActionButton: PermissionGate(
           code: 'attendance.adjustment.self',
           child: FloatingActionButton.extended(
-            backgroundColor: const Color(0xFF2A5CAA),
+            backgroundColor: const Color(0xFF5A3FD8),
             foregroundColor: Colors.white,
             onPressed: () => _openAdjustmentForm(context),
             icon: const Icon(Icons.edit_calendar_outlined),
@@ -151,7 +151,7 @@ class _HistoryTabState extends State<_HistoryTab> {
               IconButton(
                 tooltip: 'Xuất CSV',
                 onPressed: () => _export(provider),
-                icon: const Icon(Icons.ios_share, color: Color(0xFF2A5CAA)),
+                icon: const Icon(Icons.ios_share, color: Color(0xFF5A3FD8)),
               ),
             ],
           ),
@@ -309,7 +309,7 @@ class _RecordCard extends StatelessWidget {
           Container(
             width: 52,
             padding: const EdgeInsets.symmetric(vertical: 6),
-            decoration: BoxDecoration(color: const Color(0xFFF5F7FA), borderRadius: BorderRadius.circular(10)),
+            decoration: BoxDecoration(color: const Color(0xFFF6F4FC), borderRadius: BorderRadius.circular(10)),
             child: Column(
               children: [
                 Text('${date.day}', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
@@ -572,7 +572,7 @@ class _AdjustmentFormState extends State<_AdjustmentForm> {
               width: double.infinity,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF2A5CAA),
+                  backgroundColor: const Color(0xFF5A3FD8),
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 14),
                 ),

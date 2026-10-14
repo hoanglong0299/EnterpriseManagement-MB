@@ -33,7 +33,7 @@ class TodayAttendanceCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Icon(Icons.access_time_filled, color: Color(0xFF2A5CAA)),
+              const Icon(Icons.access_time_filled, color: Color(0xFF5A3FD8)),
               const SizedBox(width: 8),
               const Expanded(child: Text('Chấm công hôm nay', style: TextStyle(fontWeight: FontWeight.w600))),
               if (t != null)
@@ -58,7 +58,7 @@ class TodayAttendanceCard extends StatelessWidget {
                 width: double.infinity,
                 child: ElevatedButton.icon(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF2A5CAA),
+                    backgroundColor: const Color(0xFF5A3FD8),
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 14),
                   ),
@@ -80,7 +80,7 @@ class TodayAttendanceCard extends StatelessWidget {
   Widget _timeBox(String label, String value) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
-      decoration: BoxDecoration(color: const Color(0xFFF5F7FA), borderRadius: BorderRadius.circular(10)),
+      decoration: BoxDecoration(color: const Color(0xFFF6F4FC), borderRadius: BorderRadius.circular(10)),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
