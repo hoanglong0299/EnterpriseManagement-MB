@@ -49,3 +49,6 @@ app.*.map.json
 
 # Cấu hình Firebase (chứa thông tin dự án), không đưa lên Git
 /android/app/google-services.json
+
+# Báo cáo do Gradle tự sinh
+/android/build/

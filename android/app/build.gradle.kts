@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
@@ -52,3 +54,33 @@ flutter {
 if (file("google-services.json").exists()) {
     apply(plugin = "com.google.gms.google-services")
 }
+
+// Mở cổng backend (5068) cho mọi thiết bị Android đang kết nối: app gọi http://localhost:5068 và adb chuyển về máy tính.
+// Chạy mỗi lần build nên chỉ cần `flutter run`, không phải gõ `adb reverse` tay. Không có adb/thiết bị thì bỏ qua, không làm hỏng build.
+val adbReverseBackend by tasks.registering {
+    outputs.upToDateWhen { false }
+    doLast {
+        try {
+            // Thư mục Android SDK: local.properties (Flutter tự tạo) hoặc biến môi trường.
+            val props = Properties()
+            val localProps = rootProject.file("local.properties")
+            if (localProps.exists()) localProps.inputStream().use { props.load(it) }
+            val sdk = props.getProperty("sdk.dir") ?: System.getenv("ANDROID_HOME") ?: System.getenv("ANDROID_SDK_ROOT")
+            val exe = if (System.getProperty("os.name").lowercase().contains("windows")) "adb.exe" else "adb"
+            val adb = if (sdk != null) File(sdk, "platform-tools/" + exe).absolutePath else exe
+            val devices = ProcessBuilder(adb, "devices").redirectErrorStream(true).start()
+                .inputStream.bufferedReader().readLines()
+                .drop(1)
+                .map { it.trim().split(Char(9), Char(32)).filter { part -> part.isNotEmpty() } }
+                .filter { it.size >= 2 && it[1] == "device" }
+                .map { it[0] }
+            for (serial in devices) {
+                ProcessBuilder(adb, "-s", serial, "reverse", "tcp:5068", "tcp:5068").redirectErrorStream(true).start().waitFor()
+            }
+        } catch (e: Exception) {
+            logger.warn("Bỏ qua adb reverse: " + e.message)
+        }
+    }
+}
+
+tasks.matching { it.name == "preBuild" }.configureEach { dependsOn(adbReverseBackend) }
