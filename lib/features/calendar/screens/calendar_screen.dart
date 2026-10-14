@@ -9,6 +9,7 @@ import '../../../services/hr_service.dart';
 import '../../../shared/widgets/state_views.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../widgets/attendance_day_cell.dart';
+import '../widgets/month_year_picker.dart';
 
 class CalendarScreen extends StatefulWidget {
   const CalendarScreen({super.key});
@@ -69,6 +70,18 @@ class _CalendarScreenState extends State<CalendarScreen> {
   void _changeMonth(int offset) {
     setState(() {
       _focusedMonth = DateTime(_focusedMonth.year, _focusedMonth.month + offset, 1);
+    });
+    _loadMonth(_focusedMonth);
+  }
+
+  Future<void> _pickMonthYear() async {
+    final picked = await showMonthYearPicker(context, _focusedMonth);
+    if (picked == null || !mounted) return;
+    setState(() {
+      _focusedMonth = picked;
+      // Giữ ngày đang chọn nếu còn nằm trong tháng mới, không thì chọn ngày 1 để phần chi tiết bên dưới khớp tháng.
+      final lastDay = DateTime(picked.year, picked.month + 1, 0).day;
+      _selectedDate = DateTime(picked.year, picked.month, _selectedDate.day.clamp(1, lastDay));
     });
     _loadMonth(_focusedMonth);
   }
@@ -227,9 +240,23 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   IconButton(icon: const Icon(Icons.chevron_left, color: Color(0xFF5A3FD8)), onPressed: () => _changeMonth(-1)),
-                  Text(
-                    viMonthYear(_focusedMonth),
-                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.black87),
+                  // Bấm vào tháng/năm để chọn nhanh tháng, năm khác.
+                  InkWell(
+                    borderRadius: BorderRadius.circular(10),
+                    onTap: _pickMonthYear,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            viMonthYear(_focusedMonth),
+                            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.black87),
+                          ),
+                          const Icon(Icons.arrow_drop_down, color: Color(0xFF5A3FD8)),
+                        ],
+                      ),
+                    ),
                   ),
                   IconButton(icon: const Icon(Icons.chevron_right, color: Color(0xFF5A3FD8)), onPressed: () => _changeMonth(1)),
                 ],
