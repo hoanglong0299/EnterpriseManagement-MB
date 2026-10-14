@@ -94,15 +94,6 @@ Color requestColor(String status) {
   }
 }
 
-class AttendanceStatusChip extends StatelessWidget {
-  final String status;
-  const AttendanceStatusChip({super.key, required this.status});
-
-  @override
-  Widget build(BuildContext context) =>
-      StatusChip(label: attendanceLabel(status), color: attendanceColor(status));
-}
-
 class RequestStatusChip extends StatelessWidget {
   final String status;
   const RequestStatusChip({super.key, required this.status});

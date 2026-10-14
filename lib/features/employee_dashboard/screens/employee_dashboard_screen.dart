@@ -4,7 +4,6 @@ import 'package:provider/provider.dart';
 import '../../../core/network/api_client.dart';
 import '../../../services/dashboard_service.dart';
 import '../../../shared/widgets/state_views.dart';
-import '../../attendance/widgets/today_attendance_card.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../providers/employee_dashboard_provider.dart';
 
@@ -53,8 +52,6 @@ class _EmployeeDashboardView extends StatelessWidget {
               const SizedBox(height: 8),
               Text(provider.errorMessage!, style: const TextStyle(color: Colors.red)),
             ],
-            const SizedBox(height: 16),
-            TodayAttendanceCard(today: data.todayAttendance, onReturn: provider.load),
             const SizedBox(height: 16),
             _MetricCard(
               icon: Icons.beach_access_outlined,

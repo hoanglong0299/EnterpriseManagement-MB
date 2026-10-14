@@ -44,7 +44,7 @@ class AppFeature {
 final List<AppFeature> appFeatures = [
   // Employee
   AppFeature(route: '/employee/dashboard', fallbackTitle: 'Tổng quan', icon: Icons.dashboard_outlined, color: const Color(0xFF5C6BC0), builder: (_) => const EmployeeDashboardScreen()),
-  AppFeature(route: '/employee/attendance', fallbackTitle: 'Chấm công', icon: Icons.location_on, color: const Color(0xFFE69D35), builder: (_) => const EmployeeAttendanceScreen()),
+  AppFeature(route: '/employee/attendance', fallbackTitle: 'Điều chỉnh chấm công', icon: Icons.edit_calendar_outlined, color: const Color(0xFFE69D35), builder: (_) => const EmployeeAttendanceScreen()),
   AppFeature(route: '/employee/leave', fallbackTitle: 'Xin nghỉ phép', icon: Icons.flight_takeoff, color: const Color(0xFF2FA2B1), builder: (_) => const LeaveRecordScreen()),
   // Manager
   AppFeature(route: '/manager/dashboard', fallbackTitle: 'Dashboard tổng quan', icon: Icons.insights, color: const Color(0xFF5C6BC0), builder: (_) => const ManagerDashboardScreen()),

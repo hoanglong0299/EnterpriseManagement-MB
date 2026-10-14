@@ -7,6 +7,8 @@ import '../../../core/utils/vi_date.dart';
 import '../../../models/attendance_hr.dart';
 import '../../../services/hr_service.dart';
 import '../../../shared/widgets/state_views.dart';
+import '../../../shared/widgets/permission_gate.dart';
+import '../../attendance/widgets/adjustment_form.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../widgets/attendance_day_cell.dart';
 import '../widgets/month_year_picker.dart';
@@ -113,6 +115,22 @@ class _CalendarScreenState extends State<CalendarScreen> {
       });
       _loadMonth(_focusedMonth);
     }
+  }
+
+  // Gửi yêu cầu chỉnh sửa cho ngày đang chọn; thành công thì tải lại tháng.
+  Future<void> _requestAdjustment() async {
+    final ok = await showAdjustmentForm(context, initialDate: _selectedDate);
+    if (ok == true && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Đã gửi yêu cầu điều chỉnh chấm công')));
+      _loadMonth(_focusedMonth, force: true);
+    }
+  }
+
+  // Chỉ cho yêu cầu với ngày làm việc (không cuối tuần) và không ở tương lai.
+  bool get _canRequestAdjustment {
+    final today = DateTime.now();
+    final d = DateTime(_selectedDate.year, _selectedDate.month, _selectedDate.day);
+    return d.weekday < DateTime.saturday && !d.isAfter(DateTime(today.year, today.month, today.day));
   }
 
   static bool _sameDay(DateTime a, DateTime b) => a.year == b.year && a.month == b.month && a.day == b.day;
@@ -356,6 +374,18 @@ class _CalendarScreenState extends State<CalendarScreen> {
                     ErrorView(message: _error!, onRetry: () => _loadMonth(_focusedMonth, force: true))
                   else
                     ..._detailRows(_selectedDate),
+                  if (_canRequestAdjustment)
+                    PermissionGate(
+                      code: 'attendance.adjustment.self',
+                      child: Padding(
+                        padding: const EdgeInsets.only(top: 8),
+                        child: OutlinedButton.icon(
+                          onPressed: _requestAdjustment,
+                          icon: const Icon(Icons.edit_calendar_outlined),
+                          label: const Text('Yêu cầu chỉnh sửa'),
+                        ),
+                      ),
+                    ),
                 ],
               ),
             ),
