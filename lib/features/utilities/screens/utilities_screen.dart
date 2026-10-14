@@ -6,6 +6,7 @@ import '../../../app/theme.dart';
 import '../../dashboard/providers/menu_provider.dart';
 import '../../leave/providers/leave_provider.dart';
 import '../../leave/screens/leave_status_screen.dart';
+import '../widgets/utility_grid.dart';
 
 // Tiện ích: các chức năng của tài khoản (xin nghỉ, quản lý chấm công, duyệt đơn...) dạng lưới icon.
 // Mỗi chức năng chỉ hiện khi menu backend cấp trang tương ứng cho tài khoản (giống bản web, không dựa vào tên role).
@@ -41,60 +42,18 @@ class UtilitiesScreen extends StatelessWidget {
             ),
           )
         else
-          GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 3,
-              childAspectRatio: 0.95,
-              crossAxisSpacing: 12,
-              mainAxisSpacing: 12,
-            ),
-            itemCount: features.length,
-            itemBuilder: (context, index) => _tile(context, features[index], menu),
-          ),
-      ],
-    );
-  }
-
-  Widget _tile(BuildContext context, AppFeature feature, MenuProvider menu) {
-    final title = menu.titleOf(feature.route) ?? feature.fallbackTitle;
-    return Material(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(18),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(18),
-        onTap: () => Navigator.push(context, MaterialPageRoute(builder: feature.builder)),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: Colors.black.withValues(alpha: 0.06)),
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                width: 46,
-                height: 46,
-                decoration: BoxDecoration(
-                  color: feature.color.withValues(alpha: 0.14),
-                  borderRadius: BorderRadius.circular(14),
+          UtilityGrid(
+            items: [
+              for (final feature in features)
+                UtilityItem(
+                  title: menu.titleOf(feature.route) ?? feature.fallbackTitle,
+                  icon: feature.icon,
+                  color: feature.color,
+                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: feature.builder)),
                 ),
-                child: Icon(feature.icon, color: feature.color, size: 24),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                title,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.ink, height: 1.2),
-              ),
             ],
           ),
-        ),
-      ),
+      ],
     );
   }
 
