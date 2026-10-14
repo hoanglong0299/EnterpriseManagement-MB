@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
 
 import '../../../core/storage/local_storage.dart';
@@ -24,10 +26,23 @@ class AuthProvider extends ChangeNotifier {
     return s.roles.contains('ADMIN') || s.permissions.contains(permission);
   }
 
+  // Đọc trường exp của JWT; token hỏng hoặc không đọc được coi như đã hết hạn.
+  bool _isExpired(String? token) {
+    if (token == null) return true;
+    try {
+      final parts = token.split('.');
+      final payload = jsonDecode(utf8.decode(base64Url.decode(base64Url.normalize(parts[1])))) as Map<String, dynamic>;
+      final exp = payload['exp'] as int;
+      return DateTime.now().millisecondsSinceEpoch ~/ 1000 >= exp;
+    } catch (_) {
+      return true;
+    }
+  }
+
   Future<void> restoreSession() async {
     final saved = await _storage.readSession();
     // Phiên lưu từ bản cũ chưa có danh sách permission: bắt đăng nhập lại để lấy quyền từng hành động.
-    if (saved == null || saved['permissions'] == null) {
+    if (saved == null || saved['permissions'] == null || _isExpired(saved['token'] as String?)) {
       if (saved != null) await _storage.clear();
       status = AuthStatus.unauthenticated;
     } else {

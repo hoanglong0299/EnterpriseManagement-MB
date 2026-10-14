@@ -8,6 +8,7 @@ import '../features/auth/providers/auth_provider.dart';
 import '../features/auth/screens/login_screen.dart';
 import '../features/check_in/providers/check_in_provider.dart';
 import '../features/dashboard/providers/menu_provider.dart';
+import '../features/dashboard/screens/dashboard_screen.dart';
 import '../features/leave/providers/leave_approval_provider.dart';
 import '../features/leave/providers/leave_provider.dart';
 import '../features/profile/providers/profile_provider.dart';
@@ -79,8 +80,27 @@ class MyApp extends StatelessWidget {
           GlobalWidgetsLocalizations.delegate,
           GlobalCupertinoLocalizations.delegate,
         ],
-        home: const LoginScreen(),
+        home: const _AuthGate(),
       ),
     );
+  }
+}
+
+// Màn hình khởi đầu: còn phiên đăng nhập hợp lệ thì vào thẳng Dashboard, không bắt đăng nhập lại.
+class _AuthGate extends StatelessWidget {
+  const _AuthGate();
+
+  @override
+  Widget build(BuildContext context) {
+    final status = context.watch<AuthProvider>().status;
+    switch (status) {
+      case AuthStatus.unknown:
+        return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      case AuthStatus.authenticated:
+        return const DashboardScreen();
+      case AuthStatus.loading:
+      case AuthStatus.unauthenticated:
+        return const LoginScreen();
+    }
   }
 }
