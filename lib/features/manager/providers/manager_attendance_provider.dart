@@ -6,6 +6,7 @@ import 'package:share_plus/share_plus.dart';
 
 import '../../../core/utils/helpers.dart';
 import '../../../models/manager_attendance.dart';
+import '../../../models/manager_employee.dart';
 import '../../../services/manager_service.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../manager_helpers.dart';
@@ -31,11 +32,19 @@ class ManagerAttendanceProvider extends ChangeNotifier {
   String? pendingError;
   int? busyId;
 
-  // Danh sách nhân viên xuất hiện trong bảng công để lọc theo người.
+  // Toàn bộ cấp dưới của quản lý (không phụ thuộc ngày đang xem), dùng cho ô chọn nhân viên.
+  List<ManagerEmployee> teamMembers = [];
+
+  // Ô chọn nhân viên: mọi cấp dưới còn làm việc, kể cả người chưa có dòng chấm công trong khoảng ngày.
   Map<String, String> get employeeOptions {
     final map = <String, String>{};
+    for (final e in teamMembers) {
+      if (e.employmentStatus == 'Resigned' || e.employmentStatus == 'Terminated') continue;
+      map[e.employeeCode] = e.fullName;
+    }
+    // Phòng khi API cấp dưới chưa tải được: vẫn cho lọc theo người có trong bảng công.
     for (final r in records) {
-      map[r.employeeCode] = r.employeeName;
+      map.putIfAbsent(r.employeeCode, () => r.employeeName);
     }
     return map;
   }
@@ -70,6 +79,13 @@ class ManagerAttendanceProvider extends ChangeNotifier {
       final code = _auth.session?.employeeCode;
       if (code == null) throw Exception('Tài khoản chưa gắn với nhân viên nào.');
       // Danh sách là cấp dưới mà người này quản lý (đệ quy), không phải mọi người cùng phòng ban.
+      if (teamMembers.isEmpty) {
+        try {
+          teamMembers = await _service.getTeamRecursive(code);
+        } catch (_) {
+          // Không tải được danh sách thì ô chọn tạm dùng người có trong bảng công.
+        }
+      }
       records = await _service.getTeamAttendance(code, isoDate(startDate), isoDate(endDate));
       // Nhân viên đang lọc không còn trong kết quả mới thì bỏ lọc.
       if (employeeFilter != null && !employeeOptions.containsKey(employeeFilter)) employeeFilter = null;

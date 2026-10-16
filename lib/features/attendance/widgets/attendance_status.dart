@@ -10,7 +10,7 @@ const Map<String, String> attendanceLabels = {
   'HalfDayAbsent': 'Vắng nửa buổi sáng',
   'Absent': 'Vắng mặt',
   'OnLeave': 'Nghỉ phép',
-  'None': 'Chưa có dữ liệu',
+  'None': 'Chưa chấm công',
 };
 
 const Map<String, String> requestLabels = {
