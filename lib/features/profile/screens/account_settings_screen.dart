@@ -5,6 +5,7 @@ import '../../../core/network/api_client.dart';
 import '../../../services/account_service.dart';
 import '../../../shared/widgets/confirm_dialog.dart';
 import '../../auth/providers/auth_provider.dart';
+import '../widgets/text_size_section.dart';
 
 // Cài đặt tài khoản (giống trang "Cài đặt tài khoản" bên web): thông tin đăng nhập + đổi mật khẩu.
 class AccountSettingsScreen extends StatefulWidget {
@@ -101,6 +102,8 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
               ],
             ),
           ),
+          const SizedBox(height: 16),
+          _section('Cỡ chữ', const TextSizeSection()),
           const SizedBox(height: 16),
           _section(
             'Đổi mật khẩu',

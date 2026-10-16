@@ -3,6 +3,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 
 import '../core/network/api_client.dart';
+import '../core/settings/text_size_provider.dart';
 import 'theme.dart';
 import '../core/storage/local_storage.dart';
 import '../features/auth/providers/auth_provider.dart';
@@ -54,6 +55,8 @@ class MyApp extends StatelessWidget {
       providers: [
         // Dùng chung cho các màn hình tự tạo service/provider riêng: context.read<ApiClient>().
         Provider<ApiClient>.value(value: apiClient),
+        // Cỡ chữ do người dùng chọn trong Cài đặt (nhớ lại qua các lần mở app).
+        ChangeNotifierProvider(create: (_) => TextSizeProvider()..load()),
         ChangeNotifierProvider(
           create: (_) => AuthProvider(authService, storage)..restoreSession(),
         ),
@@ -92,6 +95,16 @@ class MyApp extends StatelessWidget {
           GlobalWidgetsLocalizations.delegate,
           GlobalCupertinoLocalizations.delegate,
         ],
+        // Áp cỡ chữ người dùng chọn lên toàn app, nhân trên cỡ chữ của hệ điều hành.
+        builder: (context, child) {
+          final factor = context.watch<TextSizeProvider>().factor;
+          final media = MediaQuery.of(context);
+          final scale = (media.textScaler.scale(1.0) * factor).clamp(0.8, 2.4).toDouble();
+          return MediaQuery(
+            data: media.copyWith(textScaler: TextScaler.linear(scale)),
+            child: child ?? const SizedBox.shrink(),
+          );
+        },
         home: const _AuthGate(),
       ),
     );
