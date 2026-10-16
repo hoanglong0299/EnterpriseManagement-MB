@@ -60,7 +60,10 @@ class PermissionPicker extends StatelessWidget {
   Widget build(BuildContext context) {
     final state = context.watch<SystemProvider>().permissions;
     if (state.loading && !state.loaded) {
-      return const Padding(padding: EdgeInsets.all(16), child: Center(child: CircularProgressIndicator()));
+      return const Padding(
+        padding: EdgeInsets.all(16),
+        child: Center(child: CircularProgressIndicator()),
+      );
     }
     if (state.error != null && !state.loaded) {
       return Padding(
@@ -78,14 +81,14 @@ class PermissionPicker extends StatelessWidget {
     }
 
     Widget tile(SystemPermission p, String label) => CheckboxListTile(
-          dense: true,
-          contentPadding: EdgeInsets.zero,
-          controlAffinity: ListTileControlAffinity.leading,
-          title: Text(label),
-          subtitle: Text(p.permissionCode, style: const TextStyle(fontSize: 11)),
-          value: selected.contains(p.permissionCode),
-          onChanged: (v) => toggle(p.permissionCode, v ?? false),
-        );
+      dense: true,
+      contentPadding: EdgeInsets.zero,
+      controlAffinity: ListTileControlAffinity.leading,
+      title: Text(label),
+      subtitle: Text(p.permissionCode, style: const TextStyle(fontSize: 11)),
+      value: selected.contains(p.permissionCode),
+      onChanged: (v) => toggle(p.permissionCode, v ?? false),
+    );
 
     return Column(
       children: groups.map((g) {
@@ -94,11 +97,21 @@ class PermissionPicker extends StatelessWidget {
           tilePadding: EdgeInsets.zero,
           childrenPadding: const EdgeInsets.only(left: 4),
           title: Text(g.label, style: const TextStyle(fontWeight: FontWeight.w600)),
-          trailing: count > 0 ? CircleAvatar(radius: 11, child: Text('$count', style: const TextStyle(fontSize: 11))) : null,
+          trailing: count > 0
+              ? CircleAvatar(radius: 11, child: Text('$count', style: const TextStyle(fontSize: 11)))
+              : null,
           children: [
-            if (g.pages.isNotEmpty) const Align(alignment: Alignment.centerLeft, child: Text('Xem menu', style: TextStyle(fontSize: 12, color: Colors.grey))),
+            if (g.pages.isNotEmpty)
+              const Align(
+                alignment: Alignment.centerLeft,
+                child: Text('Xem menu', style: TextStyle(fontSize: 12, color: Colors.grey)),
+              ),
             ...g.pages.map((p) => tile(p, _pageLabel(p))),
-            if (g.actions.isNotEmpty) const Align(alignment: Alignment.centerLeft, child: Text('Hành động trong trang', style: TextStyle(fontSize: 12, color: Colors.grey))),
+            if (g.actions.isNotEmpty)
+              const Align(
+                alignment: Alignment.centerLeft,
+                child: Text('Hành động trong trang', style: TextStyle(fontSize: 12, color: Colors.grey)),
+              ),
             ...g.actions.map((p) => tile(p, p.permissionName)),
           ],
         );

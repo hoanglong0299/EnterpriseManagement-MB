@@ -10,7 +10,9 @@ import '../../../shared/widgets/permission_gate.dart';
 import '../../../shared/widgets/state_views.dart';
 import '../../../shared/widgets/status_chip.dart';
 import '../../auth/providers/auth_provider.dart';
-import '../../attendance/widgets/attendance_status.dart' show sessionSummaryText, adjustmentLabels;
+import '../../attendance/widgets/attendance_status.dart'
+    show sessionSummaryText, adjustmentLabels;
+import '../../attendance/widgets/capped_width.dart';
 import '../manager_helpers.dart';
 import '../providers/manager_attendance_provider.dart';
 
@@ -61,13 +63,18 @@ class _ManagerAttendanceViewState extends State<_ManagerAttendanceView> {
       if (_canTeam) const Tab(text: 'Chấm công team'),
       if (_canPending) const Tab(text: 'Yêu cầu chỉnh sửa'),
     ];
-    final pendingCount = context.select<ManagerAttendanceProvider, int>((p) => p.pending.length);
+    final pendingCount = context.select<ManagerAttendanceProvider, int>(
+      (p) => p.pending.length,
+    );
 
     if (tabs.isEmpty) {
       return Scaffold(
         backgroundColor: managerBackground,
         appBar: managerAppBar('Quản lý chấm công'),
-        body: const EmptyView(message: 'Bạn không có quyền xem chấm công của team.', icon: Icons.lock_outline),
+        body: const EmptyView(
+          message: 'Bạn không có quyền xem chấm công của team.',
+          icon: Icons.lock_outline,
+        ),
       );
     }
 
@@ -83,7 +90,12 @@ class _ManagerAttendanceViewState extends State<_ManagerAttendanceView> {
             indicatorColor: Colors.white,
             tabs: [
               if (_canTeam) const Tab(text: 'Chấm công team'),
-              if (_canPending) Tab(text: pendingCount > 0 ? 'Yêu cầu chỉnh sửa ($pendingCount)' : 'Yêu cầu chỉnh sửa'),
+              if (_canPending)
+                Tab(
+                  text: pendingCount > 0
+                      ? 'Yêu cầu chỉnh sửa ($pendingCount)'
+                      : 'Yêu cầu chỉnh sửa',
+                ),
             ],
           ),
         ),
@@ -102,7 +114,10 @@ class _ManagerAttendanceViewState extends State<_ManagerAttendanceView> {
 class _TeamTab extends StatelessWidget {
   const _TeamTab();
 
-  Future<void> _pickRange(BuildContext context, ManagerAttendanceProvider p) async {
+  Future<void> _pickRange(
+    BuildContext context,
+    ManagerAttendanceProvider p,
+  ) async {
     final picked = await showDateRangePicker(
       context: context,
       firstDate: DateTime(2020),
@@ -112,11 +127,16 @@ class _TeamTab extends StatelessWidget {
     if (picked != null) await p.setRange(picked.start, picked.end);
   }
 
-  Future<void> _export(BuildContext context, ManagerAttendanceProvider p) async {
+  Future<void> _export(
+    BuildContext context,
+    ManagerAttendanceProvider p,
+  ) async {
     final messenger = ScaffoldMessenger.of(context);
     final error = await p.exportCsv();
     if (error != null) {
-      messenger.showSnackBar(SnackBar(content: Text(error), backgroundColor: Colors.red));
+      messenger.showSnackBar(
+        SnackBar(content: Text(error), backgroundColor: Colors.red),
+      );
     }
   }
 
@@ -131,7 +151,10 @@ class _TeamTab extends StatelessWidget {
     } else if (p.teamError != null && p.records.isEmpty) {
       content = ErrorView(message: p.teamError!, onRetry: p.loadTeam);
     } else if (list.isEmpty) {
-      content = const EmptyView(message: 'Chưa có bản ghi chấm công trong khoảng thời gian này.', icon: Icons.event_busy);
+      content = const EmptyView(
+        message: 'Chưa có bản ghi chấm công trong khoảng thời gian này.',
+        icon: Icons.event_busy,
+      );
     } else {
       content = RefreshIndicator(
         onRefresh: p.loadTeam,
@@ -146,59 +169,99 @@ class _TeamTab extends StatelessWidget {
 
     return Column(
       children: [
-        Container(
-          color: Colors.white,
-          padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
-          child: Column(
-            children: [
-              Row(
+        // Phần bộ lọc cuộn được khi chữ lớn để không chiếm hết màn hình.
+        Flexible(
+          flex: 0,
+          child: SingleChildScrollView(
+            child: Container(
+              color: Colors.white,
+              padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
+              child: Column(
                 children: [
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: () => _pickRange(context, p),
-                      icon: const Icon(Icons.date_range),
-                      label: Text('${formatDate(p.startDate)} - ${formatDate(p.endDate)}'),
-                    ),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed: () => _pickRange(context, p),
+                          icon: const Icon(Icons.date_range),
+                          label: Text(
+                            '${formatDate(p.startDate)} - ${formatDate(p.endDate)}',
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      IconButton.filledTonal(
+                        tooltip: 'Xuất bảng công',
+                        onPressed: p.filteredRecords.isEmpty
+                            ? null
+                            : () => _export(context, p),
+                        icon: const Icon(Icons.download),
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 8),
-                  IconButton.filledTonal(
-                    tooltip: 'Xuất bảng công',
-                    onPressed: p.filteredRecords.isEmpty ? null : () => _export(context, p),
-                    icon: const Icon(Icons.download),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: DropdownButtonFormField<String?>(
+                          initialValue: p.employeeFilter,
+                          isExpanded: true,
+                          decoration: const InputDecoration(
+                            labelText: 'Nhân viên',
+                            isDense: true,
+                            border: OutlineInputBorder(),
+                          ),
+                          items: [
+                            const DropdownMenuItem<String?>(
+                              value: null,
+                              child: Text('Tất cả'),
+                            ),
+                            ...p.employeeOptions.entries.map(
+                              (e) => DropdownMenuItem<String?>(
+                                value: e.key,
+                                child: Text(
+                                  e.value,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ),
+                          ],
+                          onChanged: p.setEmployee,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: DropdownButtonFormField<String?>(
+                          initialValue: p.statusFilter,
+                          isExpanded: true,
+                          decoration: const InputDecoration(
+                            labelText: 'Trạng thái',
+                            isDense: true,
+                            border: OutlineInputBorder(),
+                          ),
+                          items: [
+                            const DropdownMenuItem<String?>(
+                              value: null,
+                              child: Text('Tất cả'),
+                            ),
+                            ...attendanceLabels.entries.map(
+                              (e) => DropdownMenuItem<String?>(
+                                value: e.key,
+                                child: Text(
+                                  e.value,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ),
+                          ],
+                          onChanged: p.setStatus,
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Expanded(
-                    child: DropdownButtonFormField<String?>(
-                      initialValue: p.employeeFilter,
-                      isExpanded: true,
-                      decoration: const InputDecoration(labelText: 'Nhân viên', isDense: true, border: OutlineInputBorder()),
-                      items: [
-                        const DropdownMenuItem<String?>(value: null, child: Text('Tất cả')),
-                        ...p.employeeOptions.entries.map((e) => DropdownMenuItem<String?>(value: e.key, child: Text(e.value, overflow: TextOverflow.ellipsis))),
-                      ],
-                      onChanged: p.setEmployee,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: DropdownButtonFormField<String?>(
-                      initialValue: p.statusFilter,
-                      isExpanded: true,
-                      decoration: const InputDecoration(labelText: 'Trạng thái', isDense: true, border: OutlineInputBorder()),
-                      items: [
-                        const DropdownMenuItem<String?>(value: null, child: Text('Tất cả')),
-                        ...attendanceLabels.entries.map((e) => DropdownMenuItem<String?>(value: e.key, child: Text(e.value, overflow: TextOverflow.ellipsis))),
-                      ],
-                      onChanged: p.setStatus,
-                    ),
-                  ),
-                ],
-              ),
-            ],
+            ),
           ),
         ),
         Expanded(child: content),
@@ -227,17 +290,34 @@ class _RecordCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                Expanded(child: Text(r.employeeName, style: const TextStyle(fontWeight: FontWeight.w600))),
-                StatusChip(label: attendanceLabel(r.status), color: attendanceColor(r.status)),
+                Expanded(
+                  child: Text(
+                    r.employeeName,
+                    style: const TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                ),
+                CappedWidth(
+                  child: StatusChip(
+                    label: attendanceLabel(r.status),
+                    color: attendanceColor(r.status),
+                  ),
+                ),
               ],
             ),
             const SizedBox(height: 4),
-            Text('${formatDate(r.attendanceDate)} · Vào ${formatTime(r.checkInTime)} · Ra ${formatTime(r.checkOutTime)}',
-                style: const TextStyle(color: Colors.black54, fontSize: 13)),
-            Text('Giờ làm: ${r.workingHours ?? '--'}', style: const TextStyle(color: Colors.black54, fontSize: 13)),
+            Text(
+              '${formatDate(r.attendanceDate)} · Vào ${formatTime(r.checkInTime)} · Ra ${formatTime(r.checkOutTime)}',
+              style: const TextStyle(color: Colors.black54, fontSize: 13),
+            ),
+            Text(
+              'Giờ làm: ${r.workingHours ?? '--'}',
+              style: const TextStyle(color: Colors.black54, fontSize: 13),
+            ),
             if (sessionSummaryText(r.morningStatus, r.afternoonStatus) != null)
-              Text(sessionSummaryText(r.morningStatus, r.afternoonStatus)!,
-                  style: const TextStyle(color: Colors.black54, fontSize: 13)),
+              Text(
+                sessionSummaryText(r.morningStatus, r.afternoonStatus)!,
+                style: const TextStyle(color: Colors.black54, fontSize: 13),
+              ),
           ],
         ),
       ),
@@ -249,14 +329,18 @@ class _RecordCard extends StatelessWidget {
 class _PendingTab extends StatelessWidget {
   const _PendingTab();
 
-  Future<void> _review(BuildContext context, ManagerAttendanceAdjustment item, {required bool approve}) async {
+  Future<void> _review(
+    BuildContext context,
+    ManagerAttendanceAdjustment item, {
+    required bool approve,
+  }) async {
     final provider = context.read<ManagerAttendanceProvider>();
     final ok = await confirmDialog(
       context,
       title: approve ? 'Xác nhận yêu cầu' : 'Từ chối yêu cầu',
       message: approve
           ? 'Xác nhận ${item.employeeName} có mặt ngày ${formatDate(item.attendanceDate)}?\n\n'
-              'Bước này chỉ xác nhận nhân viên có mặt; HR sẽ áp dụng vào dữ liệu chấm công.'
+                'Bước này chỉ xác nhận nhân viên có mặt; HR sẽ áp dụng vào dữ liệu chấm công.'
           : 'Từ chối yêu cầu chỉnh sửa công ngày ${formatDate(item.attendanceDate)} của ${item.employeeName}?',
       confirmText: approve ? 'Xác nhận' : 'Từ chối',
       danger: !approve,
@@ -264,10 +348,17 @@ class _PendingTab extends StatelessWidget {
     if (!ok || !context.mounted) return;
     final messenger = ScaffoldMessenger.of(context);
     final error = await provider.review(item.id, approve: approve);
-    messenger.showSnackBar(SnackBar(
-      content: Text(error ?? (approve ? 'Đã xác nhận, chuyển HR xử lý.' : 'Đã từ chối yêu cầu.')),
-      backgroundColor: error == null ? Colors.green : Colors.red,
-    ));
+    messenger.showSnackBar(
+      SnackBar(
+        content: Text(
+          error ??
+              (approve
+                  ? 'Đã xác nhận, chuyển HR xử lý.'
+                  : 'Đã từ chối yêu cầu.'),
+        ),
+        backgroundColor: error == null ? Colors.green : Colors.red,
+      ),
+    );
   }
 
   @override
@@ -281,10 +372,15 @@ class _PendingTab extends StatelessWidget {
     if (p.pending.isEmpty) {
       return RefreshIndicator(
         onRefresh: p.loadPending,
-        child: ListView(children: const [
-          SizedBox(height: 80),
-          EmptyView(message: 'Mọi yêu cầu chỉnh sửa chấm công đã được xử lý.', icon: Icons.task_alt),
-        ]),
+        child: ListView(
+          children: const [
+            SizedBox(height: 80),
+            EmptyView(
+              message: 'Mọi yêu cầu chỉnh sửa chấm công đã được xử lý.',
+              icon: Icons.task_alt,
+            ),
+          ],
+        ),
       );
     }
 
@@ -302,7 +398,9 @@ class _PendingTab extends StatelessWidget {
             elevation: 0,
             margin: EdgeInsets.zero,
             color: Colors.white,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
             child: Padding(
               padding: const EdgeInsets.all(12),
               child: Column(
@@ -310,8 +408,20 @@ class _PendingTab extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      Expanded(child: Text(item.employeeName, style: const TextStyle(fontWeight: FontWeight.w600))),
-                      Text(formatDate(item.attendanceDate), style: const TextStyle(color: Colors.black54)),
+                      Expanded(
+                        child: Text(
+                          item.employeeName,
+                          style: const TextStyle(fontWeight: FontWeight.w600),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      CappedWidth(
+                        fraction: 0.4,
+                        child: Text(
+                          formatDate(item.attendanceDate),
+                          style: const TextStyle(color: Colors.black54),
+                        ),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 6),
@@ -322,25 +432,42 @@ class _PendingTab extends StatelessWidget {
                     style: const TextStyle(color: Colors.black54, fontSize: 13),
                   ),
                   const SizedBox(height: 4),
-                  Text('Trạng thái: ${adjustmentLabels[item.status] ?? item.status}',
-                      style: const TextStyle(color: Colors.black54, fontSize: 13)),
+                  Text(
+                    'Trạng thái: ${adjustmentLabels[item.status] ?? item.status}',
+                    style: const TextStyle(color: Colors.black54, fontSize: 13),
+                  ),
                   PermissionGate(
                     code: 'attendance.adjustment.approve',
                     child: Padding(
                       padding: const EdgeInsets.only(top: 8),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
+                      child: Wrap(
+                        alignment: WrapAlignment.end,
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        spacing: 8,
+                        runSpacing: 8,
                         children: [
                           OutlinedButton(
-                            onPressed: busy ? null : () => _review(ctx, item, approve: false),
+                            onPressed: busy
+                                ? null
+                                : () => _review(ctx, item, approve: false),
                             child: const Text('Từ chối'),
                           ),
-                          const SizedBox(width: 8),
                           FilledButton(
-                            onPressed: busy ? null : () => _review(ctx, item, approve: true),
-                            style: FilledButton.styleFrom(backgroundColor: managerPrimary),
+                            onPressed: busy
+                                ? null
+                                : () => _review(ctx, item, approve: true),
+                            style: FilledButton.styleFrom(
+                              backgroundColor: managerPrimary,
+                            ),
                             child: busy
-                                ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                                ? const SizedBox(
+                                    width: 16,
+                                    height: 16,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: Colors.white,
+                                    ),
+                                  )
                                 : const Text('Xác nhận'),
                           ),
                         ],

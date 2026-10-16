@@ -76,7 +76,9 @@ class _LeaveTypeFormSheetState extends State<LeaveTypeFormSheet> {
     if (!_isEdit) {
       final code = _code.text.trim();
       if (code.isEmpty) return 'Vui lòng nhập mã loại nghỉ.';
-      if (!RegExp(r'^[A-Z][A-Z0-9_]*$').hasMatch(code)) return 'Mã chỉ gồm chữ HOA, số, gạch dưới và bắt đầu bằng chữ cái.';
+      if (!RegExp(r'^[A-Z][A-Z0-9_]*$').hasMatch(code)) {
+        return 'Mã chỉ gồm chữ HOA, số, gạch dưới và bắt đầu bằng chữ cái.';
+      }
     }
     if (_name.text.trim().isEmpty) return 'Vui lòng nhập tên loại nghỉ.';
     if (amount == null || amount <= 0) return 'Số lượng cấp phải là số lớn hơn 0.';
@@ -96,15 +98,15 @@ class _LeaveTypeFormSheetState extends State<LeaveTypeFormSheet> {
     });
     final desc = _desc.text.trim();
     final err = await context.read<AdminLeaveTypesProvider>().save(
-          editing: widget.editing,
-          code: _code.text.trim(),
-          name: _name.text.trim(),
-          amount: amount!,
-          unit: _unit,
-          period: _period,
-          isPaid: _isPaid,
-          description: desc.isEmpty ? null : desc,
-        );
+      editing: widget.editing,
+      code: _code.text.trim(),
+      name: _name.text.trim(),
+      amount: amount!,
+      unit: _unit,
+      period: _period,
+      isPaid: _isPaid,
+      description: desc.isEmpty ? null : desc,
+    );
     if (!mounted) return;
     if (err == null) {
       showMessage(context, _isEdit ? 'Đã cập nhật loại nghỉ.' : 'Đã tạo loại nghỉ.');
@@ -130,7 +132,10 @@ class _LeaveTypeFormSheetState extends State<LeaveTypeFormSheet> {
           padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
           child: Align(
             alignment: Alignment.centerLeft,
-            child: Text(_isEdit ? 'Sửa loại nghỉ' : 'Thêm loại nghỉ', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            child: Text(
+              _isEdit ? 'Sửa loại nghỉ' : 'Thêm loại nghỉ',
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
           ),
         ),
         Flexible(
@@ -147,42 +152,64 @@ class _LeaveTypeFormSheetState extends State<LeaveTypeFormSheet> {
                     FilteringTextInputFormatter.allow(RegExp(r'[A-Za-z0-9_]')),
                     TextInputFormatter.withFunction((o, n) => n.copyWith(text: n.text.toUpperCase())),
                   ],
-                  decoration: _input('Mã loại nghỉ *', hint: 'VD: SICK_LEAVE').copyWith(helperText: _isEdit ? 'Mã không đổi được sau khi tạo.' : null),
+                  decoration: _input(
+                    'Mã loại nghỉ *',
+                    hint: 'VD: SICK_LEAVE',
+                  ).copyWith(helperText: _isEdit ? 'Mã không đổi được sau khi tạo.' : null),
                 ),
                 const SizedBox(height: 12),
                 TextField(controller: _name, decoration: _input('Tên loại nghỉ *')),
                 const SizedBox(height: 12),
-                Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Expanded(
-                    child: TextField(
-                      controller: _amount,
-                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                      decoration: _input('Số lượng cấp *'),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: _amount,
+                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                        decoration: _input('Số lượng cấp *'),
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: DropdownButtonFormField<String>(
-                      initialValue: _unit,
-                      decoration: _input('Đơn vị'),
-                      items: LeaveTypeAdmin.unitLabels.entries.map((e) => DropdownMenuItem(value: e.key, child: Text(e.value))).toList(),
-                      onChanged: (v) => setState(() => _unit = v ?? _unit),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: DropdownButtonFormField<String>(
+                        initialValue: _unit,
+                        isExpanded: true,
+                        decoration: _input('Đơn vị'),
+                        items: LeaveTypeAdmin.unitLabels.entries
+                            .map(
+                              (e) => DropdownMenuItem(
+                                value: e.key,
+                                child: Text(e.value, overflow: TextOverflow.ellipsis),
+                              ),
+                            )
+                            .toList(),
+                        onChanged: (v) => setState(() => _unit = v ?? _unit),
+                      ),
                     ),
-                  ),
-                ]),
+                  ],
+                ),
                 const SizedBox(height: 12),
                 DropdownButtonFormField<String>(
                   initialValue: _period,
                   isExpanded: true,
                   decoration: _input('Chu kỳ cấp'),
                   items: LeaveTypeAdmin.periodLabels.entries
-                      .map((e) => DropdownMenuItem(value: e.key, child: Text(e.value, overflow: TextOverflow.ellipsis)))
+                      .map(
+                        (e) => DropdownMenuItem(
+                          value: e.key,
+                          child: Text(e.value, overflow: TextOverflow.ellipsis),
+                        ),
+                      )
                       .toList(),
                   onChanged: (v) => setState(() => _period = v ?? _period),
                 ),
                 Padding(
                   padding: const EdgeInsets.only(top: 6, left: 4),
-                  child: Text(LeaveTypeAdmin.periodHints[_period] ?? '', style: TextStyle(fontSize: 12, color: Colors.grey.shade700)),
+                  child: Text(
+                    LeaveTypeAdmin.periodHints[_period] ?? '',
+                    style: TextStyle(fontSize: 12, color: Colors.grey.shade700),
+                  ),
                 ),
                 SwitchListTile(
                   contentPadding: EdgeInsets.zero,
@@ -211,19 +238,30 @@ class _LeaveTypeFormSheetState extends State<LeaveTypeFormSheet> {
         ),
         Padding(
           padding: const EdgeInsets.all(16),
-          child: Row(children: [
-            Expanded(child: OutlinedButton(onPressed: _saving ? null : () => Navigator.pop(context), child: const Text('Huỷ'))),
-            const SizedBox(width: 12),
-            Expanded(
-              child: FilledButton(
-                onPressed: _saving ? null : _save,
-                style: FilledButton.styleFrom(backgroundColor: _primary),
-                child: _saving
-                    ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                    : const Text('Lưu'),
+          child: Row(
+            children: [
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: _saving ? null : () => Navigator.pop(context),
+                  child: const Text('Huỷ'),
+                ),
               ),
-            ),
-          ]),
+              const SizedBox(width: 12),
+              Expanded(
+                child: FilledButton(
+                  onPressed: _saving ? null : _save,
+                  style: FilledButton.styleFrom(backgroundColor: _primary),
+                  child: _saving
+                      ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                        )
+                      : const Text('Lưu'),
+                ),
+              ),
+            ],
+          ),
         ),
       ],
     );

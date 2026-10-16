@@ -9,6 +9,7 @@ import '../../../shared/widgets/confirm_dialog.dart';
 import '../../../shared/widgets/permission_gate.dart';
 import '../../../shared/widgets/state_views.dart';
 import '../../../shared/widgets/status_chip.dart';
+import '../../attendance/widgets/capped_width.dart';
 
 // Nhãn và màu cho yêu cầu đi làm lại, dùng chung giữa màn nhân viên và màn Manager.
 const Map<String, String> returnStatusLabels = {
@@ -74,9 +75,11 @@ class ReturnSessionList extends StatelessWidget {
                   ),
                 ),
                 if (showState)
-                  StatusChip(
-                    label: returnSessionStateLabels[s.state] ?? s.state,
-                    color: returnStatusColor(s.state),
+                  CappedWidth(
+                    child: StatusChip(
+                      label: returnSessionStateLabels[s.state] ?? s.state,
+                      color: returnStatusColor(s.state),
+                    ),
                   ),
               ],
             ),
@@ -112,7 +115,9 @@ class ReturnRequestCard extends StatelessWidget {
                     style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Color(0xFF5A3FD8)),
                   ),
                 ),
-                StatusChip(label: returnStatusLabels[r.status] ?? r.status, color: returnStatusColor(r.status)),
+                CappedWidth(
+                  child: StatusChip(label: returnStatusLabels[r.status] ?? r.status, color: returnStatusColor(r.status)),
+                ),
               ],
             ),
             const Divider(),

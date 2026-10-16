@@ -35,7 +35,10 @@ class HrAttendanceNotesScreen extends StatelessWidget {
               labelColor: Colors.white,
               unselectedLabelColor: Colors.white70,
               indicatorColor: Colors.white,
-              tabs: [Tab(text: 'Ghi nhận'), Tab(text: 'Đang hiệu lực')],
+              tabs: [
+                Tab(text: 'Ghi nhận'),
+                Tab(text: 'Đang hiệu lực'),
+              ],
             ),
           ),
           body: const TabBarView(children: [_FormTab(), _NotesTab()]),
@@ -75,7 +78,10 @@ class _FormTabState extends State<_FormTab> {
       context: context,
       firstDate: DateTime(2020),
       lastDate: today,
-      initialDateRange: DateTimeRange(start: _start.isAfter(today) ? today : _start, end: _end.isAfter(today) ? today : _end),
+      initialDateRange: DateTimeRange(
+        start: _start.isAfter(today) ? today : _start,
+        end: _end.isAfter(today) ? today : _end,
+      ),
     );
     if (picked == null) return;
     setState(() {
@@ -206,10 +212,9 @@ class _NotesTab extends StatelessWidget {
     if (!ok || !context.mounted) return;
     final messenger = ScaffoldMessenger.of(context);
     final err = await context.read<HrNotesProvider>().revoke(n.id);
-    messenger.showSnackBar(SnackBar(
-      content: Text(err ?? 'Đã thu hồi ghi chú.'),
-      backgroundColor: err == null ? Colors.green : Colors.red,
-    ));
+    messenger.showSnackBar(
+      SnackBar(content: Text(err ?? 'Đã thu hồi ghi chú.'), backgroundColor: err == null ? Colors.green : Colors.red),
+    );
   }
 
   @override
@@ -225,10 +230,12 @@ class _NotesTab extends StatelessWidget {
       content = RefreshIndicator(
         onRefresh: p.loadNotes,
         child: p.notes.isEmpty
-            ? ListView(children: const [
-                SizedBox(height: 80),
-                EmptyView(message: 'Chưa có ghi chú nào trong khoảng này.', icon: Icons.edit_note),
-              ])
+            ? ListView(
+                children: const [
+                  SizedBox(height: 80),
+                  EmptyView(message: 'Chưa có ghi chú nào trong khoảng này.', icon: Icons.edit_note),
+                ],
+              )
             : ListView.separated(
                 physics: const AlwaysScrollableScrollPhysics(),
                 padding: const EdgeInsets.all(12),
@@ -249,25 +256,39 @@ class _NotesTab extends StatelessWidget {
                         children: [
                           Row(
                             children: [
-                              Expanded(child: Text('${n.employeeName} (${n.employeeCode})', style: const TextStyle(fontWeight: FontWeight.w600))),
+                              Expanded(
+                                child: Text(
+                                  '${n.employeeName} (${n.employeeCode})',
+                                  style: const TextStyle(fontWeight: FontWeight.w600),
+                                ),
+                              ),
                               StatusChip(label: sessionStatusLabel(n.status), color: sessionStatusColor(n.status)),
                             ],
                           ),
                           const SizedBox(height: 4),
-                          Text('${formatDate(n.date)} · Buổi ${sessionName(n.session).toLowerCase()}', style: const TextStyle(color: Colors.black54, fontSize: 13)),
+                          Text(
+                            '${formatDate(n.date)} · Buổi ${sessionName(n.session).toLowerCase()}',
+                            style: const TextStyle(color: Colors.black54, fontSize: 13),
+                          ),
                           const SizedBox(height: 4),
                           Text(n.note),
                           const SizedBox(height: 4),
                           Row(
                             children: [
                               Expanded(
-                                child: Text('${n.createdByName} · ${formatDateTime(n.createdAt)}',
-                                    style: const TextStyle(color: Colors.black54, fontSize: 12)),
+                                child: Text(
+                                  '${n.createdByName} · ${formatDateTime(n.createdAt)}',
+                                  style: const TextStyle(color: Colors.black54, fontSize: 12),
+                                ),
                               ),
                               TextButton(
                                 onPressed: busy ? null : () => _revoke(ctx, n),
                                 child: busy
-                                    ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
+                                    ? const SizedBox(
+                                        width: 16,
+                                        height: 16,
+                                        child: CircularProgressIndicator(strokeWidth: 2),
+                                      )
                                     : const Text('Thu hồi', style: TextStyle(color: Colors.red)),
                               ),
                             ],
@@ -301,7 +322,12 @@ class _NotesTab extends StatelessWidget {
                 decoration: const InputDecoration(labelText: 'Nhân viên', isDense: true, border: OutlineInputBorder()),
                 items: [
                   const DropdownMenuItem<String?>(value: null, child: Text('Tất cả')),
-                  ...p.employees.map((e) => DropdownMenuItem<String?>(value: e.employeeCode, child: Text('${e.fullName} (${e.employeeCode})', overflow: TextOverflow.ellipsis))),
+                  ...p.employees.map(
+                    (e) => DropdownMenuItem<String?>(
+                      value: e.employeeCode,
+                      child: Text('${e.fullName} (${e.employeeCode})', overflow: TextOverflow.ellipsis),
+                    ),
+                  ),
                 ],
                 onChanged: p.setEmployeeFilter,
               ),

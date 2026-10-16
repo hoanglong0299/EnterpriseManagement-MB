@@ -8,6 +8,7 @@ import '../../../services/manager_service.dart';
 import '../../../shared/widgets/state_views.dart';
 import '../../../shared/widgets/status_chip.dart';
 import '../../auth/providers/auth_provider.dart';
+import '../../attendance/widgets/capped_width.dart';
 import '../manager_helpers.dart';
 import '../providers/manager_employees_provider.dart';
 
@@ -45,7 +46,7 @@ class _ManagerEmployeesView extends StatelessWidget {
     } else {
       body = Column(
         children: [
-          _FilterBar(provider: provider),
+          Flexible(flex: 0, child: SingleChildScrollView(child: _FilterBar(provider: provider))),
           Expanded(
             child: RefreshIndicator(
               onRefresh: provider.load,
@@ -164,7 +165,13 @@ class _EmployeeCard extends StatelessWidget {
                   ],
                 ),
               ),
-              StatusChip(label: e.isActive ? 'Đang làm' : employmentStatusLabel(e.employmentStatus), color: e.isActive ? StatusChip.success : StatusChip.neutral),
+              const SizedBox(width: 8),
+              CappedWidth(
+                child: StatusChip(
+                  label: e.isActive ? 'Đang làm' : employmentStatusLabel(e.employmentStatus),
+                  color: e.isActive ? StatusChip.success : StatusChip.neutral,
+                ),
+              ),
             ],
           ),
         ),

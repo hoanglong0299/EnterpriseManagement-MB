@@ -22,7 +22,11 @@ class SystemRolesTab extends StatelessWidget {
       danger: lock,
     );
     if (!ok || !context.mounted) return;
-    await runWrite(context, () => context.read<SystemProvider>().setRoleActive(r, !r.isActive), lock ? 'Đã khoá vai trò.' : 'Đã mở vai trò.');
+    await runWrite(
+      context,
+      () => context.read<SystemProvider>().setRoleActive(r, !r.isActive),
+      lock ? 'Đã khoá vai trò.' : 'Đã mở vai trò.',
+    );
   }
 
   @override
@@ -48,27 +52,38 @@ class SystemRolesTab extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(children: [
-              Expanded(child: Text(r.roleName, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15))),
-              StatusChip(label: r.isActive ? 'Đang hoạt động' : 'Đã khoá', color: r.isActive ? StatusChip.success : StatusChip.danger),
-            ]),
+            Row(
+              children: [
+                Expanded(
+                  child: Text(r.roleName, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                ),
+                StatusChip(
+                  label: r.isActive ? 'Đang hoạt động' : 'Đã khoá',
+                  color: r.isActive ? StatusChip.success : StatusChip.danger,
+                ),
+              ],
+            ),
             const SizedBox(height: 4),
             Text('Mã: ${r.roleCode}', style: const TextStyle(fontSize: 13)),
-            if ((r.description ?? '').isNotEmpty) Text(r.description!, style: TextStyle(fontSize: 13, color: Colors.grey.shade700)),
+            if ((r.description ?? '').isNotEmpty)
+              Text(r.description!, style: TextStyle(fontSize: 13, color: Colors.grey.shade700)),
             Text('${r.permissions.length} quyền', style: TextStyle(fontSize: 13, color: Colors.grey.shade700)),
             PermissionGate(
               code: 'role.manage',
-              child: Row(mainAxisAlignment: MainAxisAlignment.end, children: [
-                TextButton.icon(
-                  onPressed: () => showFormSheet(context, (_) => _RoleForm(editing: r)),
-                  icon: const Icon(Icons.edit, size: 18),
-                  label: const Text('Sửa / gán quyền'),
-                ),
-                TextButton(
-                  onPressed: () => _toggle(context, r),
-                  child: Text(r.isActive ? 'Khoá' : 'Mở', style: TextStyle(color: r.isActive ? Colors.red : null)),
-                ),
-              ]),
+              child: Wrap(
+                alignment: WrapAlignment.end,
+                children: [
+                  TextButton.icon(
+                    onPressed: () => showFormSheet(context, (_) => _RoleForm(editing: r)),
+                    icon: const Icon(Icons.edit, size: 18),
+                    label: const Text('Sửa / gán quyền'),
+                  ),
+                  TextButton(
+                    onPressed: () => _toggle(context, r),
+                    child: Text(r.isActive ? 'Khoá' : 'Mở', style: TextStyle(color: r.isActive ? Colors.red : null)),
+                  ),
+                ],
+              ),
             ),
           ],
         ),
@@ -118,12 +133,12 @@ class _RoleFormState extends State<_RoleForm> {
     final ok = await runWrite(
       context,
       () => context.read<SystemProvider>().saveRole(
-            editing: editing,
-            code: _code.text.trim(),
-            name: _name.text.trim(),
-            description: _desc.text.trim().isEmpty ? null : _desc.text.trim(),
-            permissionCodes: _selected.toList(),
-          ),
+        editing: editing,
+        code: _code.text.trim(),
+        name: _name.text.trim(),
+        description: _desc.text.trim().isEmpty ? null : _desc.text.trim(),
+        permissionCodes: _selected.toList(),
+      ),
       editing == null ? 'Đã tạo vai trò.' : 'Đã cập nhật vai trò.',
     );
     if (!mounted) return;

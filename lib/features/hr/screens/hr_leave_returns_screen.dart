@@ -34,7 +34,10 @@ class _View extends StatelessWidget {
       context: context,
       isScrollControlled: true,
       showDragHandle: true,
-      builder: (_) => ChangeNotifierProvider.value(value: provider, child: _DetailSheet(request: r)),
+      builder: (_) => ChangeNotifierProvider.value(
+        value: provider,
+        child: _DetailSheet(request: r),
+      ),
     );
   }
 
@@ -50,10 +53,12 @@ class _View extends StatelessWidget {
     } else if (p.items.isEmpty) {
       body = RefreshIndicator(
         onRefresh: p.load,
-        child: ListView(children: const [
-          SizedBox(height: 80),
-          EmptyView(message: 'Không có yêu cầu đi làm lại nào chờ xác nhận.', icon: Icons.task_alt),
-        ]),
+        child: ListView(
+          children: const [
+            SizedBox(height: 80),
+            EmptyView(message: 'Không có yêu cầu đi làm lại nào chờ xác nhận.', icon: Icons.task_alt),
+          ],
+        ),
       );
     } else {
       body = RefreshIndicator(
@@ -81,13 +86,20 @@ class _View extends StatelessWidget {
                     children: [
                       Row(
                         children: [
-                          Expanded(child: Text('${r.employeeName} (${r.employeeCode})', style: const TextStyle(fontWeight: FontWeight.w600))),
+                          Expanded(
+                            child: Text(
+                              '${r.employeeName} (${r.employeeCode})',
+                              style: const TextStyle(fontWeight: FontWeight.w600),
+                            ),
+                          ),
                           StatusChip(label: 'Chờ xác nhận', color: hrAmber),
                         ],
                       ),
                       const SizedBox(height: 4),
-                      Text('Đi làm lại từ ${sessionName(r.fromSession).toLowerCase()} ${formatDate(r.fromDate)}',
-                          style: const TextStyle(color: Colors.black54, fontSize: 13)),
+                      Text(
+                        'Đi làm lại từ ${sessionName(r.fromSession).toLowerCase()} ${formatDate(r.fromDate)}',
+                        style: const TextStyle(color: Colors.black54, fontSize: 13),
+                      ),
                       Text('$awaiting buổi chờ xác nhận', style: const TextStyle(color: Colors.black54, fontSize: 13)),
                       const SizedBox(height: 4),
                       Text(r.reason, maxLines: 2, overflow: TextOverflow.ellipsis),
@@ -132,7 +144,12 @@ class _DetailSheetState extends State<_DetailSheet> {
     final messenger = ScaffoldMessenger.of(context);
     final nav = Navigator.of(context);
     final err = await context.read<HrReturnsProvider>().confirm(r, _statuses);
-    messenger.showSnackBar(SnackBar(content: Text(err ?? 'Đã xác nhận đi làm lại.'), backgroundColor: err == null ? Colors.green : Colors.red));
+    messenger.showSnackBar(
+      SnackBar(
+        content: Text(err ?? 'Đã xác nhận đi làm lại.'),
+        backgroundColor: err == null ? Colors.green : Colors.red,
+      ),
+    );
     if (err == null) nav.pop();
   }
 
@@ -143,7 +160,9 @@ class _DetailSheetState extends State<_DetailSheet> {
     final messenger = ScaffoldMessenger.of(context);
     final nav = Navigator.of(context);
     final err = await context.read<HrReturnsProvider>().reject(r.id, reason);
-    messenger.showSnackBar(SnackBar(content: Text(err ?? 'Đã từ chối yêu cầu.'), backgroundColor: err == null ? Colors.green : Colors.red));
+    messenger.showSnackBar(
+      SnackBar(content: Text(err ?? 'Đã từ chối yêu cầu.'), backgroundColor: err == null ? Colors.green : Colors.red),
+    );
     if (err == null) nav.pop();
   }
 
@@ -161,50 +180,77 @@ class _DetailSheetState extends State<_DetailSheet> {
           shrinkWrap: true,
           padding: EdgeInsets.fromLTRB(16, 0, 16, 16 + MediaQuery.of(context).viewInsets.bottom),
           children: [
-            Text('${r.employeeName} (${r.employeeCode})', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+            Text(
+              '${r.employeeName} (${r.employeeCode})',
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+            ),
             const SizedBox(height: 4),
-            Text('Đi làm lại từ ${sessionName(r.fromSession).toLowerCase()} ${formatDate(r.fromDate)}', style: const TextStyle(color: Colors.black54)),
+            Text(
+              'Đi làm lại từ ${sessionName(r.fromSession).toLowerCase()} ${formatDate(r.fromDate)}',
+              style: const TextStyle(color: Colors.black54),
+            ),
             const SizedBox(height: 8),
             Text('Lý do: ${r.reason}'),
             if (r.managerName != null)
-              Text('Quản lý duyệt: ${r.managerName}${r.managerApprovedAt == null ? '' : ' · ${formatDateTime(r.managerApprovedAt)}'}',
-                  style: const TextStyle(color: Colors.black54, fontSize: 12)),
+              Text(
+                'Quản lý duyệt: ${r.managerName}${r.managerApprovedAt == null ? '' : ' · ${formatDateTime(r.managerApprovedAt)}'}',
+                style: const TextStyle(color: Colors.black54, fontSize: 12),
+              ),
             const SizedBox(height: 16),
             const Text('Các buổi chờ xác nhận', style: TextStyle(fontWeight: FontWeight.w600)),
             const SizedBox(height: 8),
             if (awaiting.isEmpty)
               const Text('Không có buổi nào chờ xác nhận.', style: TextStyle(color: Colors.black54))
             else
-              ...awaiting.map((s) => Padding(
-                    padding: const EdgeInsets.only(bottom: 8),
-                    child: Row(
-                      children: [
-                        Expanded(child: Text('${formatDate(s.date)} · ${sessionName(s.session)}\n${s.leaveTypeName}', style: const TextStyle(fontSize: 13))),
-                        SegmentedButton<String>(
-                          showSelectedIcon: false,
-                          segments: const [
-                            ButtonSegment(value: 'OnTime', label: Text('Đúng giờ')),
-                            ButtonSegment(value: 'Late', label: Text('Đi muộn')),
-                          ],
-                          selected: {_statuses[_key(s)] ?? 'OnTime'},
-                          onSelectionChanged: (v) => setState(() => _statuses[_key(s)] = v.first),
-                        ),
-                      ],
-                    ),
-                  )),
+              ...awaiting.map(
+                (s) => Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  // Xếp dọc để nút chọn không bị bóp khi màn hẹp/chữ lớn.
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Text(
+                        '${formatDate(s.date)} · ${sessionName(s.session)}\n${s.leaveTypeName}',
+                        style: const TextStyle(fontSize: 13),
+                      ),
+                      const SizedBox(height: 6),
+                      SegmentedButton<String>(
+                        showSelectedIcon: false,
+                        segments: const [
+                          ButtonSegment(value: 'OnTime', label: Text('Đúng giờ')),
+                          ButtonSegment(value: 'Late', label: Text('Đi muộn')),
+                        ],
+                        selected: {_statuses[_key(s)] ?? 'OnTime'},
+                        onSelectionChanged: (v) => setState(() => _statuses[_key(s)] = v.first),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             if (active.isNotEmpty) ...[
               const SizedBox(height: 12),
               const Text('Các buổi đã có hiệu lực', style: TextStyle(fontWeight: FontWeight.w600)),
               const SizedBox(height: 8),
-              ...active.map((s) => Padding(
-                    padding: const EdgeInsets.only(bottom: 4),
-                    child: Row(
-                      children: [
-                        Expanded(child: Text('${formatDate(s.date)} · ${sessionName(s.session)} · ${s.leaveTypeName}', style: const TextStyle(fontSize: 13, color: Colors.black54))),
-                        if (s.workedStatus != null) StatusChip(label: sessionStatusLabel(s.workedStatus!), color: sessionStatusColor(s.workedStatus!)),
-                      ],
-                    ),
-                  )),
+              ...active.map(
+                (s) => Padding(
+                  padding: const EdgeInsets.only(bottom: 4),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          '${formatDate(s.date)} · ${sessionName(s.session)} · ${s.leaveTypeName}',
+                          style: const TextStyle(fontSize: 13, color: Colors.black54),
+                        ),
+                      ),
+                      if (s.workedStatus != null)
+                        StatusChip(
+                          label: sessionStatusLabel(s.workedStatus!),
+                          color: sessionStatusColor(s.workedStatus!),
+                        ),
+                    ],
+                  ),
+                ),
+              ),
             ],
             PermissionGate(
               code: 'attendance.note.manage',
@@ -212,7 +258,9 @@ class _DetailSheetState extends State<_DetailSheet> {
                 padding: const EdgeInsets.only(top: 16),
                 child: Row(
                   children: [
-                    Expanded(child: OutlinedButton(onPressed: busy ? null : _reject, child: const Text('Từ chối'))),
+                    Expanded(
+                      child: OutlinedButton(onPressed: busy ? null : _reject, child: const Text('Từ chối')),
+                    ),
                     const SizedBox(width: 8),
                     Expanded(
                       flex: 2,

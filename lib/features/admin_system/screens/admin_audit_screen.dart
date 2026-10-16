@@ -70,11 +70,11 @@ class _AuditViewState extends State<_AuditView> {
 
   void _apply() {
     context.read<AuditProvider>().applyFilter(
-          username: _userCtrl.text,
-          module: _moduleCtrl.text,
-          action: _actionCtrl.text,
-          date: _date == null ? '' : DateFormat('yyyy-MM-dd').format(_date!),
-        );
+      username: _userCtrl.text,
+      module: _moduleCtrl.text,
+      action: _actionCtrl.text,
+      date: _date == null ? '' : DateFormat('yyyy-MM-dd').format(_date!),
+    );
     setState(() => _showFilter = false);
   }
 
@@ -92,8 +92,9 @@ class _AuditViewState extends State<_AuditView> {
   void _showDetail(AuditLog log) {
     showModalBottomSheet(
       context: context,
+      isScrollControlled: true,
       showDragHandle: true,
-      builder: (_) => Padding(
+      builder: (_) => SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -114,15 +115,20 @@ class _AuditViewState extends State<_AuditView> {
   }
 
   Widget _detailRow(String label, String value) => Padding(
-        padding: const EdgeInsets.symmetric(vertical: 5),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SizedBox(width: 100, child: Text(label, style: TextStyle(color: Colors.grey.shade600))),
-            Expanded(child: Text(value, style: const TextStyle(fontWeight: FontWeight.w500))),
-          ],
+    padding: const EdgeInsets.symmetric(vertical: 5),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          width: MediaQuery.textScalerOf(context).scale(100).clamp(100.0, 160.0),
+          child: Text(label, style: TextStyle(color: Colors.grey.shade600)),
         ),
-      );
+        Expanded(
+          child: Text(value, style: const TextStyle(fontWeight: FontWeight.w500)),
+        ),
+      ],
+    ),
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -141,11 +147,18 @@ class _AuditViewState extends State<_AuditView> {
           ),
         ],
       ),
-      body: Column(
-        children: [
-          if (_showFilter) _filterPanel(),
-          Expanded(child: _body(p)),
-        ],
+      body: LayoutBuilder(
+        builder: (context, constraints) => Column(
+          children: [
+            // Bộ lọc cuộn được và chiếm tối đa 60% chiều cao (bàn phím mở, chữ lớn vẫn không tràn).
+            if (_showFilter)
+              ConstrainedBox(
+                constraints: BoxConstraints(maxHeight: constraints.maxHeight * 0.6),
+                child: SingleChildScrollView(child: _filterPanel()),
+              ),
+            Expanded(child: _body(p)),
+          ],
+        ),
       ),
     );
   }
@@ -156,58 +169,66 @@ class _AuditViewState extends State<_AuditView> {
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
       child: Column(
         children: [
-          Row(children: [
-            Expanded(child: _field(_userCtrl, 'Người dùng')),
-            const SizedBox(width: 8),
-            Expanded(child: _field(_moduleCtrl, 'Phân hệ')),
-          ]),
+          Row(
+            children: [
+              Expanded(child: _field(_userCtrl, 'Người dùng')),
+              const SizedBox(width: 8),
+              Expanded(child: _field(_moduleCtrl, 'Phân hệ')),
+            ],
+          ),
           const SizedBox(height: 8),
-          Row(children: [
-            Expanded(child: _field(_actionCtrl, 'Hành động')),
-            const SizedBox(width: 8),
-            Expanded(
-              child: InkWell(
-                onTap: _pickDate,
-                child: InputDecorator(
-                  decoration: InputDecoration(
-                    labelText: 'Ngày',
-                    isDense: true,
-                    border: const OutlineInputBorder(),
-                    suffixIcon: _date == null
-                        ? const Icon(Icons.calendar_today, size: 18)
-                        : IconButton(
-                            icon: const Icon(Icons.close, size: 18),
-                            onPressed: () => setState(() => _date = null),
-                          ),
+          Row(
+            children: [
+              Expanded(child: _field(_actionCtrl, 'Hành động')),
+              const SizedBox(width: 8),
+              Expanded(
+                child: InkWell(
+                  onTap: _pickDate,
+                  child: InputDecorator(
+                    decoration: InputDecoration(
+                      labelText: 'Ngày',
+                      isDense: true,
+                      border: const OutlineInputBorder(),
+                      suffixIcon: _date == null
+                          ? const Icon(Icons.calendar_today, size: 18)
+                          : IconButton(
+                              icon: const Icon(Icons.close, size: 18),
+                              onPressed: () => setState(() => _date = null),
+                            ),
+                    ),
+                    child: Text(_date == null ? '' : DateFormat('dd/MM/yyyy').format(_date!)),
                   ),
-                  child: Text(_date == null ? '' : DateFormat('dd/MM/yyyy').format(_date!)),
                 ),
               ),
-            ),
-          ]),
+            ],
+          ),
           const SizedBox(height: 10),
-          Row(children: [
-            Expanded(child: OutlinedButton(onPressed: _clear, child: const Text('Xoá lọc'))),
-            const SizedBox(width: 8),
-            Expanded(
-              child: FilledButton(
-                onPressed: _apply,
-                style: FilledButton.styleFrom(backgroundColor: const Color(0xFF5A3FD8)),
-                child: const Text('Lọc'),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton(onPressed: _clear, child: const Text('Xoá lọc')),
               ),
-            ),
-          ]),
+              const SizedBox(width: 8),
+              Expanded(
+                child: FilledButton(
+                  onPressed: _apply,
+                  style: FilledButton.styleFrom(backgroundColor: const Color(0xFF5A3FD8)),
+                  child: const Text('Lọc'),
+                ),
+              ),
+            ],
+          ),
         ],
       ),
     );
   }
 
   Widget _field(TextEditingController c, String label) => TextField(
-        controller: c,
-        textInputAction: TextInputAction.search,
-        onSubmitted: (_) => _apply(),
-        decoration: InputDecoration(labelText: label, isDense: true, border: const OutlineInputBorder()),
-      );
+    controller: c,
+    textInputAction: TextInputAction.search,
+    onSubmitted: (_) => _apply(),
+    decoration: InputDecoration(labelText: label, isDense: true, border: const OutlineInputBorder()),
+  );
 
   Widget _body(AuditProvider p) {
     if (p.isLoading) return const LoadingView();
@@ -244,7 +265,10 @@ class _AuditViewState extends State<_AuditView> {
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
       elevation: 0,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10), side: BorderSide(color: Colors.grey.shade200)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10),
+        side: BorderSide(color: Colors.grey.shade200),
+      ),
       child: InkWell(
         borderRadius: BorderRadius.circular(10),
         onTap: () => _showDetail(log),
@@ -253,12 +277,20 @@ class _AuditViewState extends State<_AuditView> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(children: [
-                Expanded(
-                  child: Text('${log.module} · ${log.action}', style: const TextStyle(fontWeight: FontWeight.bold)),
-                ),
-                Text(_dateTimeFormat.format(log.createdAt), style: TextStyle(color: Colors.grey.shade600, fontSize: 12)),
-              ]),
+              // Wrap: giờ tự xuống dòng khi tiêu đề dài hoặc chữ lớn.
+              Wrap(
+                alignment: WrapAlignment.spaceBetween,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                spacing: 8,
+                runSpacing: 2,
+                children: [
+                  Text('${log.module} · ${log.action}', style: const TextStyle(fontWeight: FontWeight.bold)),
+                  Text(
+                    _dateTimeFormat.format(log.createdAt),
+                    style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+                  ),
+                ],
+              ),
               const SizedBox(height: 6),
               Text('Người dùng: ${log.username ?? '--'}', style: const TextStyle(fontSize: 13)),
               Text('Đối tượng: ${log.target ?? '--'}', style: const TextStyle(fontSize: 13)),

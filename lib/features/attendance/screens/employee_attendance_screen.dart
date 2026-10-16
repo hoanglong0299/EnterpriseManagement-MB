@@ -12,6 +12,7 @@ import '../../auth/providers/auth_provider.dart';
 import '../providers/employee_attendance_provider.dart';
 import '../widgets/adjustment_form.dart';
 import '../widgets/attendance_status.dart';
+import '../widgets/capped_width.dart';
 
 class EmployeeAttendanceScreen extends StatelessWidget {
   const EmployeeAttendanceScreen({super.key});
@@ -144,7 +145,7 @@ class _AdjustmentCard extends StatelessWidget {
               Expanded(
                 child: Text(formatDate(DateTime.parse(item.attendanceDate)), style: const TextStyle(fontWeight: FontWeight.w600)),
               ),
-              AdjustmentStatusChip(status: item.status),
+              CappedWidth(child: AdjustmentStatusChip(status: item.status)),
             ],
           ),
           const SizedBox(height: 6),

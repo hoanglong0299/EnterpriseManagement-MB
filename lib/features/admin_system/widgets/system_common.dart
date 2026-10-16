@@ -36,7 +36,10 @@ class SystemSectionList<T> extends StatelessWidget {
         children: [
           if (header != null) Padding(padding: const EdgeInsets.only(bottom: 8), child: header),
           if (state.items.isEmpty)
-            Padding(padding: const EdgeInsets.only(top: 48), child: EmptyView(message: emptyMessage))
+            Padding(
+              padding: const EdgeInsets.only(top: 48),
+              child: EmptyView(message: emptyMessage),
+            )
           else
             ...state.items.map(itemBuilder),
         ],
@@ -57,7 +60,10 @@ class SystemCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 8),
       elevation: 0,
       color: Colors.white,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10), side: BorderSide(color: Colors.grey.shade200)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10),
+        side: BorderSide(color: Colors.grey.shade200),
+      ),
       child: Padding(padding: const EdgeInsets.all(12), child: child),
     );
   }
@@ -100,7 +106,13 @@ class SystemFormFrame extends StatelessWidget {
   final bool saving;
   final VoidCallback onSave;
 
-  const SystemFormFrame({super.key, required this.title, required this.children, required this.saving, required this.onSave});
+  const SystemFormFrame({
+    super.key,
+    required this.title,
+    required this.children,
+    required this.saving,
+    required this.onSave,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -109,7 +121,10 @@ class SystemFormFrame extends StatelessWidget {
       children: [
         Padding(
           padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
-          child: Align(alignment: Alignment.centerLeft, child: Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold))),
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          ),
         ),
         Flexible(
           child: SingleChildScrollView(
@@ -119,19 +134,30 @@ class SystemFormFrame extends StatelessWidget {
         ),
         Padding(
           padding: const EdgeInsets.all(16),
-          child: Row(children: [
-            Expanded(child: OutlinedButton(onPressed: saving ? null : () => Navigator.pop(context), child: const Text('Huỷ'))),
-            const SizedBox(width: 12),
-            Expanded(
-              child: FilledButton(
-                onPressed: saving ? null : onSave,
-                style: FilledButton.styleFrom(backgroundColor: systemPrimary),
-                child: saving
-                    ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                    : const Text('Lưu'),
+          child: Row(
+            children: [
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: saving ? null : () => Navigator.pop(context),
+                  child: const Text('Huỷ'),
+                ),
               ),
-            ),
-          ]),
+              const SizedBox(width: 12),
+              Expanded(
+                child: FilledButton(
+                  onPressed: saving ? null : onSave,
+                  style: FilledButton.styleFrom(backgroundColor: systemPrimary),
+                  child: saving
+                      ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                        )
+                      : const Text('Lưu'),
+                ),
+              ),
+            ],
+          ),
         ),
       ],
     );

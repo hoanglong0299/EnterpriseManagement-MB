@@ -26,7 +26,6 @@ Future<bool> confirmDialog(
 }
 
 void showMessage(BuildContext context, String message, {bool error = false}) {
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(content: Text(message), backgroundColor: error ? Colors.red : null),
-  );
+  ScaffoldMessenger.of(context)
+      .showSnackBar(SnackBar(content: Text(message), backgroundColor: error ? Colors.red : null));
 }

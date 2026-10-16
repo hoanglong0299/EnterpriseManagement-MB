@@ -212,7 +212,8 @@ class _LeaveReturnScreenState extends State<LeaveReturnScreen> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text(_date == null ? 'Chọn ngày' : _dateFormat.format(_date!)),
+                            Expanded(child: Text(_date == null ? 'Chọn ngày' : _dateFormat.format(_date!))),
+                            const SizedBox(width: 4),
                             const Icon(Icons.calendar_today, size: 18, color: Colors.grey),
                           ],
                         ),
@@ -223,6 +224,7 @@ class _LeaveReturnScreenState extends State<LeaveReturnScreen> {
                     const SizedBox(height: 8),
                     DropdownButtonFormField<String>(
                       value: _session,
+                      isExpanded: true,
                       decoration: const InputDecoration(border: OutlineInputBorder()),
                       items: const [
                         DropdownMenuItem(value: 'Morning', child: Text('Buổi sáng (08:00-12:00)')),
@@ -246,9 +248,12 @@ class _LeaveReturnScreenState extends State<LeaveReturnScreen> {
                     const SizedBox(height: 16),
                     SizedBox(
                       width: double.infinity,
-                      height: 48,
                       child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF5A3FD8), foregroundColor: Colors.white),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF5A3FD8),
+                          foregroundColor: Colors.white,
+                          minimumSize: const Size.fromHeight(48),
+                        ),
                         onPressed: canSubmit ? _submit : null,
                         child: _submitting
                             ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))

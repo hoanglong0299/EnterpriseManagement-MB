@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../../auth/providers/auth_provider.dart';
 import '../../auth/screens/login_screen.dart';
 import '../../check_in/providers/check_in_provider.dart';
@@ -12,6 +13,7 @@ import '../providers/profile_provider.dart';
 import 'account_settings_screen.dart';
 import 'privacy_statement_screen.dart';
 import 'profile_detail_screen.dart';
+
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
 
@@ -28,9 +30,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void _openNotificationSettings() async {
     final result = await Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => NotificationSettingsScreen(initialValue: _isNotificationOn),
-      ),
+      MaterialPageRoute(builder: (context) => NotificationSettingsScreen(initialValue: _isNotificationOn)),
     );
     if (result != null) {
       setState(() {
@@ -86,10 +86,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               notifications.clear();
 
               // Xóa toàn bộ stack màn hình hiện tại và quay về Login
-              navigator.pushAndRemoveUntil(
-                MaterialPageRoute(builder: (context) => const LoginScreen()),
-                (route) => false,
-              );
+              navigator.pushAndRemoveUntil(MaterialPageRoute(builder: (context) => const LoginScreen()), (route) => false);
             },
             child: const Text('Đăng xuất', style: TextStyle(color: Colors.red)),
           ),
@@ -101,22 +98,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final profile = context.watch<ProfileProvider>();
+    // Phần header cao thêm khi chữ hệ thống phóng to (tên + email nằm dưới avatar).
+    final scaler = MediaQuery.textScalerOf(context);
+    final headerExtra = (scaler.scale(18) - 18) + (scaler.scale(14) - 14);
 
     return Scaffold(
       backgroundColor: Colors.white,
-      body: Column(
+      // Cả trang cuộn được để không tràn khi màn thấp.
+      body: ListView(
+        padding: EdgeInsets.zero,
         children: [
           // 1. Phần Header (Nền xanh + Avatar)
           SizedBox(
-            height: 260,
+            height: 260 + headerExtra,
             child: Stack(
               clipBehavior: Clip.none,
               children: [
                 // Nền xanh
-                Container(
-                  height: 180,
-                  color: const Color(0xFF5A3FD8),
-                ),
+                Container(height: 180, color: const Color(0xFF5A3FD8)),
                 // Avatar và Camera icon
                 Positioned(
                   top: 120,
@@ -131,8 +130,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             backgroundColor: Colors.white,
                             child: CircleAvatar(
                               radius: 46,
-                              backgroundImage: NetworkImage(
-                                  'https://randomuser.me/api/portraits/men/32.jpg'), // Ảnh giả lập
+                              backgroundImage: NetworkImage('https://randomuser.me/api/portraits/men/32.jpg'), // Ảnh giả lập
                             ),
                           ),
                           Positioned(
@@ -140,9 +138,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             right: 0,
                             child: GestureDetector(
                               onTap: () {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text('Tính năng đổi ảnh đại diện đang phát triển')),
-                                );
+                                ScaffoldMessenger.of(context)
+                                    .showSnackBar(const SnackBar(content: Text('Tính năng đổi ảnh đại diện đang phát triển')));
                               },
                               child: Container(
                                 padding: const EdgeInsets.all(6),
@@ -158,14 +155,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ],
                       ),
                       const SizedBox(height: 12),
-                      Text(
-                        profile.displayName,
-                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: Text(
+                          profile.displayName,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87),
+                        ),
                       ),
                       const SizedBox(height: 4),
-                      Text(
-                        _email,
-                        style: const TextStyle(fontSize: 14, color: Colors.grey),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: Text(
+                          _email,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(fontSize: 14, color: Colors.grey),
+                        ),
                       ),
                     ],
                   ),
@@ -173,52 +180,29 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ],
             ),
           ),
-          
+
           const SizedBox(height: 10),
 
           // 2. Danh sách Menu Cài đặt
-          Expanded(
-            child: ListView(
-              padding: EdgeInsets.zero,
-              children: [
-                _buildMenuItem(
-                  icon: Icons.notifications_none,
-                  title: 'Cài đặt thông báo',
-                  trailingText: _isNotificationOn ? 'Bật' : 'Tắt',
-                  onTap: _openNotificationSettings,
-                ),
-                _buildMenuItem(
-                  icon: Icons.badge_outlined,
-                  title: 'Hồ sơ cá nhân',
-                  onTap: _openProfileDetail,
-                ),
-                _buildMenuItem(
-                  icon: Icons.person_outline,
-                  title: 'Cài đặt tài khoản',
-                  onTap: _openAccountSettings,
-                ),
-                _buildMenuItem(
-                  icon: Icons.description_outlined,
-                  title: 'Chính sách quyền riêng tư',
-                  onTap: () {
-                    // Chuyển hướng sang màn hình Privacy Statement
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const PrivacyStatementScreen(),
-                      ),
-                    );
-                  },
-                ),
-                _buildMenuItem(
-                  icon: Icons.logout,
-                  title: 'Đăng xuất',
-                  hideBorder: true,
-                  onTap: _handleLogout,
-                ),
-              ],
+          ...[
+            _buildMenuItem(
+              icon: Icons.notifications_none,
+              title: 'Cài đặt thông báo',
+              trailingText: _isNotificationOn ? 'Bật' : 'Tắt',
+              onTap: _openNotificationSettings,
             ),
-          ),
+            _buildMenuItem(icon: Icons.badge_outlined, title: 'Hồ sơ cá nhân', onTap: _openProfileDetail),
+            _buildMenuItem(icon: Icons.person_outline, title: 'Cài đặt tài khoản', onTap: _openAccountSettings),
+            _buildMenuItem(
+              icon: Icons.description_outlined,
+              title: 'Chính sách quyền riêng tư',
+              onTap: () {
+                // Chuyển hướng sang màn hình Privacy Statement
+                Navigator.push(context, MaterialPageRoute(builder: (context) => const PrivacyStatementScreen()));
+              },
+            ),
+            _buildMenuItem(icon: Icons.logout, title: 'Đăng xuất', hideBorder: true, onTap: _handleLogout),
+          ],
         ],
       ),
     );
@@ -243,16 +227,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
             Icon(icon, color: const Color(0xFF5A3FD8), size: 24),
             const SizedBox(width: 16),
             Expanded(
-              child: Text(
-                title,
-                style: const TextStyle(fontSize: 15, color: Colors.black87),
-              ),
+              child: Text(title, style: const TextStyle(fontSize: 15, color: Colors.black87)),
             ),
-            if (trailingText != null)
-              Text(
-                trailingText,
-                style: const TextStyle(fontSize: 15, color: Colors.black87),
-              ),
+            if (trailingText != null) Text(trailingText, maxLines: 1, style: const TextStyle(fontSize: 15, color: Colors.black87)),
           ],
         ),
       ),

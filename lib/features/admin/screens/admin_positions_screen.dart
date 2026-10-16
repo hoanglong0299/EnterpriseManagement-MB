@@ -89,7 +89,9 @@ class _PositionsView extends StatelessWidget {
 
   Future<void> _editSalary(BuildContext context, Position p) async {
     final provider = context.read<AdminPositionsProvider>();
-    final controller = TextEditingController(text: p.standardSalary == null ? '' : p.standardSalary!.toStringAsFixed(0));
+    final controller = TextEditingController(
+      text: p.standardSalary == null ? '' : p.standardSalary!.toStringAsFixed(0),
+    );
     final value = await showDialog<double>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -150,62 +152,74 @@ class _PositionsView extends StatelessWidget {
           label: const Text('Thêm chức vụ'),
         ),
       ),
-      body: Builder(builder: (_) {
-        if (provider.isLoading && provider.items.isEmpty) return const LoadingView();
-        if (provider.errorMessage != null) {
-          return ErrorView(message: provider.errorMessage!, onRetry: provider.load);
-        }
-        if (provider.items.isEmpty) return const EmptyView(message: 'Chưa có chức vụ.');
-        return RefreshIndicator(
-          onRefresh: provider.load,
-          child: ListView.separated(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 88),
-            itemCount: provider.items.length,
-            separatorBuilder: (_, __) => const SizedBox(height: 10),
-            itemBuilder: (_, i) {
-              final p = provider.items[i];
-              return Card(
-                margin: EdgeInsets.zero,
-                child: Padding(
-                  padding: const EdgeInsets.all(14),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(p.positionName, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                          ),
-                          activeChip(p.isActive),
-                        ],
-                      ),
-                      const SizedBox(height: 6),
-                      InfoLine('Mã', p.positionCode),
-                      InfoLine('Lương chuẩn',
-                          p.standardSalary == null || p.standardSalary == 0 ? 'Chưa có lương chuẩn' : _money(p.standardSalary!)),
-                      if ((p.description ?? '').isNotEmpty) InfoLine('Mô tả', p.description!),
-                      PermissionGate(
-                        code: 'position.manage',
-                        child: Wrap(
-                          alignment: WrapAlignment.end,
+      body: Builder(
+        builder: (_) {
+          if (provider.isLoading && provider.items.isEmpty) return const LoadingView();
+          if (provider.errorMessage != null) {
+            return ErrorView(message: provider.errorMessage!, onRetry: provider.load);
+          }
+          if (provider.items.isEmpty) return const EmptyView(message: 'Chưa có chức vụ.');
+          return RefreshIndicator(
+            onRefresh: provider.load,
+            child: ListView.separated(
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 88),
+              itemCount: provider.items.length,
+              separatorBuilder: (_, _) => const SizedBox(height: 10),
+              itemBuilder: (_, i) {
+                final p = provider.items[i];
+                return Card(
+                  margin: EdgeInsets.zero,
+                  child: Padding(
+                    padding: const EdgeInsets.all(14),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
                           children: [
-                            TextButton(onPressed: () => _openForm(context, position: p), child: const Text('Sửa')),
-                            TextButton(onPressed: () => _editSalary(context, p), child: const Text('Lương chuẩn')),
-                            TextButton(
-                              onPressed: () => _toggle(context, p),
-                              child: Text(p.isActive ? 'Khóa' : 'Mở khóa'),
+                            Expanded(
+                              child: Text(
+                                p.positionName,
+                                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                              ),
                             ),
+                            activeChip(p.isActive),
                           ],
                         ),
-                      ),
-                    ],
+                        const SizedBox(height: 6),
+                        InfoLine('Mã', p.positionCode),
+                        InfoLine(
+                          'Lương chuẩn',
+                          p.standardSalary == null || p.standardSalary == 0
+                              ? 'Chưa có lương chuẩn'
+                              : _money(p.standardSalary!),
+                        ),
+                        if ((p.description ?? '').isNotEmpty) InfoLine('Mô tả', p.description!),
+                        PermissionGate(
+                          code: 'position.manage',
+                          child: Wrap(
+                            alignment: WrapAlignment.end,
+                            children: [
+                              TextButton(
+                                onPressed: () => _openForm(context, position: p),
+                                child: const Text('Sửa'),
+                              ),
+                              TextButton(onPressed: () => _editSalary(context, p), child: const Text('Lương chuẩn')),
+                              TextButton(
+                                onPressed: () => _toggle(context, p),
+                                child: Text(p.isActive ? 'Khóa' : 'Mở khóa'),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              );
-            },
-          ),
-        );
-      }),
+                );
+              },
+            ),
+          );
+        },
+      ),
     );
   }
 }

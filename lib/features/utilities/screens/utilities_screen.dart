@@ -79,7 +79,9 @@ class UtilitiesScreen extends StatelessWidget {
               const Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('Tình trạng nghỉ phép', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.ink)),
+                  Expanded(
+                    child: Text('Tình trạng nghỉ phép', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.ink)),
+                  ),
                   Icon(Icons.chevron_right, color: AppColors.primary),
                 ],
               ),
@@ -91,7 +93,10 @@ class UtilitiesScreen extends StatelessWidget {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text('${leaveStatus[i]['title']}', style: const TextStyle(fontSize: 13, color: Colors.black87)),
+                      Expanded(
+                        child: Text('${leaveStatus[i]['title']}', style: const TextStyle(fontSize: 13, color: Colors.black87)),
+                      ),
+                      const SizedBox(width: 8),
                       Text('${leaveStatus[i]['value']}', style: const TextStyle(fontSize: 13, color: Colors.black54)),
                     ],
                   ),

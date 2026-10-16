@@ -10,6 +10,7 @@ import '../../../shared/widgets/confirm_dialog.dart';
 import '../../../shared/widgets/permission_gate.dart';
 import '../../../shared/widgets/state_views.dart';
 import '../../../shared/widgets/status_chip.dart';
+import '../../attendance/widgets/capped_width.dart';
 import '../providers/leave_provider.dart';
 import 'leave_return_screen.dart';
 import '../widgets/leave_ui.dart';
@@ -201,6 +202,7 @@ class _LeaveRecordScreenState extends State<LeaveRecordScreen> {
             child: DropdownButtonFormField<String?>(
               value: _typeFilter,
               isDense: true,
+              isExpanded: true,
               decoration: const InputDecoration(
                 labelText: 'Loại nghỉ',
                 border: OutlineInputBorder(),
@@ -257,7 +259,7 @@ class _LeaveRecordScreenState extends State<LeaveRecordScreen> {
                       style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Color(0xFF5A3FD8)),
                     ),
                   ),
-                  LeaveStatusChip(r),
+                  CappedWidth(child: LeaveStatusChip(r)),
                 ],
               ),
               const Divider(),
@@ -322,9 +324,13 @@ class _LeaveRecordScreenState extends State<LeaveRecordScreen> {
                 Expanded(
                   child: Text(b.leaveTypeName, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                 ),
-                Text(
-                  '${_num(b.remainingTime)} / ${_num(b.allocatedTime)} $unit',
-                  style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF5A3FD8)),
+                const SizedBox(width: 8),
+                Flexible(
+                  child: Text(
+                    '${_num(b.remainingTime)} / ${_num(b.allocatedTime)} $unit',
+                    textAlign: TextAlign.end,
+                    style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF5A3FD8)),
+                  ),
                 ),
               ],
             ),
@@ -655,9 +661,12 @@ class _LeaveApplicationScreenState extends State<LeaveApplicationScreen> {
             const SizedBox(height: 32),
             SizedBox(
               width: double.infinity,
-              height: 50,
               child: ElevatedButton(
-                style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF5A3FD8), foregroundColor: Colors.white),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF5A3FD8),
+                  foregroundColor: Colors.white,
+                  minimumSize: const Size.fromHeight(50),
+                ),
                 onPressed: _submitting ? null : _submit,
                 child: _submitting
                     ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
@@ -688,7 +697,8 @@ class _LeaveApplicationScreenState extends State<LeaveApplicationScreen> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(_dateFormat.format(value)),
+                Expanded(child: Text(_dateFormat.format(value))),
+                const SizedBox(width: 4),
                 const Icon(Icons.calendar_today, size: 18, color: Colors.grey),
               ],
             ),

@@ -6,6 +6,7 @@ import '../../../models/manager_organization.dart';
 import '../../../services/manager_service.dart';
 import '../../../shared/widgets/state_views.dart';
 import '../../../shared/widgets/status_chip.dart';
+import '../../attendance/widgets/capped_width.dart';
 import '../manager_helpers.dart';
 
 // Phòng ban & chức vụ (tương ứng ManagerOrganizationPage), chỉ xem.
@@ -156,7 +157,10 @@ class _Row extends StatelessWidget {
                 ],
               ),
             ),
-            StatusChip(label: active ? 'Hoạt động' : 'Ngừng', color: active ? StatusChip.success : StatusChip.neutral),
+            const SizedBox(width: 8),
+            CappedWidth(
+              child: StatusChip(label: active ? 'Hoạt động' : 'Ngừng', color: active ? StatusChip.success : StatusChip.neutral),
+            ),
           ],
         ),
       ),

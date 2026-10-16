@@ -44,7 +44,8 @@ class _MonthYearPickerState extends State<_MonthYearPicker> {
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      child: Padding(
+      // Cuộn được khi màn thấp hoặc chữ lớn.
+      child: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -57,10 +58,7 @@ class _MonthYearPickerState extends State<_MonthYearPicker> {
             const SizedBox(height: 12),
             _pickingYear ? _yearHeader() : _monthHeader(),
             const SizedBox(height: 12),
-            AnimatedSwitcher(
-              duration: const Duration(milliseconds: 180),
-              child: _pickingYear ? _yearGrid() : _monthGrid(),
-            ),
+            AnimatedSwitcher(duration: const Duration(milliseconds: 180), child: _pickingYear ? _yearGrid() : _monthGrid()),
           ],
         ),
       ),
@@ -76,20 +74,25 @@ class _MonthYearPickerState extends State<_MonthYearPicker> {
           icon: const Icon(Icons.chevron_left, color: AppColors.primary),
           onPressed: _year > _minYear ? () => setState(() => _year--) : null,
         ),
-        InkWell(
-          borderRadius: BorderRadius.circular(10),
-          onTap: () => setState(() {
-            _pageStart = _pageStartOf(_year);
-            _pickingYear = true;
-          }),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text('$_year', style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: AppColors.ink)),
-                const Icon(Icons.arrow_drop_down, color: AppColors.primary),
-              ],
+        Flexible(
+          child: InkWell(
+            borderRadius: BorderRadius.circular(10),
+            onTap: () => setState(() {
+              _pageStart = _pageStartOf(_year);
+              _pickingYear = true;
+            }),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    '$_year',
+                    style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: AppColors.ink),
+                  ),
+                  const Icon(Icons.arrow_drop_down, color: AppColors.primary),
+                ],
+              ),
             ),
           ),
         ),
@@ -110,7 +113,15 @@ class _MonthYearPickerState extends State<_MonthYearPicker> {
           icon: const Icon(Icons.chevron_left, color: AppColors.primary),
           onPressed: _pageStart > _minYear ? () => _shiftPage(-1) : null,
         ),
-        Text('$_pageStart - $end', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: AppColors.ink)),
+        Flexible(
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              '$_pageStart - $end',
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: AppColors.ink),
+            ),
+          ),
+        ),
         IconButton(
           icon: const Icon(Icons.chevron_right, color: AppColors.primary),
           onPressed: _pageStart + _yearsPerPage <= _maxYear ? () => _shiftPage(1) : null,
@@ -177,12 +188,15 @@ class _MonthYearPickerState extends State<_MonthYearPicker> {
           borderRadius: BorderRadius.circular(14),
           border: current && !selected ? Border.all(color: AppColors.primary, width: 1.4) : null,
         ),
-        child: Text(
-          label,
-          style: TextStyle(
-            fontSize: 15,
-            fontWeight: selected || current ? FontWeight.w700 : FontWeight.w500,
-            color: selected ? Colors.white : AppColors.ink,
+        child: FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: selected || current ? FontWeight.w700 : FontWeight.w500,
+              color: selected ? Colors.white : AppColors.ink,
+            ),
           ),
         ),
       ),

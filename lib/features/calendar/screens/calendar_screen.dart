@@ -97,11 +97,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.light(
-              primary: Color(0xFF5A3FD8),
-              onPrimary: Colors.white,
-              onSurface: Colors.black,
-            ),
+            colorScheme: const ColorScheme.light(primary: Color(0xFF5A3FD8), onPrimary: Colors.white, onSurface: Colors.black),
           ),
           child: child!,
         );
@@ -141,12 +137,12 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
   // Ánh xạ trạng thái buổi của backend sang vạch màu.
   static DayPartStatus _part(String s) => switch (s) {
-        'OnTime' => DayPartStatus.onTime,
-        'Late' => DayPartStatus.late,
-        'Absent' => DayPartStatus.absent,
-        'OnLeave' => DayPartStatus.off,
-        _ => DayPartStatus.none,
-      };
+    'OnTime' => DayPartStatus.onTime,
+    'Late' => DayPartStatus.late,
+    'Absent' => DayPartStatus.absent,
+    'OnLeave' => DayPartStatus.off,
+    _ => DayPartStatus.none,
+  };
 
   DayAttendance? _attendanceOf(DateTime date) {
     final d = _dayData(date);
@@ -155,12 +151,12 @@ class _CalendarScreenState extends State<CalendarScreen> {
   }
 
   static String _partText(String s) => switch (s) {
-        'OnTime' => 'Đúng giờ',
-        'Late' => 'Đi muộn',
-        'Absent' => 'Vắng mặt',
-        'OnLeave' => 'Nghỉ phép',
-        _ => 'Chưa có dữ liệu',
-      };
+    'OnTime' => 'Đúng giờ',
+    'Late' => 'Đi muộn',
+    'Absent' => 'Vắng mặt',
+    'OnLeave' => 'Nghỉ phép',
+    _ => 'Chưa có dữ liệu',
+  };
 
   // Chú thích: vạch màu + nhãn.
   Widget _legendItem(DayPartStatus status, String label) {
@@ -179,22 +175,28 @@ class _CalendarScreenState extends State<CalendarScreen> {
   }
 
   Widget _detailRow(IconData icon, Color color, String text) => Padding(
-        padding: const EdgeInsets.only(bottom: 12),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Icon(icon, size: 18, color: color),
-            const SizedBox(width: 12),
-            Expanded(child: Text(text, style: const TextStyle(fontSize: 16, color: Colors.black87))),
-          ],
+    padding: const EdgeInsets.only(bottom: 12),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, size: 18, color: color),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Text(text, style: const TextStyle(fontSize: 16, color: Colors.black87)),
         ),
-      );
+      ],
+    ),
+  );
 
   // Một buổi: trạng thái + loại nghỉ phép / ghi chú HR / xác nhận đi làm lại theo nguồn.
   List<Widget> _sessionRows(String label, String status, String source, AttendanceCalendarDay d, String? note) {
     final color = dayPartColor(_part(status)) ?? Colors.grey;
     final rows = <Widget>[
-      _detailRow(Icons.circle, color, '$label: ${_partText(status)}${status == 'OnLeave' && d.leaveTypeName != null ? ' (${d.leaveTypeName})' : ''}'),
+      _detailRow(
+        Icons.circle,
+        color,
+        '$label: ${_partText(status)}${status == 'OnLeave' && d.leaveTypeName != null ? ' (${d.leaveTypeName})' : ''}',
+      ),
     ];
     if (source == 'Note' && note != null && note.isNotEmpty) {
       rows.add(_detailRow(Icons.sticky_note_2_outlined, Colors.blueGrey, 'Ghi chú của HR: $note'));
@@ -242,7 +244,10 @@ class _CalendarScreenState extends State<CalendarScreen> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text('Lịch', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFF1E293B))),
+                  const Text(
+                    'Lịch',
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFF1E293B)),
+                  ),
                   IconButton(
                     icon: const Icon(Icons.calendar_month, color: Color(0xFF5A3FD8)),
                     onPressed: () => _selectDate(context),
@@ -257,26 +262,38 @@ class _CalendarScreenState extends State<CalendarScreen> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  IconButton(icon: const Icon(Icons.chevron_left, color: Color(0xFF5A3FD8)), onPressed: () => _changeMonth(-1)),
+                  IconButton(
+                    icon: const Icon(Icons.chevron_left, color: Color(0xFF5A3FD8)),
+                    onPressed: () => _changeMonth(-1),
+                  ),
                   // Bấm vào tháng/năm để chọn nhanh tháng, năm khác.
-                  InkWell(
-                    borderRadius: BorderRadius.circular(10),
-                    onTap: _pickMonthYear,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            viMonthYear(_focusedMonth),
-                            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.black87),
-                          ),
-                          const Icon(Icons.arrow_drop_down, color: Color(0xFF5A3FD8)),
-                        ],
+                  Flexible(
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(10),
+                      onTap: _pickMonthYear,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Flexible(
+                              child: Text(
+                                viMonthYear(_focusedMonth),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.black87),
+                              ),
+                            ),
+                            const Icon(Icons.arrow_drop_down, color: Color(0xFF5A3FD8)),
+                          ],
+                        ),
                       ),
                     ),
                   ),
-                  IconButton(icon: const Icon(Icons.chevron_right, color: Color(0xFF5A3FD8)), onPressed: () => _changeMonth(1)),
+                  IconButton(
+                    icon: const Icon(Icons.chevron_right, color: Color(0xFF5A3FD8)),
+                    onPressed: () => _changeMonth(1),
+                  ),
                 ],
               ),
             ),
@@ -308,8 +325,11 @@ class _CalendarScreenState extends State<CalendarScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: Row(
                 children: _weekDays
-                    .map((day) => Expanded(
-                          child: Center(
+                    .map(
+                      (day) => Expanded(
+                        child: Center(
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
                             child: Text(
                               day,
                               style: TextStyle(
@@ -319,7 +339,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
                               ),
                             ),
                           ),
-                        ))
+                        ),
+                      ),
+                    )
                     .toList(),
               ),
             ),
@@ -332,10 +354,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
                 itemCount: rowCount * 7,
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 7,
-                  mainAxisExtent: _rowHeight,
-                ),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 7, mainAxisExtent: _rowHeight),
                 itemBuilder: (context, index) {
                   if (index < firstDayOffset || index >= firstDayOffset + daysInMonth) {
                     return const SizedBox.shrink();

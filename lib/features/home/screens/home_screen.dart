@@ -97,11 +97,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           WorkSummaryCard(record: provider.today),
           const SizedBox(height: 12),
           Center(
-            child: CheckButton(
-              checkedIn: provider.hasClockedIn,
-              loading: provider.isLoading,
-              onPressed: _handleCheck,
-            ),
+            child: CheckButton(checkedIn: provider.hasClockedIn, loading: provider.isLoading, onPressed: _handleCheck),
           ),
           const SizedBox(height: 8),
           if (office != null)

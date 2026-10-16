@@ -26,7 +26,11 @@ class AdminSystemScreen extends StatelessWidget {
 
     if (tabs.isEmpty) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Quản trị hệ thống'), backgroundColor: const Color(0xFF5A3FD8), foregroundColor: Colors.white),
+        appBar: AppBar(
+          title: const Text('Quản trị hệ thống'),
+          backgroundColor: const Color(0xFF5A3FD8),
+          foregroundColor: Colors.white,
+        ),
         body: const EmptyView(message: 'Bạn không có quyền quản trị hệ thống.', icon: Icons.lock_outline),
       );
     }

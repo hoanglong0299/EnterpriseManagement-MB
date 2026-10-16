@@ -58,8 +58,11 @@ class _DepartmentsView extends StatelessWidget {
                         setState(() => saving = true);
                         final ok = await runAdminAction(
                           sheetContext,
-                          () => provider.create(code.text.trim(), name.text.trim(),
-                              desc.text.trim().isEmpty ? null : desc.text.trim()),
+                          () => provider.create(
+                            code.text.trim(),
+                            name.text.trim(),
+                            desc.text.trim().isEmpty ? null : desc.text.trim(),
+                          ),
                           'Đã thêm phòng ban.',
                         );
                         if (ok && sheetContext.mounted) {
@@ -94,11 +97,7 @@ class _DepartmentsView extends StatelessWidget {
       );
       if (!ok || !context.mounted) return;
     }
-    await runAdminAction(
-      context,
-      () => provider.setActive(d, !d.isActive),
-      'Đã cập nhật trạng thái phòng ban.',
-    );
+    await runAdminAction(context, () => provider.setActive(d, !d.isActive), 'Đã cập nhật trạng thái phòng ban.');
   }
 
   @override
@@ -115,58 +114,62 @@ class _DepartmentsView extends StatelessWidget {
           label: const Text('Thêm phòng ban'),
         ),
       ),
-      body: Builder(builder: (_) {
-        if (provider.isLoading && provider.items.isEmpty) return const LoadingView();
-        if (provider.errorMessage != null) {
-          return ErrorView(message: provider.errorMessage!, onRetry: provider.load);
-        }
-        if (provider.items.isEmpty) return const EmptyView(message: 'Chưa có phòng ban.');
-        return RefreshIndicator(
-          onRefresh: provider.load,
-          child: ListView.separated(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 88),
-            itemCount: provider.items.length,
-            separatorBuilder: (_, __) => const SizedBox(height: 10),
-            itemBuilder: (_, i) {
-              final d = provider.items[i];
-              return Card(
-                margin: EdgeInsets.zero,
-                child: Padding(
-                  padding: const EdgeInsets.all(14),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(d.departmentName,
-                                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                          ),
-                          activeChip(d.isActive),
-                        ],
-                      ),
-                      const SizedBox(height: 6),
-                      InfoLine('Mã', d.departmentCode),
-                      InfoLine('Trưởng phòng', d.managerName ?? 'Chưa có quản lý'),
-                      if ((d.description ?? '').isNotEmpty) InfoLine('Mô tả', d.description!),
-                      PermissionGate(
-                        code: 'department.manage',
-                        child: Align(
-                          alignment: Alignment.centerRight,
-                          child: TextButton(
-                            onPressed: () => _toggle(context, d),
-                            child: Text(d.isActive ? 'Khóa' : 'Mở khóa'),
+      body: Builder(
+        builder: (_) {
+          if (provider.isLoading && provider.items.isEmpty) return const LoadingView();
+          if (provider.errorMessage != null) {
+            return ErrorView(message: provider.errorMessage!, onRetry: provider.load);
+          }
+          if (provider.items.isEmpty) return const EmptyView(message: 'Chưa có phòng ban.');
+          return RefreshIndicator(
+            onRefresh: provider.load,
+            child: ListView.separated(
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 88),
+              itemCount: provider.items.length,
+              separatorBuilder: (_, _) => const SizedBox(height: 10),
+              itemBuilder: (_, i) {
+                final d = provider.items[i];
+                return Card(
+                  margin: EdgeInsets.zero,
+                  child: Padding(
+                    padding: const EdgeInsets.all(14),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                d.departmentName,
+                                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                            activeChip(d.isActive),
+                          ],
+                        ),
+                        const SizedBox(height: 6),
+                        InfoLine('Mã', d.departmentCode),
+                        InfoLine('Trưởng phòng', d.managerName ?? 'Chưa có quản lý'),
+                        if ((d.description ?? '').isNotEmpty) InfoLine('Mô tả', d.description!),
+                        PermissionGate(
+                          code: 'department.manage',
+                          child: Align(
+                            alignment: Alignment.centerRight,
+                            child: TextButton(
+                              onPressed: () => _toggle(context, d),
+                              child: Text(d.isActive ? 'Khóa' : 'Mở khóa'),
+                            ),
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-              );
-            },
-          ),
-        );
-      }),
+                );
+              },
+            ),
+          );
+        },
+      ),
     );
   }
 }

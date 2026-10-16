@@ -115,7 +115,14 @@ class _MetricCard extends StatelessWidget {
           CircleAvatar(backgroundColor: color.withValues(alpha: 0.12), child: Icon(icon, color: color)),
           const SizedBox(width: 12),
           Expanded(child: Text(label)),
-          Text(value, style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: color)),
+          const SizedBox(width: 8),
+          Flexible(
+            child: Text(
+              value,
+              textAlign: TextAlign.end,
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: color),
+            ),
+          ),
         ],
       ),
     );

@@ -84,9 +84,7 @@ class _WorkSummaryCardState extends State<WorkSummaryCard> {
       decoration: BoxDecoration(
         gradient: AppColors.heroGradient,
         borderRadius: BorderRadius.circular(22),
-        boxShadow: [
-          BoxShadow(color: AppColors.primary.withValues(alpha: 0.35), blurRadius: 22, offset: const Offset(0, 10)),
-        ],
+        boxShadow: [BoxShadow(color: AppColors.primary.withValues(alpha: 0.35), blurRadius: 22, offset: const Offset(0, 10))],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -97,9 +95,15 @@ class _WorkSummaryCardState extends State<WorkSummaryCard> {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Container(width: 7, height: 7, decoration: BoxDecoration(color: status.color, shape: BoxShape.circle)),
+                Container(
+                  width: 7,
+                  height: 7,
+                  decoration: BoxDecoration(color: status.color, shape: BoxShape.circle),
+                ),
                 const SizedBox(width: 6),
-                Text(status.label, style: const TextStyle(color: Colors.white, fontSize: 11.5)),
+                Flexible(
+                  child: Text(status.label, style: const TextStyle(color: Colors.white, fontSize: 11.5)),
+                ),
               ],
             ),
           ),
@@ -110,9 +114,14 @@ class _WorkSummaryCardState extends State<WorkSummaryCard> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      DateFormat('HH:mm').format(_now),
-                      style: const TextStyle(color: Colors.white, fontSize: 40, fontWeight: FontWeight.w700, height: 1),
+                    // Thu nhỏ đồng hồ khi chữ hệ thống phóng to để không tràn ngang.
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        DateFormat('HH:mm').format(_now),
+                        style: const TextStyle(color: Colors.white, fontSize: 40, fontWeight: FontWeight.w700, height: 1),
+                      ),
                     ),
                     const SizedBox(height: 6),
                     Text(
@@ -152,7 +161,13 @@ class _WorkSummaryCardState extends State<WorkSummaryCard> {
         children: [
           Text(label, style: const TextStyle(color: Colors.white60, fontSize: 11.5)),
           const SizedBox(height: 4),
-          Text(value, style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w600)),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              value,
+              style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w600),
+            ),
+          ),
         ],
       ),
     );
@@ -186,12 +201,22 @@ class _GoalRing extends StatelessWidget {
               valueColor: const AlwaysStoppedAnimation(Colors.white),
             ),
           ),
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text('Mục tiêu', style: TextStyle(color: Colors.white70, fontSize: 10)),
-              Text('${_goalHours.round()}g', style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w700)),
-            ],
+          // Chữ trong vòng thu nhỏ vừa lòng vòng khi chữ hệ thống phóng to.
+          Padding(
+            padding: const EdgeInsets.all(10),
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text('Mục tiêu', style: TextStyle(color: Colors.white70, fontSize: 10)),
+                  Text(
+                    '${_goalHours.round()}g',
+                    style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w700),
+                  ),
+                ],
+              ),
+            ),
           ),
         ],
       ),

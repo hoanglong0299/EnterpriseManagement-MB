@@ -48,6 +48,9 @@ class AdminSearchField extends StatelessWidget {
   }
 }
 
+// Độ rộng cột nhãn, nở theo cỡ chữ hệ thống (tối đa 170) để nhãn không bị bẻ chữ.
+double labelWidth(BuildContext context) => MediaQuery.textScalerOf(context).scale(110).clamp(110.0, 170.0);
+
 // Dòng "nhãn: giá trị" trong card / chi tiết.
 class InfoLine extends StatelessWidget {
   final String label;
@@ -62,7 +65,10 @@ class InfoLine extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(width: 110, child: Text(label, style: TextStyle(color: Colors.grey.shade600, fontSize: 13))),
+          SizedBox(
+            width: labelWidth(context),
+            child: Text(label, style: TextStyle(color: Colors.grey.shade600, fontSize: 13)),
+          ),
           Expanded(child: Text(value.isEmpty ? '--' : value, style: const TextStyle(fontSize: 13))),
         ],
       ),
@@ -94,21 +100,26 @@ class _CredentialSheetState extends State<_CredentialSheet> {
   @override
   Widget build(BuildContext context) {
     final c = widget.credential;
-    return Padding(
+    return SingleChildScrollView(
       padding: EdgeInsets.fromLTRB(20, 20, 20, 20 + MediaQuery.of(context).viewInsets.bottom),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(c.isReset ? 'Đã đặt lại mật khẩu' : 'Thông tin đăng nhập vừa tạo',
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          Text(
+            c.isReset ? 'Đã đặt lại mật khẩu' : 'Thông tin đăng nhập vừa tạo',
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
           const SizedBox(height: 8),
           const Text('Gửi thông tin dưới đây cho nhân viên. Mật khẩu chỉ hiển thị một lần.'),
           const SizedBox(height: 12),
           InfoLine('Tên đăng nhập', c.username),
           Row(
             children: [
-              SizedBox(width: 110, child: Text('Mật khẩu tạm', style: TextStyle(color: Colors.grey.shade600, fontSize: 13))),
+              SizedBox(
+                width: labelWidth(context),
+                child: Text('Mật khẩu tạm', style: TextStyle(color: Colors.grey.shade600, fontSize: 13)),
+              ),
               Expanded(
                 child: Text(
                   _show ? c.password : '•' * c.password.length,
@@ -129,13 +140,17 @@ class _CredentialSheetState extends State<_CredentialSheet> {
                   icon: const Icon(Icons.copy),
                   label: const Text('Sao chép'),
                   onPressed: () async {
-                    await Clipboard.setData(ClipboardData(text: 'Tên đăng nhập: ${c.username}\nMật khẩu: ${c.password}'));
+                    await Clipboard.setData(
+                      ClipboardData(text: 'Tên đăng nhập: ${c.username}\nMật khẩu: ${c.password}'),
+                    );
                     if (context.mounted) showMessage(context, 'Đã sao chép thông tin đăng nhập.');
                   },
                 ),
               ),
               const SizedBox(width: 12),
-              Expanded(child: FilledButton(onPressed: () => Navigator.pop(context), child: const Text('Đóng'))),
+              Expanded(
+                child: FilledButton(onPressed: () => Navigator.pop(context), child: const Text('Đóng')),
+              ),
             ],
           ),
         ],
@@ -171,9 +186,5 @@ class FormSheet extends StatelessWidget {
   }
 }
 
-InputDecoration fieldDecoration(String label, {String? hint}) => InputDecoration(
-      labelText: label,
-      hintText: hint,
-      border: const OutlineInputBorder(),
-      isDense: true,
-    );
+InputDecoration fieldDecoration(String label, {String? hint}) =>
+    InputDecoration(labelText: label, hintText: hint, border: const OutlineInputBorder(), isDense: true);

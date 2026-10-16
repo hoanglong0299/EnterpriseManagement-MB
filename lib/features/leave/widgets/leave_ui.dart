@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 
 import '../../../models/leave_request.dart';
 import '../../../shared/widgets/status_chip.dart';
+import '../../attendance/widgets/capped_width.dart';
 
 // Phần giao diện dùng chung cho màn nghỉ phép của nhân viên và quản lý.
 
@@ -44,8 +45,10 @@ class LeaveStatusFilterBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Chiều cao thanh chip nở theo cỡ chữ hệ thống để chip không bị cắt.
+    final textScale = (MediaQuery.textScalerOf(context).scale(14) / 14).clamp(1.0, 2.5);
     return SizedBox(
-      height: 44,
+      height: 44 * textScale,
       child: ListView(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -98,7 +101,7 @@ void showLeaveDetail(BuildContext context, LeaveRequest r, {bool showEmployee = 
                   child: Text('Chi tiết đơn nghỉ',
                       style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF5A3FD8))),
                 ),
-                LeaveStatusChip(r),
+                CappedWidth(child: LeaveStatusChip(r)),
               ],
             ),
             const Divider(height: 24),

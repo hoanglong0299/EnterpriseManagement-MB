@@ -55,15 +55,15 @@ class _ManagerDashboardView extends StatelessWidget {
 
   Widget _buildContent(ManagerDashboard d) {
     final cards = [
-      _Metric('Quy mô team', d.teamSize, Icons.groups, managerPrimary),
-      _Metric('Có mặt hôm nay', d.teamPresentTodayCount, Icons.how_to_reg, StatusChip.success),
-      _Metric('Vắng hôm nay', d.teamAbsentTodayCount, Icons.person_off,
+      ManagerMetric('Quy mô team', d.teamSize, Icons.groups, managerPrimary),
+      ManagerMetric('Có mặt hôm nay', d.teamPresentTodayCount, Icons.how_to_reg, StatusChip.success),
+      ManagerMetric('Vắng hôm nay', d.teamAbsentTodayCount, Icons.person_off,
           d.teamAbsentTodayCount > 0 ? StatusChip.danger : StatusChip.success),
       if (d.teamOnLeaveTodayCount != null)
-        _Metric('Nghỉ phép hôm nay', d.teamOnLeaveTodayCount!, Icons.beach_access, StatusChip.info),
-      _Metric('Đơn nghỉ chờ duyệt', d.pendingLeaveRequestsCount, Icons.flight_takeoff,
+        ManagerMetric('Nghỉ phép hôm nay', d.teamOnLeaveTodayCount!, Icons.beach_access, StatusChip.info),
+      ManagerMetric('Đơn nghỉ chờ duyệt', d.pendingLeaveRequestsCount, Icons.flight_takeoff,
           d.pendingLeaveRequestsCount > 0 ? StatusChip.warning : StatusChip.success),
-      _Metric('Chỉnh sửa công chờ duyệt', d.pendingAttendanceAdjustmentsCount, Icons.edit_calendar,
+      ManagerMetric('Chỉnh sửa công chờ duyệt', d.pendingAttendanceAdjustmentsCount, Icons.edit_calendar,
           d.pendingAttendanceAdjustmentsCount > 0 ? StatusChip.warning : StatusChip.success),
     ];
 
@@ -73,37 +73,61 @@ class _ManagerDashboardView extends StatelessWidget {
       children: [
         const Text('Tình hình team và các đơn đang chờ duyệt.', style: TextStyle(color: Colors.black54)),
         const SizedBox(height: 12),
-        GridView.count(
-          crossAxisCount: 2,
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          mainAxisSpacing: 12,
-          crossAxisSpacing: 12,
-          childAspectRatio: 1.3,
-          children: cards.map((m) => _MetricCard(metric: m)).toList(),
-        ),
+        ManagerMetricGrid(metrics: cards),
       ],
     );
   }
 }
 
-class _Metric {
+class ManagerMetric {
   final String label;
   final int value;
   final IconData icon;
   final Color color;
 
-  _Metric(this.label, this.value, this.icon, this.color);
+  ManagerMetric(this.label, this.value, this.icon, this.color);
+}
+
+// Lưới 2 cột: mỗi hàng cao theo ô nhiều chữ nhất nên nhãn dài/chữ lớn không bị tràn.
+class ManagerMetricGrid extends StatelessWidget {
+  final List<ManagerMetric> metrics;
+
+  const ManagerMetricGrid({super.key, required this.metrics});
+
+  static const double _spacing = 12;
+
+  @override
+  Widget build(BuildContext context) {
+    final rows = <Widget>[];
+    for (var start = 0; start < metrics.length; start += 2) {
+      final chunk = metrics.skip(start).take(2).toList();
+      rows.add(
+        IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(child: _MetricCard(metric: chunk[0])),
+              const SizedBox(width: _spacing),
+              Expanded(child: chunk.length > 1 ? _MetricCard(metric: chunk[1]) : const SizedBox.shrink()),
+            ],
+          ),
+        ),
+      );
+      if (start + 2 < metrics.length) rows.add(const SizedBox(height: _spacing));
+    }
+    return Column(children: rows);
+  }
 }
 
 class _MetricCard extends StatelessWidget {
-  final _Metric metric;
+  final ManagerMetric metric;
 
   const _MetricCard({required this.metric});
 
   @override
   Widget build(BuildContext context) {
     return Card(
+      margin: EdgeInsets.zero,
       elevation: 0,
       color: Colors.white,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -114,6 +138,7 @@ class _MetricCard extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Icon(metric.icon, color: metric.color),
+            const SizedBox(height: 8),
             Text('${metric.value}', style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: metric.color)),
             Text(metric.label, style: const TextStyle(color: Colors.black54, fontSize: 13)),
           ],

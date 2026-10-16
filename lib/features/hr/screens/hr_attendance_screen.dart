@@ -60,10 +60,12 @@ class _View extends StatelessWidget {
       content = RefreshIndicator(
         onRefresh: p.load,
         child: list.isEmpty
-            ? ListView(children: const [
-                SizedBox(height: 80),
-                EmptyView(message: 'Không có bản ghi chấm công trong khoảng này.', icon: Icons.event_busy),
-              ])
+            ? ListView(
+                children: const [
+                  SizedBox(height: 80),
+                  EmptyView(message: 'Không có bản ghi chấm công trong khoảng này.', icon: Icons.event_busy),
+                ],
+              )
             : ListView.separated(
                 physics: const AlwaysScrollableScrollPhysics(),
                 padding: const EdgeInsets.all(12),
@@ -120,10 +122,19 @@ class _View extends StatelessWidget {
                       child: DropdownButtonFormField<String?>(
                         initialValue: p.departmentCode,
                         isExpanded: true,
-                        decoration: const InputDecoration(labelText: 'Phòng ban', isDense: true, border: OutlineInputBorder()),
+                        decoration: const InputDecoration(
+                          labelText: 'Phòng ban',
+                          isDense: true,
+                          border: OutlineInputBorder(),
+                        ),
                         items: [
                           const DropdownMenuItem<String?>(value: null, child: Text('Tất cả')),
-                          ...p.departments.map((d) => DropdownMenuItem<String?>(value: d.departmentCode, child: Text(d.departmentName, overflow: TextOverflow.ellipsis))),
+                          ...p.departments.map(
+                            (d) => DropdownMenuItem<String?>(
+                              value: d.departmentCode,
+                              child: Text(d.departmentName, overflow: TextOverflow.ellipsis),
+                            ),
+                          ),
                         ],
                         onChanged: p.setDepartment,
                       ),
@@ -162,13 +173,20 @@ class _RecordCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                Expanded(child: Text('${r.employeeName} (${r.employeeCode})', style: const TextStyle(fontWeight: FontWeight.w600))),
+                Expanded(
+                  child: Text(
+                    '${r.employeeName} (${r.employeeCode})',
+                    style: const TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                ),
                 Text(formatDate(day), style: const TextStyle(color: Colors.black54)),
               ],
             ),
             const SizedBox(height: 4),
-            Text('Vào ${formatTime(r.checkInTime)} · Ra ${formatTime(r.checkOutTime)}',
-                style: const TextStyle(color: Colors.black54, fontSize: 13)),
+            Text(
+              'Vào ${formatTime(r.checkInTime)} · Ra ${formatTime(r.checkOutTime)}',
+              style: const TextStyle(color: Colors.black54, fontSize: 13),
+            ),
             if (r.leaveTypeName != null && r.leaveTypeName!.isNotEmpty)
               Text('Nghỉ phép: ${r.leaveTypeName}', style: const TextStyle(color: Colors.black54, fontSize: 13)),
             const SizedBox(height: 8),
@@ -206,15 +224,29 @@ class _SessionTile extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        SizedBox(width: 44, child: Text('$label:', style: const TextStyle(fontSize: 13, color: Colors.black54))),
+        ConstrainedBox(
+          constraints: const BoxConstraints(minWidth: 44),
+          child: Text('$label:', style: const TextStyle(fontSize: 13, color: Colors.black54)),
+        ),
+        const SizedBox(width: 4),
         StatusChip(label: sessionStatusLabel(status), color: sessionStatusColor(status)),
         if (icon != null) ...[
           const SizedBox(width: 6),
-          Tooltip(message: tip!, child: Icon(icon, size: 18, color: hrPrimary)),
+          Tooltip(
+            message: tip!,
+            child: Icon(icon, size: 18, color: hrPrimary),
+          ),
         ],
         if (hasNote) ...[
           const SizedBox(width: 6),
-          Expanded(child: Text(note!, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 12, color: Colors.black54))),
+          Expanded(
+            child: Text(
+              note!,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(fontSize: 12, color: Colors.black54),
+            ),
+          ),
         ],
       ],
     );

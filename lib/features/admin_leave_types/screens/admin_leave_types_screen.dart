@@ -57,7 +57,12 @@ class _Body extends StatelessWidget {
       child: p.items.isEmpty
           ? ListView(
               physics: const AlwaysScrollableScrollPhysics(),
-              children: const [Padding(padding: EdgeInsets.only(top: 80), child: EmptyView(message: 'Chưa có loại nghỉ phép.'))],
+              children: const [
+                Padding(
+                  padding: EdgeInsets.only(top: 80),
+                  child: EmptyView(message: 'Chưa có loại nghỉ phép.'),
+                ),
+              ],
             )
           : ListView.builder(
               physics: const AlwaysScrollableScrollPhysics(),
@@ -103,7 +108,11 @@ class _LeaveTypeCard extends StatelessWidget {
     final err = await context.read<AdminLeaveTypesProvider>().delete(item);
     if (!context.mounted) return;
     // Backend từ chối khi đã có đơn/số dư: hiện nguyên văn và gợi ý tắt thay vì xoá.
-    showMessage(context, err == null ? 'Đã xoá loại nghỉ.' : '$err\nBạn có thể tắt loại nghỉ thay vì xoá.', error: err != null);
+    showMessage(
+      context,
+      err == null ? 'Đã xoá loại nghỉ.' : '$err\nBạn có thể tắt loại nghỉ thay vì xoá.',
+      error: err != null,
+    );
   }
 
   @override
@@ -113,44 +122,69 @@ class _LeaveTypeCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 8),
       elevation: 0,
       color: Colors.white,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10), side: BorderSide(color: Colors.grey.shade200)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10),
+        side: BorderSide(color: Colors.grey.shade200),
+      ),
       child: Padding(
         padding: const EdgeInsets.all(12),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(children: [
-              Expanded(child: Text(item.leaveTypeName, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15))),
-              StatusChip(label: item.isActive ? 'Đang dùng' : 'Đã tắt', color: item.isActive ? StatusChip.success : StatusChip.danger),
-            ]),
+            Row(
+              children: [
+                Expanded(
+                  child: Text(item.leaveTypeName, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                ),
+                StatusChip(
+                  label: item.isActive ? 'Đang dùng' : 'Đã tắt',
+                  color: item.isActive ? StatusChip.success : StatusChip.danger,
+                ),
+              ],
+            ),
             const SizedBox(height: 4),
             Text('Mã: ${item.leaveTypeCode}', style: const TextStyle(fontSize: 13)),
             const SizedBox(height: 2),
             Text(item.ruleText, style: TextStyle(fontSize: 13, color: Colors.grey.shade800)),
             const SizedBox(height: 6),
-            Wrap(spacing: 6, runSpacing: 4, children: [
-              StatusChip(label: 'Đơn vị: ${LeaveTypeAdmin.unitLabels[item.accrualUnit] ?? item.accrualUnit}', color: StatusChip.info),
-              StatusChip(label: item.isPaid ? 'Có lương' : 'Không lương', color: item.isPaid ? StatusChip.success : StatusChip.warning),
-            ]),
+            Wrap(
+              spacing: 6,
+              runSpacing: 4,
+              children: [
+                StatusChip(
+                  label: 'Đơn vị: ${LeaveTypeAdmin.unitLabels[item.accrualUnit] ?? item.accrualUnit}',
+                  color: StatusChip.info,
+                ),
+                StatusChip(
+                  label: item.isPaid ? 'Có lương' : 'Không lương',
+                  color: item.isPaid ? StatusChip.success : StatusChip.warning,
+                ),
+              ],
+            ),
             if (desc != null && desc.isNotEmpty)
-              Padding(padding: const EdgeInsets.only(top: 6), child: Text(desc, style: TextStyle(fontSize: 12, color: Colors.grey.shade600))),
+              Padding(
+                padding: const EdgeInsets.only(top: 6),
+                child: Text(desc, style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
+              ),
             PermissionGate(
               code: 'leavetype.manage',
-              child: Row(children: [
-                Switch(value: item.isActive, onChanged: (v) => _toggle(context, v)),
-                Text(item.isActive ? 'Bật' : 'Tắt', style: const TextStyle(fontSize: 13)),
-                const Spacer(),
-                IconButton(
-                  tooltip: 'Sửa',
-                  icon: const Icon(Icons.edit_outlined, color: _primary),
-                  onPressed: () => showLeaveTypeForm(context, editing: item),
-                ),
-                IconButton(
-                  tooltip: 'Xoá',
-                  icon: const Icon(Icons.delete_outline, color: Colors.red),
-                  onPressed: () => _delete(context),
-                ),
-              ]),
+              child: Row(
+                children: [
+                  Switch(value: item.isActive, onChanged: (v) => _toggle(context, v)),
+                  Text(item.isActive ? 'Bật' : 'Tắt', style: const TextStyle(fontSize: 13)),
+                  const Spacer(),
+                  IconButton(
+                    tooltip: 'Sửa',
+                    icon: const Icon(Icons.edit_outlined, color: _primary),
+                    onPressed: () => showLeaveTypeForm(context, editing: item),
+                  ),
+                  IconButton(
+                    tooltip: 'Xoá',
+                    icon: const Icon(Icons.delete_outline, color: Colors.red),
+                    onPressed: () => _delete(context),
+                  ),
+                ],
+              ),
             ),
           ],
         ),

@@ -37,7 +37,12 @@ class _View extends StatelessWidget {
     if (!ok || !context.mounted) return;
     final messenger = ScaffoldMessenger.of(context);
     final err = await context.read<HrAdjustmentsProvider>().apply(a.id);
-    messenger.showSnackBar(SnackBar(content: Text(err ?? 'Đã áp dụng điều chỉnh.'), backgroundColor: err == null ? Colors.green : Colors.red));
+    messenger.showSnackBar(
+      SnackBar(
+        content: Text(err ?? 'Đã áp dụng điều chỉnh.'),
+        backgroundColor: err == null ? Colors.green : Colors.red,
+      ),
+    );
   }
 
   Future<void> _reject(BuildContext context, AttendanceAdjustment a) async {
@@ -45,7 +50,9 @@ class _View extends StatelessWidget {
     if (reason == null || !context.mounted) return;
     final messenger = ScaffoldMessenger.of(context);
     final err = await context.read<HrAdjustmentsProvider>().reject(a.id, reason);
-    messenger.showSnackBar(SnackBar(content: Text(err ?? 'Đã từ chối yêu cầu.'), backgroundColor: err == null ? Colors.green : Colors.red));
+    messenger.showSnackBar(
+      SnackBar(content: Text(err ?? 'Đã từ chối yêu cầu.'), backgroundColor: err == null ? Colors.green : Colors.red),
+    );
   }
 
   @override
@@ -60,10 +67,12 @@ class _View extends StatelessWidget {
     } else if (p.items.isEmpty) {
       body = RefreshIndicator(
         onRefresh: p.load,
-        child: ListView(children: const [
-          SizedBox(height: 80),
-          EmptyView(message: 'Không có yêu cầu nào chờ xử lý.', icon: Icons.task_alt),
-        ]),
+        child: ListView(
+          children: const [
+            SizedBox(height: 80),
+            EmptyView(message: 'Không có yêu cầu nào chờ xử lý.', icon: Icons.task_alt),
+          ],
+        ),
       );
     } else {
       body = RefreshIndicator(
@@ -88,7 +97,12 @@ class _View extends StatelessWidget {
                   children: [
                     Row(
                       children: [
-                        Expanded(child: Text('${a.employeeName} (${a.employeeCode})', style: const TextStyle(fontWeight: FontWeight.w600))),
+                        Expanded(
+                          child: Text(
+                            '${a.employeeName} (${a.employeeCode})',
+                            style: const TextStyle(fontWeight: FontWeight.w600),
+                          ),
+                        ),
                         Text(formatDate(parseDay(a.attendanceDate)), style: const TextStyle(color: Colors.black54)),
                       ],
                     ),
@@ -100,18 +114,24 @@ class _View extends StatelessWidget {
                     if (a.approverName != null)
                       Padding(
                         padding: const EdgeInsets.only(top: 4),
-                        child: Text('Quản lý duyệt: ${a.approverName}${a.approvedAt == null ? '' : ' · ${formatDateTime(a.approvedAt)}'}',
-                            style: const TextStyle(color: Colors.black54, fontSize: 12)),
+                        child: Text(
+                          'Quản lý duyệt: ${a.approverName}${a.approvedAt == null ? '' : ' · ${formatDateTime(a.approvedAt)}'}',
+                          style: const TextStyle(color: Colors.black54, fontSize: 12),
+                        ),
                       ),
                     PermissionGate(
                       code: 'attendance.adjustment.apply',
                       child: Padding(
                         padding: const EdgeInsets.only(top: 8),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
+                        child: Wrap(
+                          alignment: WrapAlignment.end,
+                          spacing: 8,
+                          runSpacing: 8,
                           children: [
-                            OutlinedButton(onPressed: busy ? null : () => _reject(ctx, a), child: const Text('Từ chối')),
-                            const SizedBox(width: 8),
+                            OutlinedButton(
+                              onPressed: busy ? null : () => _reject(ctx, a),
+                              child: const Text('Từ chối'),
+                            ),
                             FilledButton(
                               onPressed: busy ? null : () => _apply(ctx, a),
                               style: FilledButton.styleFrom(backgroundColor: hrPrimary),

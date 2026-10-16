@@ -30,7 +30,10 @@ class HomeHeader extends StatelessWidget {
           height: 46,
           decoration: const BoxDecoration(shape: BoxShape.circle, gradient: AppColors.buttonGradient),
           alignment: Alignment.center,
-          child: Text(initial, style: const TextStyle(color: Colors.white, fontSize: 19, fontWeight: FontWeight.bold)),
+          child: Text(
+            initial,
+            style: const TextStyle(color: Colors.white, fontSize: 19, fontWeight: FontWeight.bold),
+          ),
         ),
         const SizedBox(width: 12),
         Expanded(
@@ -44,7 +47,12 @@ class HomeHeader extends StatelessWidget {
                 style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: AppColors.ink),
               ),
               const SizedBox(height: 2),
-              Text(subtitle, style: const TextStyle(fontSize: 12.5, color: Colors.black54)),
+              Text(
+                subtitle,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(fontSize: 12.5, color: Colors.black54),
+              ),
             ],
           ),
         ),

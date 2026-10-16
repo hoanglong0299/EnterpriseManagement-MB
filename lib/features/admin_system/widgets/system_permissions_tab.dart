@@ -21,7 +21,11 @@ class SystemPermissionsTab extends StatelessWidget {
       danger: lock,
     );
     if (!ok || !context.mounted) return;
-    await runWrite(context, () => context.read<SystemProvider>().setPermissionActive(x, !x.isActive), lock ? 'Đã khoá quyền.' : 'Đã mở quyền.');
+    await runWrite(
+      context,
+      () => context.read<SystemProvider>().setPermissionActive(x, !x.isActive),
+      lock ? 'Đã khoá quyền.' : 'Đã mở quyền.',
+    );
   }
 
   @override
@@ -47,27 +51,38 @@ class SystemPermissionsTab extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(children: [
-              Expanded(child: Text(x.permissionName, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15))),
-              StatusChip(label: x.isActive ? 'Đang hoạt động' : 'Đã khoá', color: x.isActive ? StatusChip.success : StatusChip.danger),
-            ]),
+            Row(
+              children: [
+                Expanded(
+                  child: Text(x.permissionName, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                ),
+                StatusChip(
+                  label: x.isActive ? 'Đang hoạt động' : 'Đã khoá',
+                  color: x.isActive ? StatusChip.success : StatusChip.danger,
+                ),
+              ],
+            ),
             const SizedBox(height: 4),
             Text(x.permissionCode, style: const TextStyle(fontSize: 13)),
             Text('Phân hệ: ${x.module}', style: TextStyle(fontSize: 13, color: Colors.grey.shade700)),
-            if ((x.description ?? '').isNotEmpty) Text(x.description!, style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
+            if ((x.description ?? '').isNotEmpty)
+              Text(x.description!, style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
             PermissionGate(
               code: 'permission.manage',
-              child: Row(mainAxisAlignment: MainAxisAlignment.end, children: [
-                TextButton.icon(
-                  onPressed: () => showFormSheet(context, (_) => _PermissionForm(editing: x)),
-                  icon: const Icon(Icons.edit, size: 18),
-                  label: const Text('Sửa'),
-                ),
-                TextButton(
-                  onPressed: () => _toggle(context, x),
-                  child: Text(x.isActive ? 'Khoá' : 'Mở', style: TextStyle(color: x.isActive ? Colors.red : null)),
-                ),
-              ]),
+              child: Wrap(
+                alignment: WrapAlignment.end,
+                children: [
+                  TextButton.icon(
+                    onPressed: () => showFormSheet(context, (_) => _PermissionForm(editing: x)),
+                    icon: const Icon(Icons.edit, size: 18),
+                    label: const Text('Sửa'),
+                  ),
+                  TextButton(
+                    onPressed: () => _toggle(context, x),
+                    child: Text(x.isActive ? 'Khoá' : 'Mở', style: TextStyle(color: x.isActive ? Colors.red : null)),
+                  ),
+                ],
+              ),
             ),
           ],
         ),
@@ -116,12 +131,12 @@ class _PermissionFormState extends State<_PermissionForm> {
     final ok = await runWrite(
       context,
       () => context.read<SystemProvider>().savePermission(
-            editing: editing,
-            code: _code.text.trim(),
-            name: _name.text.trim(),
-            module: _module.text.trim(),
-            description: _desc.text.trim().isEmpty ? null : _desc.text.trim(),
-          ),
+        editing: editing,
+        code: _code.text.trim(),
+        name: _name.text.trim(),
+        module: _module.text.trim(),
+        description: _desc.text.trim().isEmpty ? null : _desc.text.trim(),
+      ),
       editing == null ? 'Đã tạo quyền.' : 'Đã cập nhật quyền.',
     );
     if (!mounted) return;
@@ -139,7 +154,11 @@ class _PermissionFormState extends State<_PermissionForm> {
       saving: _saving,
       onSave: _save,
       children: [
-        TextField(controller: _code, enabled: widget.editing == null, decoration: systemInput('Mã quyền *', hint: 'vd: report.view')),
+        TextField(
+          controller: _code,
+          enabled: widget.editing == null,
+          decoration: systemInput('Mã quyền *', hint: 'vd: report.view'),
+        ),
         const SizedBox(height: 12),
         TextField(controller: _name, decoration: systemInput('Tên quyền *')),
         const SizedBox(height: 12),

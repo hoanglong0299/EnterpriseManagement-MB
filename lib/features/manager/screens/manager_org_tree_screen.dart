@@ -6,6 +6,7 @@ import '../../../models/org_tree_node.dart';
 import '../../../services/manager_service.dart';
 import '../../../shared/widgets/state_views.dart';
 import '../../../shared/widgets/status_chip.dart';
+import '../../attendance/widgets/capped_width.dart';
 import '../manager_helpers.dart';
 
 // Cây tổ chức (tương ứng ManagerOrgTreePage): các team bên dưới, thu/mở lồng nhau, kèm chấm công hôm nay.
@@ -98,7 +99,7 @@ class _NodeTileState extends State<_NodeTile> {
     return Column(
       children: [
         Padding(
-          padding: EdgeInsets.only(left: widget.depth * 16.0, bottom: 6),
+          padding: EdgeInsets.only(left: widget.depth.clamp(0, 5) * 16.0, bottom: 6),
           child: Card(
             elevation: 0,
             margin: EdgeInsets.zero,
@@ -128,7 +129,10 @@ class _NodeTileState extends State<_NodeTile> {
                       ),
                     ),
                     const SizedBox(width: 8),
-                    StatusChip(label: attendanceLabel(n.todayAttendanceStatus), color: attendanceColor(n.todayAttendanceStatus)),
+                    CappedWidth(
+                      fraction: 0.35,
+                      child: StatusChip(label: attendanceLabel(n.todayAttendanceStatus), color: attendanceColor(n.todayAttendanceStatus)),
+                    ),
                   ],
                 ),
               ),

@@ -118,7 +118,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           child: Row(
             children: [
               const Expanded(
-                child: Text('Thông báo', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                child: Text('Thông báo', maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
               ),
               TextButton.icon(
                 onPressed: p.unreadCount > 0 ? _markAll : null,
@@ -134,14 +134,15 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         ),
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 10, 16, 6),
-          child: Row(
+          child: Wrap(
+            spacing: 8,
+            runSpacing: 4,
             children: [
               ChoiceChip(
                 label: const Text('Tất cả'),
                 selected: !p.unreadOnly,
                 onSelected: (_) => p.setUnreadOnly(false),
               ),
-              const SizedBox(width: 8),
               ChoiceChip(
                 label: const Text('Chưa đọc'),
                 selected: p.unreadOnly,

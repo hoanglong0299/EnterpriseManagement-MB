@@ -6,6 +6,7 @@ import '../../../shared/widgets/permission_gate.dart';
 import '../../../shared/widgets/state_views.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../providers/leave_approval_provider.dart';
+import '../../attendance/widgets/capped_width.dart';
 import '../widgets/leave_return_ui.dart';
 import '../widgets/leave_ui.dart';
 
@@ -202,7 +203,7 @@ class _LeaveApprovalScreenState extends State<LeaveApprovalScreen> {
                     style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Color(0xFF5A3FD8)),
                   ),
                 ),
-                LeaveStatusChip(item),
+                CappedWidth(child: LeaveStatusChip(item)),
               ],
             ),
             const Divider(),

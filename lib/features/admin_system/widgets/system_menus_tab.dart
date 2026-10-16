@@ -38,40 +38,83 @@ class SystemMenusTab extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(children: [
-              Expanded(child: Text(m.menuName, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15))),
-              Text('#${m.displayOrder}', style: TextStyle(color: Colors.grey.shade600)),
-            ]),
+            Row(
+              children: [
+                Expanded(
+                  child: Text(m.menuName, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                ),
+                Text('#${m.displayOrder}', style: TextStyle(color: Colors.grey.shade600)),
+              ],
+            ),
             const SizedBox(height: 4),
             Text('Mã: ${m.menuCode}', style: const TextStyle(fontSize: 13)),
             Text('Đường dẫn: ${m.route}', style: const TextStyle(fontSize: 13)),
-            Text('Quyền: ${m.permissions.isEmpty ? '--' : m.permissions.join(', ')}', style: TextStyle(fontSize: 12, color: Colors.grey.shade700)),
+            Text(
+              'Quyền: ${m.permissions.isEmpty ? '--' : m.permissions.join(', ')}',
+              style: TextStyle(fontSize: 12, color: Colors.grey.shade700),
+            ),
             const SizedBox(height: 6),
-            Wrap(spacing: 8, children: [
-              StatusChip(label: m.isVisible ? 'Hiện' : 'Ẩn', color: m.isVisible ? StatusChip.info : StatusChip.neutral),
-              StatusChip(label: m.isActive ? 'Đang hoạt động' : 'Đã tắt', color: m.isActive ? StatusChip.success : StatusChip.danger),
-            ]),
+            Wrap(
+              spacing: 8,
+              children: [
+                StatusChip(
+                  label: m.isVisible ? 'Hiện' : 'Ẩn',
+                  color: m.isVisible ? StatusChip.info : StatusChip.neutral,
+                ),
+                StatusChip(
+                  label: m.isActive ? 'Đang hoạt động' : 'Đã tắt',
+                  color: m.isActive ? StatusChip.success : StatusChip.danger,
+                ),
+              ],
+            ),
             // Công tắc và nút sửa chỉ hiện với người có quyền menu.manage.
             if (canManage) ...[
-              Row(children: [
-                const Text('Hiện menu', style: TextStyle(fontSize: 13)),
-                Switch(
-                  value: m.isVisible,
-                  onChanged: (v) => runWrite(context, () => context.read<SystemProvider>().setMenuVisible(m, v), v ? 'Đã hiện menu.' : 'Đã ẩn menu.'),
-                ),
-                const Spacer(),
-                const Text('Hoạt động', style: TextStyle(fontSize: 13)),
-                Switch(
-                  value: m.isActive,
-                  onChanged: (v) async {
-                    if (!v) {
-                      final ok = await confirmDialog(context, title: 'Tắt menu?', message: 'Tắt menu "${m.menuName}"?', danger: true);
-                      if (!ok || !context.mounted) return;
-                    }
-                    await runWrite(context, () => context.read<SystemProvider>().setMenuActive(m, v), v ? 'Đã bật menu.' : 'Đã tắt menu.');
-                  },
-                ),
-              ]),
+              // Wrap để 2 công tắc tự xuống dòng khi màn hẹp/chữ lớn.
+              Wrap(
+                alignment: WrapAlignment.spaceBetween,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: [
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Text('Hiện menu', style: TextStyle(fontSize: 13)),
+                      Switch(
+                        value: m.isVisible,
+                        onChanged: (v) => runWrite(
+                          context,
+                          () => context.read<SystemProvider>().setMenuVisible(m, v),
+                          v ? 'Đã hiện menu.' : 'Đã ẩn menu.',
+                        ),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Text('Hoạt động', style: TextStyle(fontSize: 13)),
+                      Switch(
+                        value: m.isActive,
+                        onChanged: (v) async {
+                          if (!v) {
+                            final ok = await confirmDialog(
+                              context,
+                              title: 'Tắt menu?',
+                              message: 'Tắt menu "${m.menuName}"?',
+                              danger: true,
+                            );
+                            if (!ok || !context.mounted) return;
+                          }
+                          await runWrite(
+                            context,
+                            () => context.read<SystemProvider>().setMenuActive(m, v),
+                            v ? 'Đã bật menu.' : 'Đã tắt menu.',
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                ],
+              ),
               Align(
                 alignment: Alignment.centerRight,
                 child: TextButton.icon(
@@ -141,14 +184,14 @@ class _MenuFormState extends State<_MenuForm> {
     final ok = await runWrite(
       context,
       () => context.read<SystemProvider>().saveMenu(
-            editing: editing,
-            code: _code.text.trim(),
-            name: _name.text.trim(),
-            icon: _icon.text.trim().isEmpty ? null : _icon.text.trim(),
-            route: _route.text.trim(),
-            displayOrder: order,
-            permissionCodes: _selected.toList(),
-          ),
+        editing: editing,
+        code: _code.text.trim(),
+        name: _name.text.trim(),
+        icon: _icon.text.trim().isEmpty ? null : _icon.text.trim(),
+        route: _route.text.trim(),
+        displayOrder: order,
+        permissionCodes: _selected.toList(),
+      ),
       editing == null ? 'Đã tạo menu.' : 'Đã cập nhật menu.',
     );
     if (!mounted) return;
@@ -170,16 +213,27 @@ class _MenuFormState extends State<_MenuForm> {
         const SizedBox(height: 12),
         TextField(controller: _name, decoration: systemInput('Tên menu *')),
         const SizedBox(height: 12),
-        TextField(controller: _route, decoration: systemInput('Đường dẫn *', hint: 'vd: /admin/users')),
+        TextField(
+          controller: _route,
+          decoration: systemInput('Đường dẫn *', hint: 'vd: /admin/users'),
+        ),
         const SizedBox(height: 12),
-        Row(children: [
-          Expanded(child: TextField(controller: _icon, decoration: systemInput('Biểu tượng'))),
-          const SizedBox(width: 12),
-          SizedBox(
-            width: 100,
-            child: TextField(controller: _order, keyboardType: TextInputType.number, decoration: systemInput('Thứ tự')),
-          ),
-        ]),
+        Row(
+          children: [
+            Expanded(
+              child: TextField(controller: _icon, decoration: systemInput('Biểu tượng')),
+            ),
+            const SizedBox(width: 12),
+            SizedBox(
+              width: 100,
+              child: TextField(
+                controller: _order,
+                keyboardType: TextInputType.number,
+                decoration: systemInput('Thứ tự'),
+              ),
+            ),
+          ],
+        ),
         const SizedBox(height: 16),
         const Text('Quyền được thấy menu này', style: TextStyle(fontWeight: FontWeight.bold)),
         PermissionPicker(selected: _selected, onChanged: (v) => setState(() => _selected = v)),
