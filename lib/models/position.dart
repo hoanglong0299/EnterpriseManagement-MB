@@ -5,6 +5,7 @@ class Position {
   final String? description;
   final bool isActive;
   final double? standardSalary;
+  final String? roleCode; // vai trò mặc định của chức vụ (nếu backend trả)
 
   Position({
     required this.positionCode,
@@ -12,6 +13,7 @@ class Position {
     this.description,
     required this.isActive,
     this.standardSalary,
+    this.roleCode,
   });
 
   factory Position.fromJson(Map<String, dynamic> json) => Position(
@@ -20,5 +22,6 @@ class Position {
         description: json['description'] as String?,
         isActive: json['isActive'] as bool? ?? true,
         standardSalary: (json['standardSalary'] as num?)?.toDouble(),
+        roleCode: json['roleCode'] as String?,
       );
 }

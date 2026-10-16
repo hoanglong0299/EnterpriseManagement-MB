@@ -61,7 +61,7 @@ class EmployeeAttendanceProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> load() async {
+  Future<void> load({bool silent = false}) async {
     final code = _auth.session?.employeeCode;
     if (code == null) {
       errorMessage = 'Tài khoản chưa gắn hồ sơ nhân viên. Liên hệ quản trị viên để được liên kết.';
@@ -69,15 +69,17 @@ class EmployeeAttendanceProvider extends ChangeNotifier {
       return;
     }
     // Chỉ hiện vòng quay toàn màn hình ở lần tải đầu; các lần làm mới sau giữ nguyên nội dung cũ.
-    isLoading = _history.isEmpty;
-    errorMessage = null;
-    notifyListeners();
+    if (!silent) {
+      isLoading = _history.isEmpty;
+      errorMessage = null;
+      notifyListeners();
+    }
     try {
       _history = await _service.getHistory(code);
       // Yêu cầu điều chỉnh chỉ gọi khi có quyền (endpoint cần attendance.adjustment.self).
       _adjustments = _auth.can('attendance.adjustment.self') ? await _service.getMyAdjustments() : [];
     } catch (e) {
-      errorMessage = e.toString().replaceFirst('Exception: ', '');
+      if (!silent) errorMessage = e.toString().replaceFirst('Exception: ', '');
     }
     isLoading = false;
     notifyListeners();

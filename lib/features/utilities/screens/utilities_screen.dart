@@ -1,3 +1,5 @@
+import '../../../services/live_updates.dart';
+import '../../../shared/widgets/auto_refresh.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -15,6 +17,14 @@ class UtilitiesScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return AutoRefresh(
+      onRefresh: () => context.read<LeaveProvider>().load(silent: true),
+      types: NotificationTypes.myAttendance,
+      child: _buildContent(context),
+    );
+  }
+
+  Widget _buildContent(BuildContext context) {
     final menu = context.watch<MenuProvider>();
     final leaveStatus = context.watch<LeaveProvider>().leaveStatusList;
 

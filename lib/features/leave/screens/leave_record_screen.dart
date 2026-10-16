@@ -1,3 +1,5 @@
+import '../../../services/live_updates.dart';
+import '../../../shared/widgets/auto_refresh.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -79,6 +81,14 @@ class _LeaveRecordScreenState extends State<LeaveRecordScreen> {
 
   @override
   Widget build(BuildContext context) {
+    return AutoRefresh(
+      onRefresh: () => context.read<LeaveProvider>().load(silent: true),
+      types: NotificationTypes.employeeLeave,
+      child: _buildContent(context),
+    );
+  }
+
+  Widget _buildContent(BuildContext context) {
     final provider = context.watch<LeaveProvider>();
 
     return DefaultTabController(

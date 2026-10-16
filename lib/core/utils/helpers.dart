@@ -28,6 +28,6 @@ String isoDate(DateTime value) {
 String employmentStatusLabel(String s) => switch (s) {
       'Active' => 'Đang làm việc',
       'Probation' => 'Thử việc',
-      'Terminated' => 'Đã nghỉ việc',
+      'Resigned' || 'Terminated' => 'Đã nghỉ việc',
       _ => s,
     };

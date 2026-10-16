@@ -1,3 +1,5 @@
+import '../../../services/live_updates.dart';
+import '../../../shared/widgets/auto_refresh.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -31,6 +33,14 @@ class _ManagerDashboardView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return AutoRefresh(
+      onRefresh: () => context.read<ManagerDashboardProvider>().load(silent: true),
+      types: NotificationTypes.manager,
+      child: _buildBody(context),
+    );
+  }
+
+  Widget _buildBody(BuildContext context) {
     final provider = context.watch<ManagerDashboardProvider>();
     final data = provider.data;
 

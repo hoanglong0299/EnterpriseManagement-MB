@@ -71,10 +71,12 @@ class ManagerAttendanceProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> loadTeam() async {
-    isLoadingTeam = true;
-    teamError = null;
-    notifyListeners();
+  Future<void> loadTeam({bool silent = false}) async {
+    if (!silent) {
+      isLoadingTeam = true;
+      teamError = null;
+      notifyListeners();
+    }
     try {
       final code = _auth.session?.employeeCode;
       if (code == null) throw Exception('Tài khoản chưa gắn với nhân viên nào.');
@@ -90,20 +92,22 @@ class ManagerAttendanceProvider extends ChangeNotifier {
       // Nhân viên đang lọc không còn trong kết quả mới thì bỏ lọc.
       if (employeeFilter != null && !employeeOptions.containsKey(employeeFilter)) employeeFilter = null;
     } catch (e) {
-      teamError = e.toString().replaceFirst('Exception: ', '');
+      if (!silent) teamError = e.toString().replaceFirst('Exception: ', '');
     }
     isLoadingTeam = false;
     notifyListeners();
   }
 
-  Future<void> loadPending() async {
-    isLoadingPending = true;
-    pendingError = null;
-    notifyListeners();
+  Future<void> loadPending({bool silent = false}) async {
+    if (!silent) {
+      isLoadingPending = true;
+      pendingError = null;
+      notifyListeners();
+    }
     try {
       pending = await _service.getPendingAdjustments();
     } catch (e) {
-      pendingError = e.toString().replaceFirst('Exception: ', '');
+      if (!silent) pendingError = e.toString().replaceFirst('Exception: ', '');
     }
     isLoadingPending = false;
     notifyListeners();

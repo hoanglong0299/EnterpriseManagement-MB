@@ -215,7 +215,7 @@ class _MenuFormState extends State<_MenuForm> {
         const SizedBox(height: 12),
         TextField(
           controller: _route,
-          decoration: systemInput('Đường dẫn *', hint: 'vd: /admin/users'),
+          decoration: systemInput('Đường dẫn *', hint: 'vd: /admin/employees'),
         ),
         const SizedBox(height: 12),
         Row(

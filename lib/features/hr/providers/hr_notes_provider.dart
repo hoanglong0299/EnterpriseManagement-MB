@@ -38,14 +38,16 @@ class HrNotesProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> loadNotes() async {
-    isLoading = true;
-    error = null;
-    notifyListeners();
+  Future<void> loadNotes({bool silent = false}) async {
+    if (!silent) {
+      isLoading = true;
+      error = null;
+      notifyListeners();
+    }
     try {
       notes = await _service.getNotes(from, to, employeeCode: employeeFilter);
     } catch (e) {
-      error = e.toString().replaceFirst('Exception: ', '');
+      if (!silent) error = e.toString().replaceFirst('Exception: ', '');
     }
     isLoading = false;
     notifyListeners();

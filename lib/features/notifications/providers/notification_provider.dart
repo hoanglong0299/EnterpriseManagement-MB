@@ -1,16 +1,18 @@
 import 'dart:async';
 
-import 'package:flutter/widgets.dart';
+import 'package:flutter/foundation.dart';
 
 import '../../../models/app_notification.dart';
+import '../../../services/live_updates.dart';
 import '../../../services/notification_service.dart';
 
-class NotificationProvider extends ChangeNotifier with WidgetsBindingObserver {
+class NotificationProvider extends ChangeNotifier {
   static const int _pageSize = 30;
 
   final NotificationService _service;
+  final LiveUpdates _live;
 
-  NotificationProvider(this._service);
+  NotificationProvider(this._service, this._live);
 
   List<AppNotification> items = [];
   int unreadCount = 0;
@@ -20,45 +22,24 @@ class NotificationProvider extends ChangeNotifier with WidgetsBindingObserver {
   bool unreadOnly = false;
   String? errorMessage;
 
-  Timer? _timer;
-  bool _observing = false;
+  StreamSubscription<LivePollResult>? _pollSub;
   // Tăng mỗi lần clear() để bỏ kết quả của request cũ trả về muộn (đổi tài khoản).
   int _epoch = 0;
 
-  // Bắt đầu tự làm mới số chưa đọc: ngay lập tức, mỗi 60 giây và khi app quay lại foreground.
+  // Bắt đầu tự làm mới: LiveUpdates poll mỗi 10 giây (và khi quay lại foreground), kết quả dùng chung
+  // để cập nhật số chưa đọc và danh sách.
   void startPolling() {
-    if (!_observing) {
-      WidgetsBinding.instance.addObserver(this);
-      _observing = true;
-    }
-    _startTimer();
-    refreshUnread();
+    _pollSub ??= _live.polls.listen(_onPoll);
+    _live.start();
   }
 
-  void _startTimer() {
-    _timer?.cancel();
-    _timer = Timer.periodic(const Duration(seconds: 60), (_) => refreshUnread());
-  }
-
-  void _stopPolling() {
-    _timer?.cancel();
-    _timer = null;
-    if (_observing) {
-      WidgetsBinding.instance.removeObserver(this);
-      _observing = false;
+  void _onPoll(LivePollResult r) {
+    final count = r.unreadCount;
+    if (count != null && count != unreadCount) {
+      unreadCount = count;
+      notifyListeners();
     }
-  }
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (!_observing) return;
-    if (state == AppLifecycleState.resumed) {
-      _startTimer();
-      refreshUnread();
-    } else if (state == AppLifecycleState.paused) {
-      _timer?.cancel();
-      _timer = null;
-    }
+    if (r.newItems.isNotEmpty) load(showSpinner: false);
   }
 
   Future<void> refreshUnread() async {
@@ -154,7 +135,9 @@ class NotificationProvider extends ChangeNotifier with WidgetsBindingObserver {
   // Xoá sạch khi đăng xuất.
   void clear() {
     _epoch++;
-    _stopPolling();
+    _pollSub?.cancel();
+    _pollSub = null;
+    _live.stop();
     items = [];
     unreadCount = 0;
     isLoading = false;
@@ -167,7 +150,7 @@ class NotificationProvider extends ChangeNotifier with WidgetsBindingObserver {
 
   @override
   void dispose() {
-    _stopPolling();
+    _pollSub?.cancel();
     super.dispose();
   }
 }

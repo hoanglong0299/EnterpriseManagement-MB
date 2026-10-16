@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../../../models/admin_user.dart';
+import '../../../models/admin_employee.dart';
 import '../../../shared/widgets/confirm_dialog.dart';
 import '../../../shared/widgets/status_chip.dart';
 

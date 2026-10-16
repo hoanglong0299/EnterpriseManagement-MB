@@ -1,18 +1,16 @@
 import 'package:flutter/material.dart';
 
 import '../../../models/admin_employee.dart';
-import '../../../models/admin_user.dart';
 import '../../../models/department.dart';
 import '../../../models/position.dart';
 import '../../../services/admin_service.dart';
 import '../widgets/admin_common.dart';
 
-// Danh sách nhân viên + phòng ban + chức vụ + tài khoản theo nhân viên cho Admin > Quản lý nhân viên.
+// Danh sách nhân viên (kèm tài khoản) + phòng ban + chức vụ + vai trò cho Admin > Quản lý nhân viên.
 class AdminEmployeesProvider extends ChangeNotifier {
   final AdminService _service;
-  final bool _canViewUsers;
 
-  AdminEmployeesProvider(this._service, {required bool canViewUsers}) : _canViewUsers = canViewUsers;
+  AdminEmployeesProvider(this._service);
 
   bool isLoading = false;
   String? errorMessage;
@@ -20,8 +18,8 @@ class AdminEmployeesProvider extends ChangeNotifier {
   List<Department> departments = [];
   List<Position> positions = [];
 
-  // Tài khoản đăng nhập gắn theo mã nhân viên: để biết hồ sơ nào đã có tài khoản.
-  Map<String, List<AdminUser>> usersByEmployee = {};
+  // Vai trò đang hoạt động (rỗng nếu không có quyền role.manage).
+  List<AdminRole> roles = [];
 
   String query = '';
   String? departmentFilter;
@@ -50,7 +48,8 @@ class AdminEmployeesProvider extends ChangeNotifier {
         if (query.isNotEmpty &&
             !(e.fullName.toLowerCase().contains(query) ||
                 e.employeeCode.toLowerCase().contains(query) ||
-                (e.email ?? '').toLowerCase().contains(query))) {
+                e.email.toLowerCase().contains(query) ||
+                e.username.toLowerCase().contains(query))) {
           return false;
         }
         return true;
@@ -73,11 +72,12 @@ class AdminEmployeesProvider extends ChangeNotifier {
         _service.getEmployees(),
         _service.getDepartments(),
         _service.getPositions(),
+        _service.getRoles(),
       ]);
       employees = results[0] as List<AdminEmployee>;
       departments = results[1] as List<Department>;
       positions = results[2] as List<Position>;
-      await _loadUsers();
+      roles = results[3] as List<AdminRole>;
     } catch (e) {
       errorMessage = errText(e);
     }
@@ -85,39 +85,18 @@ class AdminEmployeesProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> _loadUsers() async {
-    if (!_canViewUsers) {
-      usersByEmployee = {};
-      return;
-    }
-    try {
-      final list = await _service.getUsers();
-      final map = <String, List<AdminUser>>{};
-      for (final u in list) {
-        if (u.employeeCode == null) continue;
-        map.putIfAbsent(u.employeeCode!, () => []).add(u);
-      }
-      usersByEmployee = map;
-    } catch (_) {
-      usersByEmployee = {};
-    }
-  }
-
   Future<void> _reloadEmployees() async {
     employees = await _service.getEmployees();
     notifyListeners();
   }
 
-  Future<void> _reloadUsers() async {
-    await _loadUsers();
-    notifyListeners();
-  }
-
   // Các hàm ghi ném Exception khi lỗi để màn hình hiện thông báo.
-  Future<void> create({
+  Future<AdminCredential> create({
     required String firstName,
     required String lastName,
-    String? email,
+    required String username,
+    required String email,
+    String? roleCode,
     String? phone,
     String? address,
     String? dateOfBirth,
@@ -127,10 +106,12 @@ class AdminEmployeesProvider extends ChangeNotifier {
     String? managerCode,
     required String hireDate,
   }) async {
-    await _service.createEmployee(
+    final result = await _service.createEmployee(
       firstName: firstName,
       lastName: lastName,
+      username: username,
       email: email,
+      roleCode: roleCode,
       phone: phone,
       address: address,
       dateOfBirth: dateOfBirth,
@@ -141,12 +122,15 @@ class AdminEmployeesProvider extends ChangeNotifier {
       hireDate: hireDate,
     );
     await _reloadEmployees();
+    return AdminCredential(username: result.employee.username, password: result.generatedPassword, isReset: false);
   }
 
   Future<void> update(
     AdminEmployee e, {
     required String firstName,
     required String lastName,
+    required String email,
+    required List<String> roleCodes,
     String? phone,
     String? address,
     required String departmentCode,
@@ -157,6 +141,8 @@ class AdminEmployeesProvider extends ChangeNotifier {
       e.employeeCode,
       firstName: firstName,
       lastName: lastName,
+      email: email,
+      roleCodes: roleCodes,
       phone: phone,
       address: address,
       departmentCode: departmentCode,
@@ -166,22 +152,16 @@ class AdminEmployeesProvider extends ChangeNotifier {
     await _reloadEmployees();
   }
 
+  // Cho nghỉ việc/phục hồi: backend khoá/mở tài khoản theo.
   Future<void> setActive(AdminEmployee e, bool active) async {
     await _service.setEmployeeActive(e.employeeCode, active);
     await _reloadEmployees();
   }
 
-  Future<AdminCredential> createAccount(AdminEmployee e, String username, String email) async {
-    // Vai trò do backend tự lấy theo chức vụ khi không truyền roleCode (giống web).
-    final result = await _service.createUser(username: username, email: email, employeeCode: e.employeeCode);
-    await _reloadUsers();
-    return result;
+  Future<void> setAccountActive(AdminEmployee e, bool active) async {
+    await _service.setAccountActive(e.username, active);
+    await _reloadEmployees();
   }
 
-  Future<void> setAccountActive(AdminUser u, bool active) async {
-    await _service.setUserActive(u.username, active);
-    await _reloadUsers();
-  }
-
-  Future<AdminCredential> resetPassword(AdminUser u) => _service.resetPassword(u.username);
+  Future<AdminCredential> resetPassword(AdminEmployee e) => _service.resetPassword(e.username);
 }

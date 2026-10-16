@@ -14,7 +14,7 @@ class EmployeeDashboardProvider extends ChangeNotifier {
   String? errorMessage;
   EmployeeDashboardData? data;
 
-  Future<void> load() async {
+  Future<void> load({bool silent = false}) async {
     final code = _auth.session?.employeeCode;
     if (code == null) {
       errorMessage = 'Tài khoản chưa gắn hồ sơ nhân viên. Liên hệ quản trị viên để được liên kết.';
@@ -22,13 +22,15 @@ class EmployeeDashboardProvider extends ChangeNotifier {
       return;
     }
     // Chỉ hiện vòng quay toàn màn hình ở lần tải đầu; các lần làm mới sau giữ nguyên nội dung cũ.
-    isLoading = data == null;
-    errorMessage = null;
-    notifyListeners();
+    if (!silent) {
+      isLoading = data == null;
+      errorMessage = null;
+      notifyListeners();
+    }
     try {
       data = await _service.getEmployeeDashboard(code);
     } catch (e) {
-      errorMessage = e.toString().replaceFirst('Exception: ', '');
+      if (!silent) errorMessage = e.toString().replaceFirst('Exception: ', '');
     }
     isLoading = false;
     notifyListeners();

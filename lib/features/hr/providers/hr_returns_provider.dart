@@ -15,14 +15,16 @@ class HrReturnsProvider extends ChangeNotifier {
   String? error;
   int? busyId;
 
-  Future<void> load() async {
-    isLoading = true;
-    error = null;
-    notifyListeners();
+  Future<void> load({bool silent = false}) async {
+    if (!silent) {
+      isLoading = true;
+      error = null;
+      notifyListeners();
+    }
     try {
       items = await _service.getReturnsAwaitingProcessing();
     } catch (e) {
-      error = e.toString().replaceFirst('Exception: ', '');
+      if (!silent) error = e.toString().replaceFirst('Exception: ', '');
     }
     isLoading = false;
     notifyListeners();

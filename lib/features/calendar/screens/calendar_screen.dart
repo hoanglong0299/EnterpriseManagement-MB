@@ -6,6 +6,8 @@ import '../../../core/network/api_client.dart';
 import '../../../core/utils/vi_date.dart';
 import '../../../models/attendance_hr.dart';
 import '../../../services/hr_service.dart';
+import '../../../services/live_updates.dart';
+import '../../../shared/widgets/auto_refresh.dart';
 import '../../../shared/widgets/state_views.dart';
 import '../../../shared/widgets/permission_gate.dart';
 import '../../attendance/widgets/adjustment_form.dart';
@@ -13,8 +15,15 @@ import '../../auth/providers/auth_provider.dart';
 import '../widgets/attendance_day_cell.dart';
 import '../widgets/month_year_picker.dart';
 
+typedef CalendarLoader = Future<List<AttendanceCalendarDay>> Function(String employeeCode, DateTime from, DateTime to);
+
 class CalendarScreen extends StatefulWidget {
-  const CalendarScreen({super.key});
+  // active: tab Lịch đang được chọn; chuyển false -> true thì tải lại im lặng tháng đang xem.
+  final bool active;
+  // Cho phép thay nguồn dữ liệu (test); mặc định gọi HrService.getCalendar.
+  final CalendarLoader? loader;
+
+  const CalendarScreen({super.key, this.active = true, this.loader});
 
   @override
   State<CalendarScreen> createState() => _CalendarScreenState();
@@ -41,31 +50,47 @@ class _CalendarScreenState extends State<CalendarScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _loadMonth(_focusedMonth, force: true));
+    WidgetsBinding.instance.addPostFrameCallback((_) => _loadMonth(_focusedMonth));
   }
 
-  // Tải lịch của một tháng; tháng đã có trong cache thì bỏ qua trừ khi force.
-  Future<void> _loadMonth(DateTime month, {bool force = false}) async {
+  @override
+  void didUpdateWidget(CalendarScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Vừa chọn lại tab Lịch: tải lại tháng đang xem (cache chỉ để hiện nhanh, không phải dữ liệu mới).
+    if (widget.active && !oldWidget.active) _loadMonth(_focusedMonth, silent: true);
+  }
+
+  // Tải lịch của một tháng. Cache chỉ để chuyển tháng nhanh: tháng đã có cache vẫn hiện ngay
+  // nhưng luôn tải lại nền (không bật vòng tải). silent: tải ngầm, giữ nguyên lỗi/cuộn hiện tại.
+  Future<void> _loadMonth(DateTime month, {bool silent = false}) async {
     final key = _monthKey(month);
-    if (!force && _monthCache.containsKey(key)) return;
     final employeeCode = context.read<AuthProvider>().session?.employeeCode;
     if (employeeCode == null) return;
+    final background = silent || _monthCache.containsKey(key);
 
-    setState(() {
-      _loading = true;
-      _error = null;
-    });
+    if (!background) {
+      setState(() {
+        _loading = true;
+        _error = null;
+      });
+    }
     try {
       final from = DateTime(month.year, month.month, 1);
       final to = DateTime(month.year, month.month + 1, 0);
-      final days = await HrService(context.read<ApiClient>()).getCalendar(employeeCode, from, to);
+      final loader = widget.loader;
+      final days = loader != null
+          ? await loader(employeeCode, from, to)
+          : await HrService(context.read<ApiClient>()).getCalendar(employeeCode, from, to);
       if (!mounted) return;
-      setState(() => _monthCache[key] = {for (final d in days) _dayKey(d.date): d});
+      setState(() {
+        _monthCache[key] = {for (final d in days) _dayKey(d.date): d};
+        if (!background) _error = null;
+      });
     } catch (e) {
       if (!mounted) return;
-      setState(() => _error = e.toString().replaceFirst('Exception: ', ''));
+      if (!background) setState(() => _error = e.toString().replaceFirst('Exception: ', ''));
     } finally {
-      if (mounted) setState(() => _loading = false);
+      if (mounted && !background) setState(() => _loading = false);
     }
   }
 
@@ -118,7 +143,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
     final ok = await showAdjustmentForm(context, initialDate: _selectedDate);
     if (ok == true && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Đã gửi yêu cầu điều chỉnh chấm công')));
-      _loadMonth(_focusedMonth, force: true);
+      _loadMonth(_focusedMonth, silent: true);
     }
   }
 
@@ -232,7 +257,16 @@ class _CalendarScreenState extends State<CalendarScreen> {
     // Chỉ vẽ đủ số hàng cần thiết (4-6 hàng) thay vì cố định 6 hàng.
     int rowCount = ((firstDayOffset + daysInMonth) / 7).ceil();
 
-    return Container(
+    return AutoRefresh(
+      onRefresh: () => _loadMonth(_focusedMonth, silent: true),
+      types: const {
+        NotificationTypes.attendanceNoteCreated,
+        NotificationTypes.adjustmentApplied,
+        NotificationTypes.leaveApproved,
+        NotificationTypes.returnApproved,
+        NotificationTypes.localAttendanceChanged,
+      },
+      child: Container(
       color: Colors.white,
       child: SingleChildScrollView(
         physics: const BouncingScrollPhysics(),
@@ -390,7 +424,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                   ),
                   const SizedBox(height: 16),
                   if (_error != null)
-                    ErrorView(message: _error!, onRetry: () => _loadMonth(_focusedMonth, force: true))
+                    ErrorView(message: _error!, onRetry: () => _loadMonth(_focusedMonth))
                   else
                     ..._detailRows(_selectedDate),
                   if (_canRequestAdjustment)
@@ -411,6 +445,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
           ],
         ),
       ),
+    ),
     );
   }
 }

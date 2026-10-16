@@ -1,3 +1,5 @@
+import '../../../services/live_updates.dart';
+import '../../../shared/widgets/auto_refresh.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -48,20 +50,22 @@ class _LeaveReturnScreenState extends State<LeaveReturnScreen> {
     super.dispose();
   }
 
-  Future<void> _loadMine() async {
-    setState(() {
-      _loadingMine = true;
-      _mineError = null;
-    });
+  Future<void> _loadMine({bool silent = false}) async {
+    if (!silent) {
+      setState(() {
+        _loadingMine = true;
+        _mineError = null;
+      });
+    }
     try {
       final items = await _service.getMyReturns();
       if (!mounted) return;
       setState(() => _mine = items..sort((a, b) => b.id.compareTo(a.id)));
     } catch (e) {
       if (!mounted) return;
-      setState(() => _mineError = e.toString().replaceFirst('Exception: ', ''));
+      if (!silent) setState(() => _mineError = e.toString().replaceFirst('Exception: ', ''));
     } finally {
-      if (mounted) setState(() => _loadingMine = false);
+      if (mounted && !silent) setState(() => _loadingMine = false);
     }
   }
 
@@ -174,6 +178,14 @@ class _LeaveReturnScreenState extends State<LeaveReturnScreen> {
 
   @override
   Widget build(BuildContext context) {
+    return AutoRefresh(
+      onRefresh: () => _loadMine(silent: true),
+      types: NotificationTypes.employeeLeave,
+      child: _buildContent(context),
+    );
+  }
+
+  Widget _buildContent(BuildContext context) {
     final canSubmit = _preview != null && !_submitting;
 
     return Scaffold(

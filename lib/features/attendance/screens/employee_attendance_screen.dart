@@ -1,3 +1,5 @@
+import '../../../services/live_updates.dart';
+import '../../../shared/widgets/auto_refresh.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -48,6 +50,14 @@ class _AttendanceView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return AutoRefresh(
+      onRefresh: () => context.read<EmployeeAttendanceProvider>().load(silent: true),
+      types: NotificationTypes.employeeAdjustment,
+      child: _buildContent(context),
+    );
+  }
+
+  Widget _buildContent(BuildContext context) {
     final provider = context.watch<EmployeeAttendanceProvider>();
 
     Widget body;

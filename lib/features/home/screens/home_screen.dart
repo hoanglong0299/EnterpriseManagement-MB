@@ -4,6 +4,8 @@ import 'package:provider/provider.dart';
 
 import '../../../app/theme.dart';
 import '../../../core/utils/vi_date.dart';
+import '../../../services/live_updates.dart';
+import '../../../shared/widgets/auto_refresh.dart';
 import '../../check_in/providers/check_in_provider.dart';
 import '../../notifications/providers/notification_provider.dart';
 import '../../profile/providers/profile_provider.dart';
@@ -51,6 +53,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     if (!mounted) return;
 
     final error = provider.errorMessage;
+    // Chấm công thành công: báo cho Lịch, thẻ Trang chủ, Tiện ích... tải lại ngay.
+    if (error == null) context.read<LiveUpdates>().notifyLocalChange();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(error ?? (wasClockedIn ? 'Chấm công ra thành công!' : 'Chấm công vào thành công!')),
@@ -79,7 +83,16 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     final unread = context.watch<NotificationProvider>().unreadCount;
     final office = provider.office;
 
-    return RefreshIndicator(
+    return AutoRefresh(
+      onRefresh: provider.loadToday,
+      types: const {
+        NotificationTypes.attendanceNoteCreated,
+        NotificationTypes.adjustmentApplied,
+        NotificationTypes.leaveApproved,
+        NotificationTypes.returnApproved,
+        NotificationTypes.localAttendanceChanged,
+      },
+      child: RefreshIndicator(
       color: AppColors.primary,
       onRefresh: provider.loadToday,
       child: ListView(
@@ -124,6 +137,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           ),
         ],
       ),
+    ),
     );
   }
 

@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../features/admin/screens/admin_departments_screen.dart';
 import '../features/admin/screens/admin_employees_screen.dart';
 import '../features/admin/screens/admin_positions_screen.dart';
-import '../features/admin/screens/admin_users_screen.dart';
 import '../features/admin_leave_types/screens/admin_leave_types_screen.dart';
 import '../features/admin_system/screens/admin_audit_screen.dart';
 import '../features/admin_system/screens/admin_system_screen.dart';
@@ -59,7 +58,6 @@ final List<AppFeature> appFeatures = [
   AppFeature(route: '/hr/adjustments', fallbackTitle: 'Xử lý điều chỉnh công', icon: Icons.rule, color: const Color(0xFFE69D35), builder: (_) => const HrAdjustmentsScreen()),
   AppFeature(route: '/hr/leave-returns', fallbackTitle: 'Xử lý đi làm lại', icon: Icons.assignment_return, color: const Color(0xFF7E57C2), builder: (_) => const HrLeaveReturnsScreen()),
   // Admin
-  AppFeature(route: '/admin/users', fallbackTitle: 'Tài khoản', icon: Icons.admin_panel_settings, color: const Color(0xFFD84315), builder: (_) => const AdminUsersScreen()),
   AppFeature(route: '/admin/employees', fallbackTitle: 'Quản lý nhân viên', icon: Icons.badge, color: const Color(0xFF26A69A), builder: (_) => const AdminEmployeesScreen()),
   AppFeature(route: '/admin/departments', fallbackTitle: 'Phòng ban', icon: Icons.business, color: const Color(0xFF8D6E63), builder: (_) => const AdminDepartmentsScreen()),
   AppFeature(route: '/admin/positions', fallbackTitle: 'Chức vụ', icon: Icons.work_outline, color: const Color(0xFF6D4C41), builder: (_) => const AdminPositionsScreen()),

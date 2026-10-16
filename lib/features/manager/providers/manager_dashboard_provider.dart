@@ -14,20 +14,22 @@ class ManagerDashboardProvider extends ChangeNotifier {
   bool isLoading = false;
   String? errorMessage;
 
-  Future<void> load() async {
+  Future<void> load({bool silent = false}) async {
     final code = _auth.session?.employeeCode;
     if (code == null) {
       errorMessage = 'Tài khoản chưa gắn với nhân viên nào.';
       notifyListeners();
       return;
     }
-    isLoading = true;
-    errorMessage = null;
-    notifyListeners();
+    if (!silent) {
+      isLoading = true;
+      errorMessage = null;
+      notifyListeners();
+    }
     try {
       data = await _service.getDashboard(code);
     } catch (e) {
-      errorMessage = e.toString().replaceFirst('Exception: ', '');
+      if (!silent) errorMessage = e.toString().replaceFirst('Exception: ', '');
     }
     isLoading = false;
     notifyListeners();

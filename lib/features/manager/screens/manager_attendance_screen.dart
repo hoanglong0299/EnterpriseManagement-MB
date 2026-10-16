@@ -1,3 +1,5 @@
+import '../../../services/live_updates.dart';
+import '../../../shared/widgets/auto_refresh.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -57,8 +59,24 @@ class _ManagerAttendanceViewState extends State<_ManagerAttendanceView> {
     });
   }
 
+  Future<void> _autoRefresh() async {
+    final provider = context.read<ManagerAttendanceProvider>();
+    await Future.wait([
+      if (_canTeam) provider.loadTeam(silent: true),
+      if (_canPending) provider.loadPending(silent: true),
+    ]);
+  }
+
   @override
   Widget build(BuildContext context) {
+    return AutoRefresh(
+      onRefresh: _autoRefresh,
+      types: NotificationTypes.manager,
+      child: _buildContent(context),
+    );
+  }
+
+  Widget _buildContent(BuildContext context) {
     final tabs = <Tab>[
       if (_canTeam) const Tab(text: 'Chấm công team'),
       if (_canPending) const Tab(text: 'Yêu cầu chỉnh sửa'),

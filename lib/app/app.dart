@@ -22,6 +22,7 @@ import '../services/menu_service.dart';
 import '../services/photo_service.dart';
 import '../features/notifications/providers/notification_provider.dart';
 import '../services/notification_service.dart';
+import '../services/live_updates.dart';
 import '../services/push_service.dart';
 
 class MyApp extends StatelessWidget {
@@ -37,9 +38,17 @@ class MyApp extends StatelessWidget {
     final employeeService = EmployeeService(apiClient);
     final menuService = MenuService(apiClient);
     final notificationService = NotificationService(apiClient);
-    final notificationProvider = NotificationProvider(notificationService);
     final messengerKey = GlobalKey<ScaffoldMessengerState>();
-    final pushService = PushService(notificationService, notificationProvider, messengerKey);
+    final liveUpdates = LiveUpdates(
+      () async {
+        final items = await notificationService.getList(take: 10);
+        final unread = await notificationService.getUnreadCount();
+        return LivePollResult(items, unreadCount: unread);
+      },
+      messengerKey: messengerKey,
+    );
+    final notificationProvider = NotificationProvider(notificationService, liveUpdates);
+    final pushService = PushService(notificationService, liveUpdates);
 
     return MultiProvider(
       providers: [
@@ -67,6 +76,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => MenuProvider(menuService)),
         ChangeNotifierProvider(create: (_) => LeaveApprovalProvider(leaveService)),
         ChangeNotifierProvider.value(value: notificationProvider),
+        Provider<LiveUpdates>.value(value: liveUpdates),
         Provider<PushService>.value(value: pushService),
       ],
       child: MaterialApp(

@@ -1,3 +1,5 @@
+import '../../../services/live_updates.dart';
+import '../../../shared/widgets/auto_refresh.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -57,6 +59,14 @@ class _View extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return AutoRefresh(
+      onRefresh: () => context.read<HrAdjustmentsProvider>().load(silent: true),
+      types: NotificationTypes.hr,
+      child: _buildContent(context),
+    );
+  }
+
+  Widget _buildContent(BuildContext context) {
     final p = context.watch<HrAdjustmentsProvider>();
 
     Widget body;

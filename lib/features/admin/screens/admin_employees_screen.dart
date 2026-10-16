@@ -4,29 +4,25 @@ import 'package:provider/provider.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/utils/helpers.dart';
 import '../../../models/admin_employee.dart';
-import '../../../models/admin_user.dart';
 import '../../../services/admin_service.dart';
 import '../../../shared/widgets/confirm_dialog.dart';
 import '../../../shared/widgets/permission_gate.dart';
 import '../../../shared/widgets/state_views.dart';
-import '../../../shared/widgets/status_chip.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../providers/admin_employees_provider.dart';
 import '../widgets/admin_common.dart';
+import '../widgets/employee_account_widgets.dart';
 
-// Admin > Quản lý nhân viên (tương ứng AdminEmployeesPage bên web): xem toàn bộ nhân viên, tìm/lọc,
-// xem chi tiết, thêm/sửa hồ sơ, cho nghỉ việc/phục hồi, tạo và quản lý tài khoản đăng nhập.
-// Quyền xem: employee.view.all, ghi: employee.manage, tài khoản: user.manage.
+// Admin > Quản lý nhân viên (tương ứng AdminEmployeesPage bên web): mỗi nhân viên = 1 hồ sơ + 1 tài khoản.
+// Tạo (kèm tài khoản, hiện mật khẩu sinh), sửa hồ sơ/email/vai trò, đặt lại mật khẩu,
+// khoá/mở tài khoản, cho nghỉ việc/phục hồi. Quyền: employee.view.all, employee.manage, user.manage.
 class AdminEmployeesScreen extends StatelessWidget {
   const AdminEmployeesScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (ctx) => AdminEmployeesProvider(
-        AdminService(ctx.read<ApiClient>()),
-        canViewUsers: ctx.read<AuthProvider>().can('user.manage'),
-      )..load(),
+      create: (ctx) => AdminEmployeesProvider(AdminService(ctx.read<ApiClient>()))..load(),
       child: const _EmployeesView(),
     );
   }
@@ -39,20 +35,6 @@ String _genderLabel(String? g) => switch (g) {
   _ => '',
 };
 
-String _statusLabel(String s) => switch (s) {
-  'Active' => 'Đang làm việc',
-  'Probation' => 'Thử việc',
-  'Terminated' => 'Đã nghỉ việc',
-  _ => s,
-};
-
-Color _statusColor(String s) => switch (s) {
-  'Active' => StatusChip.success,
-  'Probation' => StatusChip.warning,
-  'Terminated' => StatusChip.danger,
-  _ => StatusChip.neutral,
-};
-
 class _EmployeesView extends StatelessWidget {
   const _EmployeesView();
 
@@ -62,7 +44,8 @@ class _EmployeesView extends StatelessWidget {
     final editing = employee != null;
     final lastName = TextEditingController(text: employee?.lastName ?? '');
     final firstName = TextEditingController(text: employee?.firstName ?? '');
-    final email = TextEditingController();
+    final username = TextEditingController();
+    final email = TextEditingController(text: employee?.email ?? '');
     final phone = TextEditingController(text: employee?.phone ?? '');
     final address = TextEditingController(text: employee?.address ?? '');
     String gender = 'Male';
@@ -75,16 +58,39 @@ class _EmployeesView extends StatelessWidget {
         employee?.positionCode ?? (provider.positions.isNotEmpty ? provider.positions.first.positionCode : null);
     String? managerCode = employee?.managerCode;
 
+    // Vai trò: tạo -> chọn 1 (null = mặc định theo chức vụ); sửa -> chọn nhiều.
+    String? roleCode;
+    bool roleTouched = false;
+    final selectedRoles = <String>{...?employee?.roleCodes};
+    // Vai trò hiện có của nhân viên nhưng không nằm trong danh sách (thiếu quyền xem/vai trò đã tắt) vẫn hiện để giữ.
+    final roleOptions = <AdminRole>[
+      ...provider.roles,
+      if (employee != null)
+        for (var i = 0; i < employee.roleCodes.length; i++)
+          if (!provider.roles.any((r) => r.roleCode == employee.roleCodes[i]))
+            AdminRole(
+              roleCode: employee.roleCodes[i],
+              roleName: i < employee.roleNames.length ? employee.roleNames[i] : employee.roleCodes[i],
+              isActive: true,
+            ),
+    ];
+
+    String? defaultRoleFor(String? posCode) {
+      for (final p in provider.positions) {
+        if (p.positionCode == posCode && p.roleCode != null && provider.roles.any((r) => r.roleCode == p.roleCode)) {
+          return p.roleCode;
+        }
+      }
+      return null;
+    }
+
+    roleCode = defaultRoleFor(positionCode);
+
     // Ứng viên quản lý: cùng phòng ban đã chọn, chưa nghỉ việc, không phải chính mình;
     // vẫn giữ quản lý hiện tại (nếu khác phòng) để mở form Sửa không mất lựa chọn.
     List<AdminEmployee> managerCandidates() {
       final list = provider.employees
-          .where(
-            (e) =>
-                e.departmentCode == departmentCode &&
-                e.employmentStatus != 'Terminated' &&
-                e.employeeCode != employee?.employeeCode,
-          )
+          .where((e) => e.departmentCode == departmentCode && e.isActive && e.employeeCode != employee?.employeeCode)
           .toList();
       if (managerCode != null && !list.any((e) => e.employeeCode == managerCode)) {
         final current = provider.employees.where((e) => e.employeeCode == managerCode);
@@ -116,14 +122,6 @@ class _EmployeesView extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 12),
-                if (!editing) ...[
-                  TextField(
-                    controller: email,
-                    keyboardType: TextInputType.emailAddress,
-                    decoration: fieldDecoration('Email'),
-                  ),
-                  const SizedBox(height: 12),
-                ],
                 TextField(
                   controller: phone,
                   keyboardType: TextInputType.phone,
@@ -148,7 +146,7 @@ class _EmployeesView extends StatelessWidget {
                           },
                           child: InputDecorator(
                             decoration: fieldDecoration('Ngày sinh'),
-                            child: Text(dob == null ? 'Chọn ngày' : formatDate(dob)),
+                            child: Text(dob == null ? 'Chọn ngày' : formatDate(dob), overflow: TextOverflow.ellipsis),
                           ),
                         ),
                       ),
@@ -200,7 +198,11 @@ class _EmployeesView extends StatelessWidget {
                         child: Text(p.positionName, overflow: TextOverflow.ellipsis),
                       ),
                   ],
-                  onChanged: (v) => setState(() => positionCode = v),
+                  onChanged: (v) => setState(() {
+                    positionCode = v;
+                    // Chưa tự chọn vai trò thì vai trò mặc định đổi theo chức vụ.
+                    if (!editing && !roleTouched) roleCode = defaultRoleFor(v);
+                  }),
                 ),
                 const SizedBox(height: 12),
                 DropdownButtonFormField<String?>(
@@ -247,6 +249,63 @@ class _EmployeesView extends StatelessWidget {
                     ),
                   ),
                 ],
+                const SizedBox(height: 20),
+                const Text('Tài khoản đăng nhập', style: TextStyle(fontWeight: FontWeight.bold)),
+                const SizedBox(height: 12),
+                if (!editing) ...[
+                  TextField(
+                    controller: username,
+                    autocorrect: false,
+                    decoration: fieldDecoration('Tên đăng nhập *', hint: '3-50 ký tự: chữ, số, . _ -'),
+                  ),
+                  const SizedBox(height: 12),
+                ],
+                TextField(
+                  controller: email,
+                  keyboardType: TextInputType.emailAddress,
+                  autocorrect: false,
+                  decoration: fieldDecoration('Email *'),
+                ),
+                const SizedBox(height: 12),
+                if (!editing)
+                  if (provider.roles.isEmpty)
+                    Text(
+                      'Vai trò sẽ được gán theo chức vụ đã chọn.',
+                      style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+                    )
+                  else
+                    DropdownButtonFormField<String?>(
+                      key: ValueKey('role-$positionCode-$roleTouched'),
+                      initialValue: roleCode,
+                      isExpanded: true,
+                      decoration: fieldDecoration('Vai trò'),
+                      items: [
+                        const DropdownMenuItem<String?>(
+                          value: null,
+                          child: Text('Mặc định theo chức vụ', overflow: TextOverflow.ellipsis),
+                        ),
+                        for (final r in provider.roles)
+                          DropdownMenuItem<String?>(
+                            value: r.roleCode,
+                            child: Text('${r.roleName} (${r.roleCode})', overflow: TextOverflow.ellipsis),
+                          ),
+                      ],
+                      onChanged: (v) => setState(() {
+                        roleCode = v;
+                        roleTouched = true;
+                      }),
+                    )
+                else ...[
+                  Text('Vai trò (chọn một hoặc nhiều)', style: TextStyle(color: Colors.grey.shade700, fontSize: 13)),
+                  const SizedBox(height: 6),
+                  RoleChips(
+                    roles: roleOptions,
+                    selected: selectedRoles,
+                    onToggle: (code) => setState(() {
+                      if (!selectedRoles.remove(code)) selectedRoles.add(code);
+                    }),
+                  ),
+                ],
                 const SizedBox(height: 16),
                 FilledButton(
                   onPressed: saving
@@ -260,42 +319,59 @@ class _EmployeesView extends StatelessWidget {
                             showMessage(sheetContext, 'Vui lòng nhập đủ họ tên.', error: true);
                             return;
                           }
+                          final problem =
+                              (editing ? null : validateUsername(username.text)) ?? validateEmail(email.text);
+                          if (problem != null) {
+                            showMessage(sheetContext, problem, error: true);
+                            return;
+                          }
+                          if (editing && selectedRoles.isEmpty) {
+                            showMessage(sheetContext, 'Vui lòng chọn ít nhất một vai trò.', error: true);
+                            return;
+                          }
                           setState(() => saving = true);
                           String? opt(TextEditingController c) => c.text.trim().isEmpty ? null : c.text.trim();
-                          final ok = await runAdminAction(
-                            sheetContext,
-                            () => editing
-                                ? provider.update(
-                                    employee,
-                                    firstName: firstName.text.trim(),
-                                    lastName: lastName.text.trim(),
-                                    phone: opt(phone),
-                                    address: opt(address),
-                                    departmentCode: departmentCode!,
-                                    positionCode: positionCode!,
-                                    managerCode: managerCode,
-                                  )
-                                : provider.create(
-                                    firstName: firstName.text.trim(),
-                                    lastName: lastName.text.trim(),
-                                    email: opt(email),
-                                    phone: opt(phone),
-                                    address: opt(address),
-                                    dateOfBirth: dob == null ? null : isoDate(dob!),
-                                    gender: gender,
-                                    departmentCode: departmentCode!,
-                                    positionCode: positionCode!,
-                                    managerCode: managerCode,
-                                    hireDate: isoDate(hireDate),
-                                  ),
-                            editing ? 'Đã cập nhật hồ sơ nhân viên.' : 'Đã thêm nhân viên mới.',
-                          );
+                          AdminCredential? credential;
+                          final ok = await runAdminAction(sheetContext, () async {
+                            if (editing) {
+                              await provider.update(
+                                employee,
+                                firstName: firstName.text.trim(),
+                                lastName: lastName.text.trim(),
+                                email: email.text.trim(),
+                                roleCodes: selectedRoles.toList(),
+                                phone: opt(phone),
+                                address: opt(address),
+                                departmentCode: departmentCode!,
+                                positionCode: positionCode!,
+                                managerCode: managerCode,
+                              );
+                            } else {
+                              credential = await provider.create(
+                                firstName: firstName.text.trim(),
+                                lastName: lastName.text.trim(),
+                                username: username.text.trim(),
+                                email: email.text.trim(),
+                                roleCode: roleCode,
+                                phone: opt(phone),
+                                address: opt(address),
+                                dateOfBirth: dob == null ? null : isoDate(dob!),
+                                gender: gender,
+                                departmentCode: departmentCode!,
+                                positionCode: positionCode!,
+                                managerCode: managerCode,
+                                hireDate: isoDate(hireDate),
+                              );
+                            }
+                          }, editing ? 'Đã cập nhật hồ sơ nhân viên.' : 'Đã thêm nhân viên mới.');
                           if (!sheetContext.mounted) return;
-                          if (ok) {
-                            Navigator.pop(sheetContext);
-                          } else {
+                          if (!ok) {
                             setState(() => saving = false);
+                            return;
                           }
+                          Navigator.pop(sheetContext);
+                          // Mật khẩu sinh ra chỉ hiện một lần ngay sau khi tạo.
+                          if (credential != null && context.mounted) await showCredentialSheet(context, credential!);
                         },
                   child: saving
                       ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
@@ -309,195 +385,68 @@ class _EmployeesView extends StatelessWidget {
     );
     lastName.dispose();
     firstName.dispose();
+    username.dispose();
     email.dispose();
     phone.dispose();
     address.dispose();
   }
 
-  // Cho nghỉ việc cần xác nhận (khoá chấm công/nghỉ phép); phục hồi thì chạy luôn.
-  Future<void> _toggle(BuildContext context, AdminEmployee e) async {
+  // Cho nghỉ việc / phục hồi: luôn xác nhận vì tài khoản đăng nhập bị khoá/mở theo.
+  Future<void> _toggleEmployment(BuildContext context, AdminEmployee e) async {
     final provider = context.read<AdminEmployeesProvider>();
-    if (e.isActive) {
-      final ok = await confirmDialog(
-        context,
-        title: 'Cho nhân viên nghỉ việc?',
-        message:
-            'Nhân viên "${e.fullName}" sẽ chuyển sang trạng thái Ngừng, không thể chấm công/xin nghỉ nữa cho đến khi được phục hồi lại.',
-        confirmText: 'Cho nghỉ việc',
-        danger: true,
-      );
-      if (!ok || !context.mounted) return;
-    }
-    await runAdminAction(context, () => provider.setActive(e, !e.isActive), 'Đã cập nhật trạng thái nhân viên.');
-  }
-
-  Future<void> _createAccount(BuildContext context, AdminEmployee e) async {
-    final provider = context.read<AdminEmployeesProvider>();
-    final username = TextEditingController(text: e.employeeCode.toLowerCase());
-    final email = TextEditingController(text: e.email ?? '');
-    await showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      builder: (sheetContext) {
-        bool saving = false;
-        return StatefulBuilder(
-          builder: (_, setState) => FormSheet(
-            title: 'Tạo tài khoản cho ${e.fullName}',
-            children: [
-              TextField(controller: username, decoration: fieldDecoration('Tên đăng nhập *')),
-              const SizedBox(height: 12),
-              TextField(
-                controller: email,
-                keyboardType: TextInputType.emailAddress,
-                decoration: fieldDecoration('Email *'),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Vai trò được tự lấy theo chức vụ hiện tại (${e.positionName}). Muốn chọn vai trò khác, tạo tại màn hình Tài khoản.',
-                style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
-              ),
-              const SizedBox(height: 16),
-              FilledButton(
-                onPressed: saving
-                    ? null
-                    : () async {
-                        if (username.text.trim().isEmpty || email.text.trim().isEmpty) {
-                          showMessage(sheetContext, 'Vui lòng nhập đủ tên đăng nhập và email.', error: true);
-                          return;
-                        }
-                        setState(() => saving = true);
-                        AdminCredential? credential;
-                        final ok = await runAdminAction(
-                          sheetContext,
-                          () async =>
-                              credential = await provider.createAccount(e, username.text.trim(), email.text.trim()),
-                          'Đã tạo tài khoản.',
-                        );
-                        if (!sheetContext.mounted) return;
-                        if (!ok) {
-                          setState(() => saving = false);
-                          return;
-                        }
-                        Navigator.pop(sheetContext);
-                        if (credential != null && context.mounted) await showCredentialSheet(context, credential!);
-                      },
-                child: saving
-                    ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
-                    : const Text('Tạo tài khoản'),
-              ),
-            ],
-          ),
-        );
-      },
+    final leaving = e.isActive;
+    final ok = await confirmDialog(
+      context,
+      title: leaving ? 'Cho nhân viên nghỉ việc?' : 'Phục hồi nhân viên?',
+      message: leaving
+          ? 'Nhân viên "${e.fullName}" sẽ chuyển sang trạng thái Đã nghỉ việc và tài khoản đăng nhập "${e.username}" sẽ bị khoá.'
+          : 'Nhân viên "${e.fullName}" sẽ trở lại trạng thái Đang làm việc và tài khoản đăng nhập "${e.username}" sẽ được mở lại.',
+      confirmText: leaving ? 'Cho nghỉ việc' : 'Phục hồi',
+      danger: leaving,
     );
-    username.dispose();
-    email.dispose();
+    if (!ok || !context.mounted) return;
+    await runAdminAction(
+      context,
+      () => provider.setActive(e, !leaving),
+      leaving ? 'Đã cho nghỉ việc và khoá tài khoản.' : 'Đã phục hồi nhân viên và mở tài khoản.',
+    );
   }
 
-  Future<void> _toggleAccount(BuildContext context, AdminUser u) async {
+  Future<void> _toggleAccount(BuildContext context, AdminEmployee e) async {
     final provider = context.read<AdminEmployeesProvider>();
-    if (u.isActive) {
+    if (e.isAccountActive) {
       final ok = await confirmDialog(
         context,
-        title: 'Khóa tài khoản?',
-        message: 'Tài khoản "${u.username}" sẽ không thể đăng nhập cho đến khi được mở khóa lại.',
-        confirmText: 'Khóa tài khoản',
+        title: 'Khoá tài khoản?',
+        message: 'Tài khoản "${e.username}" sẽ không thể đăng nhập cho đến khi được mở lại. Trạng thái làm việc không đổi.',
+        confirmText: 'Khoá tài khoản',
         danger: true,
       );
       if (!ok || !context.mounted) return;
     }
     await runAdminAction(
       context,
-      () => provider.setAccountActive(u, !u.isActive),
-      u.isActive ? 'Đã khóa tài khoản.' : 'Đã mở khóa tài khoản.',
+      () => provider.setAccountActive(e, !e.isAccountActive),
+      e.isAccountActive ? 'Đã khoá tài khoản.' : 'Đã mở tài khoản.',
     );
   }
 
-  Future<void> _resetAccount(BuildContext context, AdminUser u) async {
+  Future<void> _resetPassword(BuildContext context, AdminEmployee e) async {
     final provider = context.read<AdminEmployeesProvider>();
     final ok = await confirmDialog(
       context,
       title: 'Đặt lại mật khẩu?',
-      message: 'Tạo mật khẩu tạm mới cho "${u.username}". Mật khẩu cũ sẽ không dùng được nữa.',
+      message: 'Tạo mật khẩu tạm mới cho "${e.username}". Mật khẩu cũ sẽ không dùng được nữa.',
       confirmText: 'Đặt lại',
     );
     if (!ok || !context.mounted) return;
     AdminCredential? credential;
     final done = await runAdminAction(
       context,
-      () async => credential = await provider.resetPassword(u),
+      () async => credential = await provider.resetPassword(e),
       'Đã đặt lại mật khẩu.',
     );
     if (done && credential != null && context.mounted) await showCredentialSheet(context, credential!);
-  }
-
-  // Danh sách tài khoản của một nhân viên.
-  void _manageAccounts(BuildContext context, AdminEmployee e) {
-    final provider = context.read<AdminEmployeesProvider>();
-    showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      builder: (sheetContext) => ChangeNotifierProvider.value(
-        value: provider,
-        child: Consumer<AdminEmployeesProvider>(
-          builder: (_, p, _) {
-            final users = p.usersByEmployee[e.employeeCode] ?? [];
-            return FormSheet(
-              title: 'Tài khoản của ${e.fullName}',
-              children: [
-                if (users.isEmpty) const Text('Nhân viên chưa có tài khoản.'),
-                for (final u in users)
-                  Card(
-                    margin: const EdgeInsets.only(bottom: 8),
-                    child: Padding(
-                      padding: const EdgeInsets.all(12),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Text(u.username, style: const TextStyle(fontWeight: FontWeight.bold)),
-                              ),
-                              StatusChip(
-                                label: u.isActive ? 'Đang hoạt động' : 'Đã khóa',
-                                color: u.isActive ? StatusChip.success : StatusChip.danger,
-                              ),
-                            ],
-                          ),
-                          InfoLine('Email', u.email),
-                          InfoLine('Vai trò', u.roles.join(', ')),
-                          InfoLine('Đăng nhập cuối', formatDateTime(u.lastLoginAt)),
-                          PermissionGate(
-                            code: 'user.manage',
-                            child: Wrap(
-                              alignment: WrapAlignment.end,
-                              children: [
-                                TextButton(
-                                  onPressed: () => _toggleAccount(sheetContext, u),
-                                  child: Text(u.isActive ? 'Khóa' : 'Mở khóa'),
-                                ),
-                                TextButton(
-                                  onPressed: () => _resetAccount(sheetContext, u),
-                                  child: const Text('Đặt lại mật khẩu'),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                const Text(
-                  'Muốn tạo thêm tài khoản thứ 2 cho nhân viên này, vào màn hình Tài khoản.',
-                  style: TextStyle(color: Colors.grey, fontSize: 12),
-                ),
-              ],
-            );
-          },
-        ),
-      ),
-    );
   }
 
   // Xem chi tiết hồ sơ.
@@ -510,7 +459,11 @@ class _EmployeesView extends StatelessWidget {
         title: e.fullName,
         children: [
           InfoLine('Mã NV', e.employeeCode),
-          InfoLine('Email', e.email ?? ''),
+          InfoLine('Tên đăng nhập', e.username),
+          InfoLine('Vai trò', e.roleNames.isNotEmpty ? e.roleNames.join(', ') : e.roleCodes.join(', ')),
+          InfoLine('Tài khoản', e.isAccountActive ? 'Hoạt động' : 'Đã khoá'),
+          InfoLine('Đăng nhập cuối', e.lastLoginAt == null ? '' : formatDateTime(e.lastLoginAt)),
+          InfoLine('Email', e.email),
           InfoLine('Điện thoại', e.phone ?? ''),
           InfoLine('Địa chỉ', e.address ?? ''),
           InfoLine('Ngày sinh', e.dateOfBirth == null ? '' : formatDate(e.dateOfBirth)),
@@ -519,7 +472,7 @@ class _EmployeesView extends StatelessWidget {
           InfoLine('Chức vụ', e.positionName),
           InfoLine('Quản lý', provider.managerName(e)),
           InfoLine('Ngày vào làm', e.hireDate == null ? '' : formatDate(e.hireDate)),
-          InfoLine('Trạng thái', _statusLabel(e.employmentStatus)),
+          InfoLine('Trạng thái', employmentStatusLabel(e.employmentStatus)),
         ],
       ),
     );
@@ -528,6 +481,9 @@ class _EmployeesView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<AdminEmployeesProvider>();
+    final auth = context.watch<AuthProvider>();
+    final canManage = auth.can('employee.manage');
+    final canAccount = auth.can('user.manage');
     final list = provider.filtered;
     return Scaffold(
       backgroundColor: adminBackground,
@@ -552,7 +508,7 @@ class _EmployeesView extends StatelessWidget {
                 padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
                 child: Column(
                   children: [
-                    AdminSearchField(hint: 'Tìm theo tên, mã, email', onChanged: provider.setQuery),
+                    AdminSearchField(hint: 'Tìm theo tên, mã, email, tên đăng nhập', onChanged: provider.setQuery),
                     const SizedBox(height: 8),
                     Row(
                       children: [
@@ -583,7 +539,7 @@ class _EmployeesView extends StatelessWidget {
                               for (final s in provider.statuses)
                                 DropdownMenuItem<String?>(
                                   value: s,
-                                  child: Text(_statusLabel(s), overflow: TextOverflow.ellipsis),
+                                  child: Text(employmentStatusLabel(s), overflow: TextOverflow.ellipsis),
                                 ),
                             ],
                             onChanged: provider.setStatusFilter,
@@ -605,72 +561,16 @@ class _EmployeesView extends StatelessWidget {
                           separatorBuilder: (_, _) => const SizedBox(height: 10),
                           itemBuilder: (_, i) {
                             final e = list[i];
-                            final hasAccount = provider.usersByEmployee[e.employeeCode]?.isNotEmpty ?? false;
-                            return Card(
-                              margin: EdgeInsets.zero,
-                              child: InkWell(
-                                borderRadius: BorderRadius.circular(12),
-                                onTap: () => _showDetail(context, e),
-                                child: Padding(
-                                  padding: const EdgeInsets.all(14),
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Row(
-                                        children: [
-                                          Expanded(
-                                            child: Text(
-                                              e.fullName,
-                                              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                                            ),
-                                          ),
-                                          StatusChip(
-                                            label: _statusLabel(e.employmentStatus),
-                                            color: _statusColor(e.employmentStatus),
-                                          ),
-                                        ],
-                                      ),
-                                      const SizedBox(height: 6),
-                                      InfoLine('Mã NV', e.employeeCode),
-                                      InfoLine('Phòng ban', e.departmentName),
-                                      InfoLine('Chức vụ', e.positionName),
-                                      InfoLine('Quản lý', provider.managerName(e)),
-                                      Wrap(
-                                        alignment: WrapAlignment.end,
-                                        children: [
-                                          PermissionGate(
-                                            code: 'employee.manage',
-                                            child: Wrap(
-                                              children: [
-                                                TextButton(
-                                                  onPressed: () => _openForm(context, employee: e),
-                                                  child: const Text('Sửa'),
-                                                ),
-                                                TextButton(
-                                                  onPressed: () => _toggle(context, e),
-                                                  child: Text(e.isActive ? 'Khóa' : 'Mở khóa'),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                          PermissionGate(
-                                            code: 'user.manage',
-                                            child: hasAccount
-                                                ? TextButton(
-                                                    onPressed: () => _manageAccounts(context, e),
-                                                    child: const Text('Quản lý tài khoản'),
-                                                  )
-                                                : TextButton(
-                                                    onPressed: () => _createAccount(context, e),
-                                                    child: const Text('Tạo tài khoản'),
-                                                  ),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
+                            return AdminEmployeeCard(
+                              employee: e,
+                              managerName: provider.managerName(e),
+                              canManageEmployee: canManage,
+                              canManageAccount: canAccount,
+                              onTap: () => _showDetail(context, e),
+                              onEdit: () => _openForm(context, employee: e),
+                              onToggleEmployment: () => _toggleEmployment(context, e),
+                              onResetPassword: () => _resetPassword(context, e),
+                              onToggleAccount: () => _toggleAccount(context, e),
                             );
                           },
                         ),

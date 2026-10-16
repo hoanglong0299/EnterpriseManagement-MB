@@ -2,11 +2,10 @@ import 'package:dio/dio.dart';
 
 import '../core/network/api_client.dart';
 import '../models/admin_employee.dart';
-import '../models/admin_user.dart';
 import '../models/department.dart';
 import '../models/position.dart';
 
-// Gọi API quản trị: tài khoản, nhân viên, phòng ban, chức vụ (tương ứng userApi/employeeApi/departmentApi/positionApi bên web).
+// Gọi API quản trị: nhân viên (kèm tài khoản), phòng ban, chức vụ (tương ứng userApi/employeeApi/departmentApi/positionApi bên web).
 class AdminService {
   final ApiClient _apiClient;
 
@@ -23,13 +22,7 @@ class AdminService {
   List<Map<String, dynamic>> _list(Response response) =>
       (response.data as List).map((e) => e as Map<String, dynamic>).toList();
 
-  // ---- Tài khoản (user.manage) ----
-  Future<List<AdminUser>> getUsers() => _run(() async {
-        final r = await _apiClient.dio.get('/users');
-        return _list(r).map(AdminUser.fromJson).toList();
-      }, 'Không thể tải danh sách tài khoản.');
-
-  // Cần quyền role.manage; không có quyền thì trả danh sách rỗng (form tạo sẽ báo thiếu vai trò).
+  // Cần quyền role.manage; không có quyền thì trả danh sách rỗng (khi đó dùng vai trò mặc định theo chức vụ).
   Future<List<AdminRole>> getRoles() async {
     try {
       final r = await _apiClient.dio.get('/roles');
@@ -39,57 +32,20 @@ class AdminService {
     }
   }
 
-  Future<AdminCredential> createUser({
-    required String username,
-    required String email,
-    String? roleCode,
-    String? employeeCode,
-  }) =>
-      _run(() async {
-        final r = await _apiClient.dio.post('/users', data: {
-          'username': username,
-          'email': email,
-          'roleCode': roleCode,
-          'employeeCode': employeeCode,
-        });
-        return _credential(r, false);
-      }, 'Không thể tạo tài khoản.');
-
-  Future<void> setUserActive(String username, bool isActive) => _run(() async {
+  // ---- Tài khoản gắn với nhân viên (user.manage) ----
+  Future<void> setAccountActive(String username, bool isActive) => _run(() async {
         await _apiClient.dio.put('/users/$username/active', data: {'isActive': isActive});
       }, 'Không thể cập nhật trạng thái tài khoản.');
 
   Future<AdminCredential> resetPassword(String username) => _run(() async {
         final r = await _apiClient.dio.post('/users/$username/reset-password');
-        return _credential(r, true);
+        final data = r.data as Map<String, dynamic>;
+        return AdminCredential(
+          username: (data['username'] as String?) ?? username,
+          password: data['generatedPassword'] as String,
+          isReset: true,
+        );
       }, 'Không thể đặt lại mật khẩu.');
-
-  // Web có form "Sửa" gọi PUT /users/{username}; backend hiện chưa có endpoint này nên sẽ báo lỗi rõ ràng.
-  Future<void> updateUser(String username, {String? email, String? employeeCode, List<String>? roleCodes}) async {
-    try {
-      await _apiClient.dio.put('/users/$username', data: {
-        'email': email,
-        'employeeCode': employeeCode,
-        'roleCodes': roleCodes,
-      });
-    } on DioException catch (e) {
-      final code = e.response?.statusCode;
-      if (code == 404 || code == 405) {
-        throw Exception('Backend chưa hỗ trợ sửa tài khoản.');
-      }
-      throw Exception(apiErrorMessage(e, 'Không thể cập nhật tài khoản.'));
-    }
-  }
-
-  AdminCredential _credential(Response r, bool isReset) {
-    final data = r.data as Map<String, dynamic>;
-    final user = data['user'] as Map<String, dynamic>;
-    return AdminCredential(
-      username: user['username'] as String,
-      password: data['generatedPassword'] as String,
-      isReset: isReset,
-    );
-  }
 
   // ---- Nhân viên (employee.view.all / employee.manage) ----
   Future<List<AdminEmployee>> getEmployees() => _run(() async {
@@ -97,10 +53,12 @@ class AdminService {
         return _list(r).map(AdminEmployee.fromJson).toList();
       }, 'Không thể tải danh sách nhân viên.');
 
-  Future<void> createEmployee({
+  Future<CreateEmployeeResult> createEmployee({
     required String firstName,
     required String lastName,
-    String? email,
+    required String username,
+    required String email,
+    String? roleCode,
     String? phone,
     String? address,
     String? dateOfBirth,
@@ -111,10 +69,12 @@ class AdminService {
     required String hireDate,
   }) =>
       _run(() async {
-        await _apiClient.dio.post('/employees', data: {
+        final r = await _apiClient.dio.post('/employees', data: {
           'firstName': firstName,
           'lastName': lastName,
+          'username': username,
           'email': email,
+          'roleCode': roleCode,
           'phone': phone,
           'address': address,
           'dateOfBirth': dateOfBirth,
@@ -124,12 +84,15 @@ class AdminService {
           'managerCode': managerCode,
           'hireDate': hireDate,
         });
+        return CreateEmployeeResult.fromJson(r.data as Map<String, dynamic>);
       }, 'Không thể thêm nhân viên.');
 
   Future<void> updateEmployee(
     String employeeCode, {
     required String firstName,
     required String lastName,
+    required String email,
+    required List<String> roleCodes,
     String? phone,
     String? address,
     required String departmentCode,
@@ -140,6 +103,8 @@ class AdminService {
         await _apiClient.dio.put('/employees/$employeeCode', data: {
           'firstName': firstName,
           'lastName': lastName,
+          'email': email,
+          'roleCodes': roleCodes,
           'phone': phone,
           'address': address,
           'departmentCode': departmentCode,

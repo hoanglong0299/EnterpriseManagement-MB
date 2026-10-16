@@ -61,7 +61,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final unread = context.watch<NotificationProvider>().unreadCount;
 
     final screens = <Widget>[
-      const CalendarScreen(),
+      CalendarScreen(active: _currentIndex == 0),
       const UtilitiesScreen(),
       HomeScreen(onOpenNotifications: () => setState(() => _currentIndex = _tabNotifications)),
       const NotificationsScreen(),

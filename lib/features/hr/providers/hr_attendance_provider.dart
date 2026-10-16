@@ -42,14 +42,16 @@ class HrAttendanceProvider extends ChangeNotifier {
     await load();
   }
 
-  Future<void> load() async {
-    isLoading = true;
-    error = null;
-    notifyListeners();
+  Future<void> load({bool silent = false}) async {
+    if (!silent) {
+      isLoading = true;
+      error = null;
+      notifyListeners();
+    }
     try {
       records = await _service.getAllAttendance(startDate, endDate, departmentCode: departmentCode);
     } catch (e) {
-      error = e.toString().replaceFirst('Exception: ', '');
+      if (!silent) error = e.toString().replaceFirst('Exception: ', '');
     }
     isLoading = false;
     notifyListeners();

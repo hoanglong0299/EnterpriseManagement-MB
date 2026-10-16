@@ -63,13 +63,16 @@ class LeaveProvider extends ChangeNotifier {
     }).toList();
   }
 
-  Future<void> load() async {
+  // silent: tải ngầm (tự cập nhật), không bật cờ loading để giao diện không nhấp nháy.
+  Future<void> load({bool silent = false}) async {
     final employeeCode = _authProvider.session?.employeeCode;
     if (employeeCode == null) return;
 
-    _isLoading = true;
-    errorMessage = null;
-    notifyListeners();
+    if (!silent) {
+      _isLoading = true;
+      errorMessage = null;
+      notifyListeners();
+    }
 
     try {
       final results = await Future.wait([
@@ -82,9 +85,9 @@ class LeaveProvider extends ChangeNotifier {
       // Id lon hon = don tao sau, xep don moi nhat len dau nhu giao dien cu.
       _requests = (results[2] as List<LeaveRequest>)..sort((a, b) => b.id.compareTo(a.id));
     } catch (e) {
-      errorMessage = e.toString().replaceFirst('Exception: ', '');
+      if (!silent) errorMessage = e.toString().replaceFirst('Exception: ', '');
     } finally {
-      _isLoading = false;
+      if (!silent) _isLoading = false;
       notifyListeners();
     }
   }

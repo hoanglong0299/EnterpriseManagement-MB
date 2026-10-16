@@ -22,10 +22,12 @@ class LeaveApprovalProvider extends ChangeNotifier {
   List<LeaveRequest> get pending => _pending;
   List<LeaveRequest> get history => _history;
 
-  Future<void> load() async {
-    _isLoading = true;
-    errorMessage = null;
-    notifyListeners();
+  Future<void> load({bool silent = false}) async {
+    if (!silent) {
+      _isLoading = true;
+      errorMessage = null;
+      notifyListeners();
+    }
 
     try {
       final results = await Future.wait([
@@ -36,9 +38,9 @@ class LeaveApprovalProvider extends ChangeNotifier {
       _pending = results[0]..sort((a, b) => b.id.compareTo(a.id));
       _history = results[1]..sort((a, b) => b.id.compareTo(a.id));
     } catch (e) {
-      errorMessage = e.toString().replaceFirst('Exception: ', '');
+      if (!silent) errorMessage = e.toString().replaceFirst('Exception: ', '');
     } finally {
-      _isLoading = false;
+      if (!silent) _isLoading = false;
       notifyListeners();
     }
   }

@@ -3,9 +3,8 @@ import 'dart:async';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 
-import '../features/notifications/providers/notification_provider.dart';
+import 'live_updates.dart';
 import 'notification_service.dart';
 
 // Nhận thông báo khi app ở nền/đã đóng: Android tự hiển thị notification message, nên chỉ cần hàm rỗng.
@@ -16,10 +15,9 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {}
 // hộp thông báo trong app vẫn dùng bình thường.
 class PushService {
   final NotificationService _service;
-  final NotificationProvider _notifications;
-  final GlobalKey<ScaffoldMessengerState> messengerKey;
+  final LiveUpdates _live;
 
-  PushService(this._service, this._notifications, this.messengerKey);
+  PushService(this._service, this._live);
 
   // Dashboard lắng nghe để chuyển sang tab Thông báo (khi bấm thông báo hệ thống).
   final ValueNotifier<int> openTabRequests = ValueNotifier<int>(0);
@@ -104,14 +102,8 @@ class PushService {
   }
 
   void _onForeground(RemoteMessage message) {
-    _notifications.refreshUnread();
-    _notifications.load(showSpinner: false);
-    final n = message.notification;
-    if (n == null) return;
-    final text = [if (n.title != null) n.title!, if (n.body != null) n.body!].join('\n');
-    messengerKey.currentState
-      ?..hideCurrentSnackBar()
-      ..showSnackBar(SnackBar(content: Text(text), behavior: SnackBarBehavior.floating));
+    // Poll ngay; SnackBar do LiveUpdates hiện (theo id thông báo) nên không bị trùng với push.
+    _live.pollNow();
   }
 
   void _requestOpenTab() {
