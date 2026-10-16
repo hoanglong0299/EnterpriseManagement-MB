@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/utils/helpers.dart';
 import '../../../services/attendance_service.dart';
+import '../../../shared/widgets/wheel_time_picker.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../providers/employee_attendance_provider.dart';
 
@@ -59,7 +60,11 @@ class AdjustmentFormState extends State<AdjustmentForm> {
   }
 
   Future<void> _pickTime(bool isIn) async {
-    final picked = await showTimePicker(context: context, initialTime: (isIn ? _checkIn : _checkOut) ?? TimeOfDay.now());
+    final picked = await showWheelTimePicker(
+      context,
+      initial: (isIn ? _checkIn : _checkOut) ?? (isIn ? const TimeOfDay(hour: 8, minute: 0) : const TimeOfDay(hour: 17, minute: 30)),
+      title: isIn ? 'Giờ vào đề xuất' : 'Giờ ra đề xuất',
+    );
     if (picked != null) setState(() => isIn ? _checkIn = picked : _checkOut = picked);
   }
 
