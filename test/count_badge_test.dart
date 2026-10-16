@@ -51,7 +51,7 @@ void main() {
           home: Scaffold(
             body: Align(
               alignment: Alignment.topLeft,
-              child: Container(
+              child: SizedBox(
                 width: 44,
                 height: 44,
                 child: Badge(

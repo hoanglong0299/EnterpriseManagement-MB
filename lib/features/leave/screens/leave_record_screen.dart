@@ -466,8 +466,9 @@ class _LeaveApplicationScreenState extends State<LeaveApplicationScreen> {
     final now = DateTime.now();
     final minutes = now.hour * 60 + now.minute;
     final ahead = minutes <= 17 * 60 ? 1 : 2;
-    _minAnnualDate = DateTime(now.year, now.month, now.day + ahead);
-    _startDate = DateTime(now.year, now.month, now.day);
+    // Ngày xin nghỉ phải là ngày làm việc: nếu rơi vào T7/CN thì nhảy sang thứ Hai kế tiếp.
+    _minAnnualDate = _nextWorkday(DateTime(now.year, now.month, now.day + ahead));
+    _startDate = _nextWorkday(DateTime(now.year, now.month, now.day));
     _endDate = _startDate;
 
     // Provider đã tải loại nghỉ ở màn trước; nếu chưa có thì tải rồi chọn loại đầu tiên.
@@ -511,13 +512,25 @@ class _LeaveApplicationScreenState extends State<LeaveApplicationScreen> {
     return '$start - $endText';
   }
 
+  static bool _isWorkday(DateTime d) => d.weekday != DateTime.saturday && d.weekday != DateTime.sunday;
+
+  static DateTime _nextWorkday(DateTime d) {
+    var day = DateTime(d.year, d.month, d.day);
+    while (!_isWorkday(day)) {
+      day = day.add(const Duration(days: 1));
+    }
+    return day;
+  }
+
   Future<void> _pickStart() async {
     final first = _isAnnual ? _minAnnualDate : DateTime.now().subtract(const Duration(days: 365));
     final picked = await showDatePicker(
       context: context,
-      initialDate: _startDate.isBefore(first) ? first : _startDate,
+      initialDate: _nextWorkday(_startDate.isBefore(first) ? first : _startDate),
       firstDate: first,
       lastDate: DateTime(2100),
+      selectableDayPredicate: _isWorkday,
+      helpText: 'Chọn ngày làm việc (thứ Hai - thứ Sáu)',
     );
     if (picked == null) return;
     setState(() {
@@ -529,9 +542,11 @@ class _LeaveApplicationScreenState extends State<LeaveApplicationScreen> {
   Future<void> _pickEnd() async {
     final picked = await showDatePicker(
       context: context,
-      initialDate: _endDate.isBefore(_startDate) ? _startDate : _endDate,
+      initialDate: _nextWorkday(_endDate.isBefore(_startDate) ? _startDate : _endDate),
       firstDate: _startDate,
       lastDate: DateTime(2100),
+      selectableDayPredicate: _isWorkday,
+      helpText: 'Chọn ngày làm việc (thứ Hai - thứ Sáu)',
     );
     if (picked != null) setState(() => _endDate = picked);
   }
