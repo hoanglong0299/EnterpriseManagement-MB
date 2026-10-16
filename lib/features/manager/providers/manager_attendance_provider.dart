@@ -16,13 +16,12 @@ class ManagerAttendanceProvider extends ChangeNotifier {
 
   ManagerAttendanceProvider(this._service, this._auth);
 
-  // Mặc định: từ đầu tháng đến hôm nay (giống web).
-  DateTime startDate = DateTime(DateTime.now().year, DateTime.now().month, 1);
-  DateTime endDate = DateTime.now();
+  // Mặc định: chỉ hôm nay (giống web); muốn xem khoảng khác thì chọn khoảng ngày.
+  DateTime startDate = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
+  DateTime endDate = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
   String? employeeFilter; // employeeCode
   String? statusFilter;
 
-  String? _departmentCode;
   List<ManagerAttendanceRecord> records = [];
   List<ManagerAttendanceAdjustment> pending = [];
 
@@ -68,12 +67,10 @@ class ManagerAttendanceProvider extends ChangeNotifier {
     teamError = null;
     notifyListeners();
     try {
-      if (_departmentCode == null || _departmentCode!.isEmpty) {
-        final code = _auth.session?.employeeCode;
-        if (code == null) throw Exception('Tài khoản chưa gắn với nhân viên nào.');
-        _departmentCode = await _service.getDepartmentCodeOf(code);
-      }
-      records = await _service.getDepartmentAttendance(_departmentCode!, isoDate(startDate), isoDate(endDate));
+      final code = _auth.session?.employeeCode;
+      if (code == null) throw Exception('Tài khoản chưa gắn với nhân viên nào.');
+      // Danh sách là cấp dưới mà người này quản lý (đệ quy), không phải mọi người cùng phòng ban.
+      records = await _service.getTeamAttendance(code, isoDate(startDate), isoDate(endDate));
       // Nhân viên đang lọc không còn trong kết quả mới thì bỏ lọc.
       if (employeeFilter != null && !employeeOptions.containsKey(employeeFilter)) employeeFilter = null;
     } catch (e) {

@@ -40,6 +40,20 @@ class ManagerService {
         return (r.data as Map<String, dynamic>)['departmentCode'] as String? ?? '';
       }, 'Không thể tải thông tin phòng ban.');
 
+  // Chấm công của toàn bộ cấp dưới (kể cả cấp dưới của cấp dưới) của quản lý, không gồm chính họ.
+  Future<List<ManagerAttendanceRecord>> getTeamAttendance(
+    String managerCode,
+    String startDate,
+    String endDate,
+  ) =>
+      _run(() async {
+        final r = await _apiClient.dio.get(
+          '/attendance/team/$managerCode',
+          queryParameters: {'startDate': startDate, 'endDate': endDate},
+        );
+        return _list(r.data).map(ManagerAttendanceRecord.fromJson).toList();
+      }, 'Không thể tải bảng chấm công.');
+
   Future<List<ManagerAttendanceRecord>> getDepartmentAttendance(
     String departmentCode,
     String startDate,

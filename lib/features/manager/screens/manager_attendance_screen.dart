@@ -16,7 +16,7 @@ import '../../attendance/widgets/capped_width.dart';
 import '../manager_helpers.dart';
 import '../providers/manager_attendance_provider.dart';
 
-// Quản lý chấm công (tương ứng ManagerAttendancePage): bảng công cả phòng + yêu cầu chỉnh sửa chờ duyệt.
+// Quản lý chấm công (tương ứng ManagerAttendancePage): bảng công của cấp dưới (mặc định hôm nay) + yêu cầu chỉnh sửa chờ duyệt.
 class ManagerAttendanceScreen extends StatelessWidget {
   const ManagerAttendanceScreen({super.key});
 
@@ -110,7 +110,7 @@ class _ManagerAttendanceViewState extends State<_ManagerAttendanceView> {
   }
 }
 
-// ===== Tab bảng công cả phòng =====
+// ===== Tab bảng công của cấp dưới =====
 class _TeamTab extends StatelessWidget {
   const _TeamTab();
 

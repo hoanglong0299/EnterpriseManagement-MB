@@ -3,7 +3,7 @@ DateTime? _date(Map<String, dynamic> json, String key) {
   return v == null ? null : DateTime.tryParse(v);
 }
 
-// Bản ghi chấm công cả phòng (GET /attendance/department/{code}).
+// Bản ghi chấm công của cấp dưới (GET /attendance/team/{mã quản lý}).
 class ManagerAttendanceRecord {
   final String employeeCode;
   final String employeeName;
