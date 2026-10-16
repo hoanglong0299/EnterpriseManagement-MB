@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../app/theme.dart';
+import '../../../shared/widgets/count_badge.dart';
 import '../../../services/push_service.dart';
 import '../../calendar/screens/calendar_screen.dart';
 import '../../home/screens/home_screen.dart';
@@ -109,11 +110,5 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   // Icon chuông kèm huy hiệu số chưa đọc (ẩn khi 0, "9+" khi lớn hơn 9).
-  Widget _bellIcon(IconData icon, int unread) {
-    return Badge(
-      isLabelVisible: unread > 0,
-      label: Text(unread > 9 ? '9+' : '$unread'),
-      child: Icon(icon),
-    );
-  }
+  Widget _bellIcon(IconData icon, int unread) => CountBadge(count: unread, child: Icon(icon));
 }

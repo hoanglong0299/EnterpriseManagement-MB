@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../app/theme.dart';
+import '../../../shared/widgets/count_badge.dart';
 
 // Đầu Trang chủ: avatar + lời chào bên trái, chuông thông báo (kèm số chưa đọc) bên phải.
 class HomeHeader extends StatelessWidget {
@@ -62,10 +63,10 @@ class HomeHeader extends StatelessWidget {
           child: Container(
             width: 44,
             height: 44,
+            alignment: Alignment.center,
             decoration: BoxDecoration(color: AppColors.tint, borderRadius: BorderRadius.circular(14)),
-            child: Badge(
-              isLabelVisible: unread > 0,
-              label: Text(unread > 9 ? '9+' : '$unread'),
+            child: CountBadge(
+              count: unread,
               child: const Icon(Icons.notifications_none_rounded, color: AppColors.primary),
             ),
           ),
