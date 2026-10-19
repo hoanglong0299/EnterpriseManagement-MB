@@ -22,6 +22,11 @@ class DashboardScreen extends StatefulWidget {
   State<DashboardScreen> createState() => _DashboardScreenState();
 }
 
+class DashboardTabs {
+  // Màn khác (vd Tổng quan phòng ban) yêu cầu chuyển về Trang chủ để chấm công: đặt giá trị rồi DashboardScreen lắng nghe.
+  static final ValueNotifier<bool> goHomeRequests = ValueNotifier(false);
+}
+
 class _DashboardScreenState extends State<DashboardScreen> {
   static const _tabHome = 2;
   static const _tabNotifications = 3;
@@ -35,11 +40,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
     if (mounted) setState(() => _currentIndex = _tabNotifications);
   }
 
+  void _goHome() {
+    if (mounted) setState(() => _currentIndex = _tabHome);
+  }
+
   @override
   void initState() {
     super.initState();
     _push = context.read<PushService>();
     _push.openTabRequests.addListener(_openNotificationsTab);
+    DashboardTabs.goHomeRequests.addListener(_goHome);
     if (_push.pendingOpenTab) _currentIndex = _tabNotifications;
     // Đây là màn hình đầu tiên sau khi đăng nhập (hoặc mở lại app khi còn phiên): tải hồ sơ, số dư phép, menu, thông báo.
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -54,6 +64,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   void dispose() {
     _push.openTabRequests.removeListener(_openNotificationsTab);
+    DashboardTabs.goHomeRequests.removeListener(_goHome);
     super.dispose();
   }
 

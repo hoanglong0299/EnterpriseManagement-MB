@@ -1,6 +1,7 @@
 import '../../../services/live_updates.dart';
 import '../../../shared/widgets/auto_refresh.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/network/api_client.dart';
@@ -9,6 +10,8 @@ import '../../../services/manager_service.dart';
 import '../../../shared/widgets/state_views.dart';
 import '../../../shared/widgets/status_chip.dart';
 import '../../auth/providers/auth_provider.dart';
+import '../../check_in/providers/check_in_provider.dart';
+import '../../dashboard/screens/dashboard_screen.dart';
 import '../manager_helpers.dart';
 import '../providers/manager_dashboard_provider.dart';
 
@@ -81,6 +84,8 @@ class _ManagerDashboardView extends StatelessWidget {
       physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.all(16),
       children: [
+        const _MyTodayStrip(),
+        const SizedBox(height: 12),
         const Text('Tình hình team và các đơn đang chờ duyệt.', style: TextStyle(color: Colors.black54)),
         const SizedBox(height: 12),
         ManagerMetricGrid(metrics: cards),
@@ -151,6 +156,58 @@ class _MetricCard extends StatelessWidget {
             const SizedBox(height: 8),
             Text('${metric.value}', style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: metric.color)),
             Text(metric.label, style: const TextStyle(color: Colors.black54, fontSize: 13)),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// Dải trạng thái chấm công của chính quản lý (nút chấm công nằm ở Trang chủ, không lặp lại ở đây).
+class _MyTodayStrip extends StatefulWidget {
+  const _MyTodayStrip();
+
+  @override
+  State<_MyTodayStrip> createState() => _MyTodayStripState();
+}
+
+class _MyTodayStripState extends State<_MyTodayStrip> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) context.read<CheckInProvider>().loadToday();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final p = context.watch<CheckInProvider>();
+    final record = p.today;
+    final inTime = record?.checkInTime;
+    final outTime = record?.checkOutTime;
+    final text = inTime == null
+        ? 'Hôm nay bạn chưa chấm công.'
+        : outTime == null
+            ? 'Hôm nay bạn vào lúc ${DateFormat('HH:mm').format(inTime)}.'
+            : 'Hôm nay bạn vào ${DateFormat('HH:mm').format(inTime)}, ra ${DateFormat('HH:mm').format(outTime)}.';
+
+    return Card(
+      margin: EdgeInsets.zero,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(14, 10, 8, 10),
+        child: Row(
+          children: [
+            Icon(inTime == null ? Icons.schedule : Icons.check_circle, color: inTime == null ? const Color(0xFFEF6C00) : const Color(0xFF2E7D32)),
+            const SizedBox(width: 10),
+            Expanded(child: Text(text)),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).popUntil((route) => route.isFirst);
+                DashboardTabs.goHomeRequests.value = !DashboardTabs.goHomeRequests.value;
+              },
+              child: Text(inTime == null ? 'Chấm công' : 'Trang chủ'),
+            ),
           ],
         ),
       ),
