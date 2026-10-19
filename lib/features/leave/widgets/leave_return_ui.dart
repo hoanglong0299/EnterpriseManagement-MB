@@ -11,7 +11,7 @@ import '../../../shared/widgets/state_views.dart';
 import '../../../shared/widgets/status_chip.dart';
 import '../../attendance/widgets/capped_width.dart';
 
-// Nhãn và màu cho yêu cầu đi làm lại, dùng chung giữa màn nhân viên và màn Manager.
+// Nhãn và màu cho yêu cầu rút ngắn nghỉ phép, dùng chung giữa màn nhân viên và màn Manager.
 const Map<String, String> returnStatusLabels = {
   'PendingManager': 'Chờ quản lý duyệt',
   'PendingHr': 'Chờ xác nhận',
@@ -89,7 +89,7 @@ class ReturnSessionList extends StatelessWidget {
   }
 }
 
-// Thẻ một yêu cầu đi làm lại. [actions] (nếu có) hiện ở cuối thẻ (nút Duyệt/Từ chối của Manager).
+// Thẻ một yêu cầu rút ngắn nghỉ phép. [actions] (nếu có) hiện ở cuối thẻ (nút Duyệt/Từ chối của Manager).
 class ReturnRequestCard extends StatelessWidget {
   final LeaveReturnRequest request;
   final bool showEmployee;
@@ -197,14 +197,14 @@ class _PendingReturnsTabState extends State<PendingReturnsTab> {
   Future<void> _approve(LeaveReturnRequest r) async {
     final ok = await confirmDialog(
       context,
-      title: 'Duyệt yêu cầu đi làm lại',
+      title: 'Duyệt yêu cầu rút ngắn nghỉ phép',
       message: 'Duyệt yêu cầu của ${r.employeeName}?\n\n'
           'Buổi chưa tới giờ bắt đầu sẽ có hiệu lực ngay (phần ngày phép được hoàn lại). '
           'Buổi đã bắt đầu sẽ chuyển sang HR xác nhận.',
       confirmText: 'Duyệt',
     );
     if (!ok || !mounted) return;
-    await _run(r, () => _service.approveReturn(r.id), 'Đã duyệt yêu cầu đi làm lại.');
+    await _run(r, () => _service.approveReturn(r.id), 'Đã duyệt yêu cầu rút ngắn nghỉ phép.');
   }
 
   Future<void> _reject(LeaveReturnRequest r) async {
@@ -212,7 +212,7 @@ class _PendingReturnsTabState extends State<PendingReturnsTab> {
     final reason = await showDialog<String>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Từ chối yêu cầu đi làm lại'),
+        title: const Text('Từ chối yêu cầu rút ngắn nghỉ phép'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -250,7 +250,7 @@ class _PendingReturnsTabState extends State<PendingReturnsTab> {
       child: _items.isEmpty
           ? ListView(children: const [
               SizedBox(height: 100),
-              EmptyView(message: 'Không có yêu cầu đi làm lại chờ duyệt', icon: Icons.work_history_outlined),
+              EmptyView(message: 'Không có yêu cầu rút ngắn nghỉ phép chờ duyệt', icon: Icons.work_history_outlined),
             ])
           : ListView.builder(
               padding: const EdgeInsets.all(16),

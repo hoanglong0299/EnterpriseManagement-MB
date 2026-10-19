@@ -1,4 +1,4 @@
-// Model cho chấm công theo buổi, ghi chú ngoại lệ (HR) và yêu cầu đi làm lại. Khớp hợp đồng API của backend.
+// Model cho chấm công theo buổi, ghi chú ngoại lệ (HR) và yêu cầu rút ngắn nghỉ phép. Khớp hợp đồng API của backend.
 
 // Trạng thái một buổi: None, OnTime, Late, Absent, OnLeave. Nguồn: None, Weekend, Leave, ReturnConfirmed, Note, Attendance, Missing.
 class AttendanceCalendarDay {
@@ -95,7 +95,7 @@ class AttendanceNote {
   }
 }
 
-// Một buổi trong yêu cầu đi làm lại. state: Pending | AwaitingHr | Active | Rejected.
+// Một buổi trong yêu cầu rút ngắn nghỉ phép. state: Pending | AwaitingHr | Active | Rejected.
 class LeaveReturnSession {
   final DateTime date;
   final String session; // Morning | Afternoon
@@ -125,7 +125,7 @@ class LeaveReturnSession {
   }
 }
 
-// Bản xem trước các buổi sẽ được gỡ khỏi nghỉ phép nếu yêu cầu đi làm lại được duyệt.
+// Bản xem trước các buổi sẽ được gỡ khỏi nghỉ phép nếu yêu cầu rút ngắn nghỉ phép được duyệt.
 class LeaveReturnPreview {
   final List<LeaveReturnSession> sessions;
   final int sessionCount;
@@ -151,7 +151,7 @@ class LeaveReturnPreview {
   }
 }
 
-// Yêu cầu đi làm lại. status: PendingManager | PendingHr | Completed | Rejected.
+// Yêu cầu rút ngắn nghỉ phép. status: PendingManager | PendingHr | Completed | Rejected.
 class LeaveReturnRequest {
   final int id;
   final String employeeCode;

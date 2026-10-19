@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 
 import '../core/network/api_client.dart';
 import '../models/leave_balance.dart';
+import '../models/leave_cancel.dart';
 import '../models/leave_request.dart';
 import '../models/leave_type.dart';
 
@@ -123,6 +124,55 @@ class LeaveService {
         data: {'rejectionReason': rejectionReason},
       );
       return LeaveRequest.fromJson(response.data as Map<String, dynamic>);
+    } on DioException catch (e) {
+      throw Exception(_message(e));
+    }
+  }
+
+  // ---- Xin hủy đơn nghỉ đã duyệt nhưng chưa bắt đầu ----
+
+  Future<List<LeaveCancelRequest>> _getCancels(String path) async {
+    try {
+      final response = await _apiClient.dio.get(path);
+      return (response.data as List).map((e) => LeaveCancelRequest.fromJson(e as Map<String, dynamic>)).toList();
+    } on DioException catch (e) {
+      throw Exception(_message(e));
+    }
+  }
+
+  Future<List<LeaveCancelRequest>> getMyCancels() => _getCancels('/leave-cancels/mine');
+
+  Future<List<LeaveCancelRequest>> getPendingCancels() => _getCancels('/leave-cancels/pending');
+
+  Future<List<LeaveCancelRequest>> getCancelHistory() => _getCancels('/leave-cancels/history');
+
+  Future<void> submitCancel(int leaveRequestId, String reason) async {
+    try {
+      await _apiClient.dio.post('/leave-cancels', data: {'leaveRequestId': leaveRequestId, 'reason': reason});
+    } on DioException catch (e) {
+      throw Exception(_message(e));
+    }
+  }
+
+  Future<void> withdrawCancel(int id) async {
+    try {
+      await _apiClient.dio.put('/leave-cancels/$id/withdraw');
+    } on DioException catch (e) {
+      throw Exception(_message(e));
+    }
+  }
+
+  Future<void> approveCancel(int id) async {
+    try {
+      await _apiClient.dio.put('/leave-cancels/$id/approve');
+    } on DioException catch (e) {
+      throw Exception(_message(e));
+    }
+  }
+
+  Future<void> rejectCancel(int id, String? reason) async {
+    try {
+      await _apiClient.dio.put('/leave-cancels/$id/reject', data: {'rejectionReason': reason});
     } on DioException catch (e) {
       throw Exception(_message(e));
     }

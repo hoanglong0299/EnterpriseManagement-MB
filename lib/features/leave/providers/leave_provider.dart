@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../models/leave_balance.dart';
+import '../../../models/leave_cancel.dart';
 import '../../../models/leave_request.dart';
 import '../../../models/leave_type.dart';
 import '../../../services/leave_service.dart';
@@ -21,11 +22,25 @@ class LeaveProvider extends ChangeNotifier {
   List<LeaveType> _types = [];
   List<LeaveBalance> _balances = [];
   List<LeaveRequest> _requests = [];
+  List<LeaveCancelRequest> _cancels = [];
 
   bool get isLoading => _isLoading;
   List<LeaveType> get types => _types;
   List<LeaveBalance> get balances => _balances;
   List<LeaveRequest> get requests => _requests;
+  List<LeaveCancelRequest> get cancels => _cancels;
+
+  // Yêu cầu hủy đang chờ duyệt của một đơn nghỉ (nếu có).
+  LeaveCancelRequest? pendingCancelFor(int leaveRequestId) {
+    for (final c in _cancels) {
+      if (c.leaveRequestId == leaveRequestId && c.isPending) return c;
+    }
+    return null;
+  }
+
+  // Đơn đã duyệt và chưa có buổi nào bắt đầu thì mới xin hủy được (backend kiểm tra lại).
+  bool canRequestCancel(LeaveRequest r) =>
+      r.status == 'Approved' && r.startDate.isAfter(DateTime.now()) && pendingCancelFor(r.id) == null;
 
   // Dinh dang Map {title, value, category} la dinh dang Dashboard va LeaveStatusScreen dang doc.
   List<Map<String, dynamic>> get leaveStatusList {
@@ -79,11 +94,13 @@ class LeaveProvider extends ChangeNotifier {
         _leaveService.getTypes(),
         _leaveService.getBalances(employeeCode, DateTime.now().year),
         _leaveService.getMyRequests(),
+        _leaveService.getMyCancels(),
       ]);
       _types = results[0] as List<LeaveType>;
       _balances = results[1] as List<LeaveBalance>;
       // Id lon hon = don tao sau, xep don moi nhat len dau nhu giao dien cu.
       _requests = (results[2] as List<LeaveRequest>)..sort((a, b) => b.id.compareTo(a.id));
+      _cancels = results[3] as List<LeaveCancelRequest>;
     } catch (e) {
       if (!silent) errorMessage = e.toString().replaceFirst('Exception: ', '');
     } finally {
@@ -196,8 +213,36 @@ class LeaveProvider extends ChangeNotifier {
     return true;
   }
 
+  // Xin hủy đơn nghỉ đã duyệt (chưa bắt đầu). Trả về true nếu gửi được, ngược lại errorMessage chứa lý do.
+  Future<bool> requestCancel(int leaveRequestId, String reason) async {
+    errorMessage = null;
+    try {
+      await _leaveService.submitCancel(leaveRequestId, reason);
+    } catch (e) {
+      errorMessage = e.toString().replaceFirst('Exception: ', '');
+      notifyListeners();
+      return false;
+    }
+    await load(silent: true);
+    return true;
+  }
+
+  Future<bool> withdrawCancel(int cancelId) async {
+    errorMessage = null;
+    try {
+      await _leaveService.withdrawCancel(cancelId);
+    } catch (e) {
+      errorMessage = e.toString().replaceFirst('Exception: ', '');
+      notifyListeners();
+      return false;
+    }
+    await load(silent: true);
+    return true;
+  }
+
   // Dung khi dang xuat de nguoi dang nhap ke tiep khong thay du lieu cua nguoi truoc.
   void clear() {
+    _cancels = [];
     _types = [];
     _balances = [];
     _requests = [];

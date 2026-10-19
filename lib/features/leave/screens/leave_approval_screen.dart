@@ -10,6 +10,7 @@ import '../../auth/providers/auth_provider.dart';
 import '../providers/leave_approval_provider.dart';
 import '../../attendance/widgets/capped_width.dart';
 import '../../overtime/widgets/overtime_approval_tab.dart';
+import '../widgets/leave_cancel_tab.dart';
 import '../widgets/leave_return_ui.dart';
 import '../widgets/leave_ui.dart';
 
@@ -102,7 +103,7 @@ class _LeaveApprovalScreenState extends State<LeaveApprovalScreen> {
     }
 
     return DefaultTabController(
-      length: 4,
+      length: 5,
       child: Scaffold(
         backgroundColor: const Color(0xFFF6F4FC),
         appBar: AppBar(
@@ -110,13 +111,16 @@ class _LeaveApprovalScreenState extends State<LeaveApprovalScreen> {
           backgroundColor: const Color(0xFF5A3FD8),
           foregroundColor: Colors.white,
           bottom: TabBar(
+            isScrollable: true,
+            tabAlignment: TabAlignment.start,
             labelColor: Colors.white,
             unselectedLabelColor: Colors.white70,
             indicatorColor: Colors.white,
             tabs: [
               Tab(text: 'Chờ duyệt (${provider.pending.length})'),
               const Tab(text: 'Lịch sử'),
-              const Tab(text: 'Đi làm lại'),
+              const Tab(text: 'Rút ngắn phép'),
+              const Tab(text: 'Hủy phép'),
               const Tab(text: 'Làm thêm giờ'),
             ],
           ),
@@ -126,6 +130,7 @@ class _LeaveApprovalScreenState extends State<LeaveApprovalScreen> {
             _buildList(provider, provider.pending, pending: true),
             _buildList(provider, provider.history, pending: false),
             const PendingReturnsTab(),
+            const LeaveCancelTab(),
             const OvertimeApprovalTab(),
           ],
         ),

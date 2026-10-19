@@ -4,7 +4,7 @@ import '../../../core/utils/helpers.dart';
 import '../../../models/attendance_hr.dart';
 import '../../../services/hr_service.dart';
 
-// Xử lý yêu cầu đi làm lại (quyền attendance.note.manage).
+// Xử lý yêu cầu rút ngắn nghỉ phép (quyền attendance.note.manage).
 class HrReturnsProvider extends ChangeNotifier {
   final HrService _service;
 

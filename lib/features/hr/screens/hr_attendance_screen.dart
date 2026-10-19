@@ -228,7 +228,7 @@ class _SessionTile extends StatelessWidget {
       tip = 'Ghi chú HR';
     } else if (source == 'ReturnConfirmed') {
       icon = Icons.assignment_turned_in_outlined;
-      tip = 'Xác nhận đi làm lại';
+      tip = 'Xác nhận rút ngắn phép';
     }
     final hasNote = note != null && note!.isNotEmpty;
     return Row(

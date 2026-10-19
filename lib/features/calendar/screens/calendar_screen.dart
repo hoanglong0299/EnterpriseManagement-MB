@@ -230,7 +230,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
     if (source == 'Note' && note != null && note.isNotEmpty) {
       rows.add(_detailRow(Icons.sticky_note_2_outlined, Colors.blueGrey, 'Ghi chú của HR: $note'));
     } else if (source == 'ReturnConfirmed') {
-      rows.add(_detailRow(Icons.verified_outlined, Colors.blueGrey, 'Đã được HR xác nhận (đi làm lại)'));
+      rows.add(_detailRow(Icons.verified_outlined, Colors.blueGrey, 'Đã được HR xác nhận (rút ngắn phép)'));
     }
     return rows;
   }

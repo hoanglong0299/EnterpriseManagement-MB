@@ -14,7 +14,7 @@ import '../../../shared/widgets/status_chip.dart';
 import '../hr_helpers.dart';
 import '../providers/hr_returns_provider.dart';
 
-// Xử lý đi làm lại (route /hr/leave-returns, quyền attendance.note.manage).
+// Xác nhận rút ngắn phép (route /hr/leave-returns, quyền attendance.note.manage).
 class HrLeaveReturnsScreen extends StatelessWidget {
   const HrLeaveReturnsScreen({super.key});
 
@@ -66,7 +66,7 @@ class _View extends StatelessWidget {
         child: ListView(
           children: const [
             SizedBox(height: 80),
-            EmptyView(message: 'Không có yêu cầu đi làm lại nào chờ xác nhận.', icon: Icons.task_alt),
+            EmptyView(message: 'Không có yêu cầu rút ngắn nghỉ phép nào chờ xác nhận.', icon: Icons.task_alt),
           ],
         ),
       );
@@ -123,7 +123,7 @@ class _View extends StatelessWidget {
       );
     }
 
-    return Scaffold(backgroundColor: hrBackground, appBar: hrAppBar('Xử lý đi làm lại'), body: body);
+    return Scaffold(backgroundColor: hrBackground, appBar: hrAppBar('Xác nhận rút ngắn phép'), body: body);
   }
 }
 
@@ -156,7 +156,7 @@ class _DetailSheetState extends State<_DetailSheet> {
     final err = await context.read<HrReturnsProvider>().confirm(r, _statuses);
     messenger.showSnackBar(
       SnackBar(
-        content: Text(err ?? 'Đã xác nhận đi làm lại.'),
+        content: Text(err ?? 'Đã xác nhận rút ngắn nghỉ phép.'),
         backgroundColor: err == null ? Colors.green : Colors.red,
       ),
     );

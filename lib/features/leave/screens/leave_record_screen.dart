@@ -60,6 +60,57 @@ class _LeaveRecordScreenState extends State<LeaveRecordScreen> {
     }
   }
 
+  // Đơn đã duyệt nhưng chưa bắt đầu: xin quản lý hủy (khác với đơn đang chờ duyệt thì hủy thẳng).
+  Future<void> _requestCancel(LeaveRequest r) async {
+    final controller = TextEditingController();
+    final reason = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Xin hủy đơn nghỉ phép'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('${r.leaveTypeName} (${r.dateLabel}). Quản lý duyệt thì đơn được hủy và phép được hoàn lại.'),
+            const SizedBox(height: 12),
+            TextField(
+              controller: controller,
+              autofocus: true,
+              maxLines: 3,
+              decoration: const InputDecoration(labelText: 'Lý do hủy', border: OutlineInputBorder()),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Đóng')),
+          TextButton(onPressed: () => Navigator.pop(ctx, controller.text.trim()), child: const Text('Gửi yêu cầu')),
+        ],
+      ),
+    );
+    controller.dispose();
+    if (reason == null || !mounted) return;
+
+    final provider = context.read<LeaveProvider>();
+    final success = await provider.requestCancel(r.id, reason);
+    if (!mounted) return;
+    showMessage(
+      context,
+      success ? 'Đã gửi yêu cầu hủy đơn, chờ quản lý duyệt.' : (provider.errorMessage ?? 'Không gửi được yêu cầu hủy.'),
+      error: !success,
+    );
+  }
+
+  Future<void> _withdrawCancel(int cancelId) async {
+    final provider = context.read<LeaveProvider>();
+    final success = await provider.withdrawCancel(cancelId);
+    if (!mounted) return;
+    showMessage(
+      context,
+      success ? 'Đã rút lại yêu cầu hủy.' : (provider.errorMessage ?? 'Không rút lại được.'),
+      error: !success,
+    );
+  }
+
   Future<void> _cancelRequest(LeaveRequest r) async {
     final confirmed = await confirmDialog(
       context,
@@ -107,7 +158,7 @@ class _LeaveRecordScreenState extends State<LeaveRecordScreen> {
               child: TextButton.icon(
                 onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const LeaveReturnScreen())),
                 icon: const Icon(Icons.work_history_outlined, color: Colors.white, size: 18),
-                label: const Text('Đi làm lại', style: TextStyle(color: Colors.white)),
+                label: const Text('Rút ngắn phép', style: TextStyle(color: Colors.white)),
               ),
             ),
           ],
@@ -308,6 +359,33 @@ class _LeaveRecordScreenState extends State<LeaveRecordScreen> {
                     ),
                   ),
                 ),
+              // Đơn đã duyệt, chưa bắt đầu: xin hủy (cần quản lý duyệt); đang chờ thì hiện trạng thái và cho rút lại.
+              if (r.status == 'Approved')
+                PermissionGate(
+                  code: 'leave.request.self',
+                  child: Builder(builder: (context) {
+                    final provider = context.watch<LeaveProvider>();
+                    final pendingCancel = provider.pendingCancelFor(r.id);
+                    if (pendingCancel != null) {
+                      return Row(
+                        children: [
+                          const Expanded(
+                            child: Text('Đang chờ quản lý duyệt hủy', style: TextStyle(color: Color(0xFFEF6C00), fontSize: 13)),
+                          ),
+                          TextButton(onPressed: () => _withdrawCancel(pendingCancel.id), child: const Text('RÚT LẠI')),
+                        ],
+                      );
+                    }
+                    if (!provider.canRequestCancel(r)) return const SizedBox.shrink();
+                    return Align(
+                      alignment: Alignment.centerRight,
+                      child: TextButton(
+                        onPressed: () => _requestCancel(r),
+                        child: const Text('XIN HỦY ĐƠN', style: TextStyle(color: Colors.red)),
+                      ),
+                    );
+                  }),
+                ),
             ],
           ),
         ),
@@ -368,7 +446,7 @@ class _LeaveRecordScreenState extends State<LeaveRecordScreen> {
             const SizedBox(height: 6),
             Text('Đã dùng ${_num(b.usedTime)} $unit', style: const TextStyle(fontSize: 12, color: Colors.black54)),
             if (b.refundedTime > 0)
-              Text('Đã hoàn ${_num(b.refundedTime)} $unit do đi làm lại',
+              Text('Đã hoàn ${_num(b.refundedTime)} $unit do rút ngắn phép',
                   style: const TextStyle(fontSize: 12, color: StatusChip.success)),
           ],
         ),

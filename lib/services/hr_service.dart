@@ -133,7 +133,7 @@ class HrService {
       );
       return LeaveReturnPreview.fromJson(response.data as Map<String, dynamic>);
     } on DioException catch (e) {
-      throw _error(e, 'Không xem trước được yêu cầu đi làm lại.');
+      throw _error(e, 'Không xem trước được yêu cầu rút ngắn nghỉ phép.');
     }
   }
 
@@ -145,7 +145,7 @@ class HrService {
       );
       return LeaveReturnRequest.fromJson(response.data as Map<String, dynamic>);
     } on DioException catch (e) {
-      throw _error(e, 'Không gửi được yêu cầu đi làm lại.');
+      throw _error(e, 'Không gửi được yêu cầu rút ngắn nghỉ phép.');
     }
   }
 
@@ -154,7 +154,7 @@ class HrService {
       final response = await _apiClient.dio.get('/leave-returns/mine');
       return _list(response.data, LeaveReturnRequest.fromJson);
     } on DioException catch (e) {
-      throw _error(e, 'Không tải được yêu cầu đi làm lại.');
+      throw _error(e, 'Không tải được yêu cầu rút ngắn nghỉ phép.');
     }
   }
 
@@ -164,7 +164,7 @@ class HrService {
       final response = await _apiClient.dio.get('/leave-returns/pending');
       return _list(response.data, LeaveReturnRequest.fromJson);
     } on DioException catch (e) {
-      throw _error(e, 'Không tải được yêu cầu đi làm lại chờ duyệt.');
+      throw _error(e, 'Không tải được yêu cầu rút ngắn nghỉ phép chờ duyệt.');
     }
   }
 

@@ -5,7 +5,7 @@ class LeaveBalance {
   final double allocatedTime;
   final double usedTime;
   final double remainingTime;
-  // Phần phép đã hoàn do đi làm lại; usedTime và remainingTime đã tính phần hoàn này.
+  // Phần phép đã hoàn do rút ngắn phép; usedTime và remainingTime đã tính phần hoàn này.
   final double refundedTime;
   final int? year;
   // Chỉ có với loại reset theo tháng (nghỉ ngắn).

@@ -61,7 +61,7 @@ final List<AppFeature> appFeatures = [
   AppFeature(route: '/hr/attendance', fallbackTitle: 'Chấm công toàn công ty', icon: Icons.table_chart, color: const Color(0xFF5A3FD8), builder: (_) => const HrAttendanceScreen()),
   AppFeature(route: '/hr/attendance-notes', fallbackTitle: 'Ghi nhận chấm công', icon: Icons.edit_note, color: const Color(0xFF00897B), builder: (_) => const HrAttendanceNotesScreen()),
   AppFeature(route: '/hr/adjustments', fallbackTitle: 'Xử lý điều chỉnh công', icon: Icons.rule, color: const Color(0xFFE69D35), builder: (_) => const HrAdjustmentsScreen()),
-  AppFeature(route: '/hr/leave-returns', fallbackTitle: 'Xử lý đi làm lại', icon: Icons.assignment_return, color: const Color(0xFF7E57C2), builder: (_) => const HrLeaveReturnsScreen()),
+  AppFeature(route: '/hr/leave-returns', fallbackTitle: 'Xác nhận rút ngắn phép', icon: Icons.assignment_return, color: const Color(0xFF7E57C2), builder: (_) => const HrLeaveReturnsScreen()),
   AppFeature(route: '/hr/timesheet', fallbackTitle: 'Bảng công tháng', icon: Icons.table_view, color: const Color(0xFF3949AB), builder: (_) => const HrTimesheetScreen()),
   AppFeature(route: '/hr/holidays', fallbackTitle: 'Ngày nghỉ lễ', icon: Icons.celebration_outlined, color: const Color(0xFFD81B60), builder: (_) => const HrHolidaysScreen()),
   // Admin

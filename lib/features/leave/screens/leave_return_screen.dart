@@ -109,7 +109,7 @@ class _LeaveReturnScreenState extends State<LeaveReturnScreen> {
     final date = _date;
     final reason = _reasonController.text.trim();
     if (date == null || _preview == null) return;
-    if (reason.isEmpty) return showMessage(context, 'Vui lòng nhập lý do đi làm lại.', error: true);
+    if (reason.isEmpty) return showMessage(context, 'Vui lòng nhập lý do rút ngắn phép.', error: true);
     if (_submitting) return;
 
     setState(() => _submitting = true);
@@ -125,7 +125,7 @@ class _LeaveReturnScreenState extends State<LeaveReturnScreen> {
       showMessage(context, error, error: true);
       return;
     }
-    showMessage(context, 'Đã gửi yêu cầu đi làm lại.');
+    showMessage(context, 'Đã gửi yêu cầu rút ngắn nghỉ phép.');
     setState(() {
       _date = null;
       _preview = null;
@@ -191,7 +191,7 @@ class _LeaveReturnScreenState extends State<LeaveReturnScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF6F4FC),
       appBar: AppBar(
-        title: const Text('Đi làm lại'),
+        title: const Text('Rút ngắn nghỉ phép'),
         backgroundColor: const Color(0xFF5A3FD8),
         foregroundColor: Colors.white,
       ),
@@ -206,11 +206,11 @@ class _LeaveReturnScreenState extends State<LeaveReturnScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('Gửi yêu cầu đi làm lại', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                    const Text('Gửi yêu cầu rút ngắn nghỉ phép', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                     const SizedBox(height: 4),
                     const Text(
-                      'Dùng khi bạn đã được duyệt nghỉ nhưng muốn đi làm lại. Chỉ chọn được buổi chưa bắt đầu; '
-                      'hệ thống tự đi làm lại đến hết đợt nghỉ liên tục.',
+                      'Dùng khi kỳ nghỉ đã bắt đầu nhưng bạn muốn đi làm sớm. Chỉ chọn được buổi chưa bắt đầu và không phải buổi đầu của kỳ nghỉ; '
+                      'hệ thống bỏ các buổi nghỉ còn lại của đơn đó và hoàn phép. Chưa bắt đầu nghỉ mà không đi nữa thì dùng "Xin hủy đơn" ở danh sách đơn nghỉ.',
                       style: TextStyle(color: Colors.grey, fontSize: 12),
                     ),
                     const SizedBox(height: 16),
@@ -255,7 +255,7 @@ class _LeaveReturnScreenState extends State<LeaveReturnScreen> {
                     TextField(
                       controller: _reasonController,
                       maxLines: 3,
-                      decoration: const InputDecoration(border: OutlineInputBorder(), hintText: 'Nhập lý do đi làm lại...'),
+                      decoration: const InputDecoration(border: OutlineInputBorder(), hintText: 'Nhập lý do rút ngắn phép...'),
                     ),
                     const SizedBox(height: 16),
                     SizedBox(
@@ -277,7 +277,7 @@ class _LeaveReturnScreenState extends State<LeaveReturnScreen> {
               ),
             ),
             const SizedBox(height: 16),
-            const Text('Yêu cầu đi làm lại của tôi', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+            const Text('Yêu cầu rút ngắn nghỉ phép của tôi', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
             const SizedBox(height: 8),
             if (_loadingMine && _mine.isEmpty)
               const Padding(padding: EdgeInsets.all(24), child: Center(child: CircularProgressIndicator()))
@@ -286,7 +286,7 @@ class _LeaveReturnScreenState extends State<LeaveReturnScreen> {
             else if (_mine.isEmpty)
               const Padding(
                 padding: EdgeInsets.all(24),
-                child: Center(child: Text('Chưa có yêu cầu đi làm lại.', style: TextStyle(color: Colors.grey))),
+                child: Center(child: Text('Chưa có yêu cầu rút ngắn nghỉ phép.', style: TextStyle(color: Colors.grey))),
               )
             else
               for (final r in _mine) ReturnRequestCard(request: r),
