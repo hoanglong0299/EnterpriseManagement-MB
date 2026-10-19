@@ -100,30 +100,12 @@ class _LeaveRecordScreenState extends State<LeaveRecordScreen> {
     );
   }
 
-  Future<void> _withdrawCancel(int cancelId) async {
-    final confirmed = await confirmDialog(
-      context,
-      title: 'Rút yêu cầu hủy?',
-      message: 'Bạn sẽ không xin hủy đơn nghỉ này nữa. Đơn nghỉ vẫn giữ nguyên và có hiệu lực.',
-      confirmText: 'Rút yêu cầu',
-    );
-    if (!confirmed || !mounted) return;
-    final provider = context.read<LeaveProvider>();
-    final success = await provider.withdrawCancel(cancelId);
-    if (!mounted) return;
-    showMessage(
-      context,
-      success ? 'Đã rút yêu cầu hủy, đơn nghỉ vẫn có hiệu lực.' : (provider.errorMessage ?? 'Không rút lại được.'),
-      error: !success,
-    );
-  }
-
   Future<void> _cancelRequest(LeaveRequest r) async {
     final confirmed = await confirmDialog(
       context,
-      title: 'Hủy đơn nghỉ phép',
-      message: 'Bạn có chắc muốn hủy đơn ${r.leaveTypeName} (${r.dateLabel}) không?',
-      confirmText: 'Hủy đơn',
+      title: 'Rút lại đơn nghỉ phép',
+      message: 'Bạn có chắc muốn rút lại đơn ${r.leaveTypeName} (${r.dateLabel}) không?',
+      confirmText: 'Rút lại',
       danger: true,
     );
     if (!confirmed || !mounted) return;
@@ -354,7 +336,7 @@ class _LeaveRecordScreenState extends State<LeaveRecordScreen> {
                 Text('Lý do: ${r.reason}', style: const TextStyle(color: Colors.black54)),
               if ((r.rejectionReason ?? '').isNotEmpty)
                 Text('Lý do từ chối: ${r.rejectionReason}', style: const TextStyle(color: Colors.black54)),
-              // Đơn đang chờ duyệt thì nhân viên được hủy (giống bản web)
+              // Đơn chưa được duyệt thì nhân viên rút lại được; đơn đã duyệt chỉ có "Xin hủy đơn".
               if (r.isPending)
                 PermissionGate(
                   code: 'leave.request.self',
@@ -362,7 +344,7 @@ class _LeaveRecordScreenState extends State<LeaveRecordScreen> {
                     alignment: Alignment.centerRight,
                     child: TextButton(
                       onPressed: () => _cancelRequest(r),
-                      child: const Text('HỦY ĐƠN', style: TextStyle(color: Colors.red)),
+                      child: const Text('RÚT LẠI', style: TextStyle(color: Colors.red)),
                     ),
                   ),
                 ),
@@ -374,10 +356,10 @@ class _LeaveRecordScreenState extends State<LeaveRecordScreen> {
                     final provider = context.watch<LeaveProvider>();
                     final pendingCancel = provider.pendingCancelFor(r.id);
                     if (pendingCancel != null) {
-                      // Đơn vẫn đang có hiệu lực; đã gửi yêu cầu hủy và đang chờ quản lý. Nút chỉ rút YÊU CẦU HỦY, không đụng tới đơn nghỉ.
+                      // Đã gửi yêu cầu hủy, chờ quản lý duyệt: chỉ hiện trạng thái, không có nút nào nữa.
                       return Container(
                         margin: const EdgeInsets.only(top: 8),
-                        padding: const EdgeInsets.fromLTRB(12, 8, 4, 8),
+                        padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
                         decoration: BoxDecoration(
                           color: const Color(0xFFFFF3E0),
                           borderRadius: BorderRadius.circular(8),
@@ -388,10 +370,6 @@ class _LeaveRecordScreenState extends State<LeaveRecordScreen> {
                             const SizedBox(width: 8),
                             const Expanded(
                               child: Text('Bạn đã xin hủy đơn này, đang chờ quản lý duyệt.', style: TextStyle(color: Color(0xFFEF6C00), fontSize: 13)),
-                            ),
-                            TextButton(
-                              onPressed: () => _withdrawCancel(pendingCancel.id),
-                              child: const Text('RÚT YÊU CẦU HỦY'),
                             ),
                           ],
                         ),
