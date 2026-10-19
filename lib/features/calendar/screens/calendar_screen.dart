@@ -349,9 +349,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
                             child: Text(
                               day,
                               style: TextStyle(
-                                color: day == 'CN' ? Colors.red.shade300 : Colors.grey, // Chữ CN màu đỏ nhạt
+                                color: const Color(0xFF1E293B), // Cả 7 thứ (kể cả CN) cùng màu đen, in đậm
                                 fontSize: 15,
-                                fontWeight: day == 'CN' ? FontWeight.bold : FontWeight.normal,
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
                           ),
