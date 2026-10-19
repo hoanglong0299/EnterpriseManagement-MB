@@ -166,7 +166,8 @@ class _LeaveRecordScreenState extends State<LeaveRecordScreen> {
 
   // 2 ô tóm tắt: ngày phép còn lại (bấm để xem chi tiết tình trạng nghỉ phép từng loại) và đơn đang chờ duyệt.
   Widget _buildMetrics(LeaveProvider provider) {
-    final days = provider.balances.where((b) => b.unit == 'Days').fold<double>(0, (sum, b) => sum + b.remainingTime);
+    // Chỉ tính Nghỉ có phép (ANNUAL), không cộng Nghỉ chế độ.
+    final days = provider.balances.where((b) => b.leaveTypeCode == 'ANNUAL').fold<double>(0, (sum, b) => sum + b.remainingTime);
     final pending = provider.requests.where((r) => r.isPending).length;
 
     Widget tile(String label, String value, Color color, {VoidCallback? onTap}) => Expanded(
