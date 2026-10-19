@@ -1,85 +1,130 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
-class PrivacyStatementScreen extends StatelessWidget {
+import '../../../core/network/api_client.dart';
+import '../../../core/utils/helpers.dart';
+import '../../../models/privacy.dart';
+import '../../../services/privacy_service.dart';
+import '../../../shared/widgets/state_views.dart';
+
+// Chính sách dữ liệu chấm công (vị trí GPS, ảnh) lấy từ backend (cùng nội dung với web) kèm trạng thái đồng ý của bạn.
+class PrivacyStatementScreen extends StatefulWidget {
   const PrivacyStatementScreen({super.key});
 
-  // Tách biệt dữ liệu văn bản thành một List cố định để code UI không bị rác
-  static const List<Map<String, String>> _privacySections = [
-    {
-      'title': '1. Phạm vi thu thập dữ liệu',
-      'content': 'Để đảm bảo chức năng chấm công chính xác, ứng dụng sẽ thu thập các thông tin sau khi nhận được sự cho phép của bạn:\n\n'
-                 '• Dữ liệu vị trí (GPS): Chỉ thu thập đúng thời điểm bạn bấm nút "Chấm công vào/ra" để xác minh bạn đang ở nơi làm việc quy định.\n'
-                 '• Dữ liệu sinh trắc học (khuôn mặt/vân tay): Hình ảnh hoặc dấu vân tay được thu thập để xác thực danh tính và ngăn chặn chấm công hộ.\n'
-                 '• Dữ liệu thiết bị và hệ thống: Thông tin về loại thiết bị (Device ID), hệ điều hành, địa chỉ IP và thời gian truy cập được thu thập để ghi nhật ký hệ thống và bảo vệ tài khoản của bạn.',
-    },
-    {
-      'title': '2. Mục đích sử dụng dữ liệu',
-      'content': 'Toàn bộ dữ liệu thu thập từ người dùng chỉ được sử dụng cho mục đích nội bộ của doanh nghiệp, bao gồm:\n\n'
-                 '• Xác minh danh tính, vị trí và thời gian làm việc thực tế của nhân viên.\n'
-                 '• Cung cấp cơ sở dữ liệu chính xác cho phòng Nhân sự để tính lương, thưởng và quản lý ca làm việc.\n'
-                 '• Ngăn chặn hành vi gian lận, giả mạo vị trí hoặc can thiệp vào thiết bị trong quá trình chấm công.',
-    },
-    {
-      'title': '3. Cam kết không tiết lộ',
-      'content': 'Chúng tôi cam kết tuyệt đối không bán, trao đổi, cho thuê hoặc cung cấp dữ liệu cá nhân, dữ liệu vị trí và dữ liệu sinh trắc học của bạn cho bất kỳ bên thứ ba nào vì mục đích thương mại. Dữ liệu của bạn chỉ được chia sẻ trong phạm vi sau:\n\n'
-                 '• Quản lý, Quản trị viên hệ thống (Admin) hoặc phòng Nhân sự của công ty/tổ chức trực tiếp quản lý bạn.\n'
-                 '• Các đối tác hạ tầng máy chủ đám mây đã ký thỏa thuận bảo mật (NDA) nghiêm ngặt với chúng tôi.',
-    },
-    {
-      'title': '4. Biện pháp bảo mật và mã hóa',
-      'content': 'Ứng dụng áp dụng các tiêu chuẩn bảo mật kỹ thuật số tiên tiến nhất hiện có. Mọi thông tin cá nhân, đặc biệt là dữ liệu sinh trắc học và vị trí, được bảo vệ bằng mã hóa đầu cuối trong quá trình truyền tải và lưu trữ trên máy chủ. Chúng tôi sử dụng tường lửa và các giao thức bảo mật chặt chẽ để ngăn chặn mọi truy cập, thay đổi hoặc phá hủy dữ liệu trái phép từ bên ngoài.',
-    },
-    {
-      'title': '5. Thời gian lưu trữ dữ liệu',
-      'content': 'Dữ liệu chấm công và hồ sơ cá nhân của bạn sẽ được lưu trong hệ thống chừng nào bạn còn làm việc tại công ty. Khi hợp đồng lao động chấm dứt, dữ liệu sinh trắc học và tài khoản của bạn sẽ bị vô hiệu hóa, lưu trữ hoặc xóa vĩnh viễn theo chính sách quản lý hồ sơ nhân sự của công ty và quy định pháp luật hiện hành.',
-    },
-    {
-      'title': '6. Quyền kiểm soát của người dùng',
-      'content': 'Người dùng được quyền xem lại toàn bộ lịch sử chấm công, gồm thời gian và vị trí đã ghi nhận, ngay trong ứng dụng. Nếu phát hiện thông tin không chính xác hoặc muốn yêu cầu chỉnh sửa/xóa dữ liệu khuôn mặt/vân tay, bạn có quyền gửi yêu cầu trực tiếp đến Quản trị viên hệ thống hoặc phòng Nhân sự của công ty để được giải quyết theo thẩm quyền.',
-    },
-  ];
+  @override
+  State<PrivacyStatementScreen> createState() => _PrivacyStatementScreenState();
+}
+
+class _PrivacyStatementScreenState extends State<PrivacyStatementScreen> {
+  PrivacyPolicy? _policy;
+  PrivacyConsent? _consent;
+  String? _error;
+  bool _busy = false;
+  late final PrivacyService _service = PrivacyService(context.read<ApiClient>());
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    setState(() => _error = null);
+    try {
+      final results = await Future.wait([_service.getPolicy(), _service.getConsent()]);
+      if (!mounted) return;
+      setState(() {
+        _policy = results[0] as PrivacyPolicy;
+        _consent = results[1] as PrivacyConsent;
+      });
+    } catch (e) {
+      if (mounted) setState(() => _error = e.toString().replaceFirst('Exception: ', ''));
+    }
+  }
+
+  Future<void> _change(Future<PrivacyConsent> Function() action, String message) async {
+    setState(() => _busy = true);
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      final result = await action();
+      if (!mounted) return;
+      setState(() => _consent = result);
+      messenger.showSnackBar(SnackBar(content: Text(message), backgroundColor: Colors.green));
+    } catch (e) {
+      messenger.showSnackBar(SnackBar(content: Text(e.toString().replaceFirst('Exception: ', '')), backgroundColor: Colors.red));
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    final policy = _policy;
+    final consent = _consent;
+
+    Widget body;
+    if (_error != null && policy == null) {
+      body = ErrorView(message: _error!, onRetry: _load);
+    } else if (policy == null || consent == null) {
+      body = const LoadingView();
+    } else {
+      body = ListView(
+        padding: const EdgeInsets.all(20),
+        children: [
+          Card(
+            elevation: 0,
+            color: const Color(0xFFF6F4FC),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('Sự đồng ý của bạn', style: TextStyle(fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 6),
+                  Text(consent.accepted
+                      ? 'Bạn đã đồng ý chính sách này${consent.acceptedAt == null ? '' : ' lúc ${formatDateTime(consent.acceptedAt!.toLocal())}'}.'
+                      : 'Bạn chưa đồng ý chính sách này nên chưa chấm công được bằng ứng dụng.'),
+                  const SizedBox(height: 10),
+                  consent.accepted
+                      ? OutlinedButton(
+                          onPressed: _busy ? null : () => _change(_service.withdraw, 'Đã rút lại đồng ý.'),
+                          child: const Text('Rút lại đồng ý'),
+                        )
+                      : ElevatedButton(
+                          style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF5A3FD8), foregroundColor: Colors.white),
+                          onPressed: _busy ? null : () => _change(_service.accept, 'Đã ghi nhận đồng ý của bạn.'),
+                          child: const Text('Tôi đồng ý'),
+                        ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 20),
+          for (final s in policy.sections)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(s.heading, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF5A3FD8))),
+                  const SizedBox(height: 8),
+                  Text(s.body, style: const TextStyle(fontSize: 14, color: Colors.black87, height: 1.5)),
+                ],
+              ),
+            ),
+        ],
+      );
+    }
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
         title: const Text('Chính sách quyền riêng tư'),
         backgroundColor: const Color(0xFF5A3FD8),
+        foregroundColor: Colors.white,
         elevation: 0,
       ),
-      body: ListView.builder(
-        padding: const EdgeInsets.all(20.0),
-        itemCount: _privacySections.length,
-        itemBuilder: (context, index) {
-          final section = _privacySections[index];
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 24.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  section['title']!,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF5A3FD8),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  section['content']!,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: Colors.black87,
-                    height: 1.5,
-                  ),
-                ),
-              ],
-            ),
-          );
-        },
-      ),
+      body: body,
     );
   }
 }

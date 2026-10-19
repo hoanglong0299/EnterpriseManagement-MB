@@ -6,12 +6,15 @@ import 'package:provider/provider.dart';
 
 import '../../../app/theme.dart';
 import '../../../core/utils/punch_lock.dart';
+import '../../../core/network/api_client.dart';
 import '../../../core/utils/vi_date.dart';
+import '../../../services/privacy_service.dart';
 import '../../../services/live_updates.dart';
 import '../../../shared/widgets/auto_refresh.dart';
 import '../../check_in/providers/check_in_provider.dart';
 import '../../notifications/providers/notification_provider.dart';
 import '../../profile/providers/profile_provider.dart';
+import '../../profile/widgets/privacy_consent_dialog.dart';
 import '../widgets/check_button.dart';
 import '../widgets/home_header.dart';
 import '../widgets/work_summary_card.dart';
@@ -61,6 +64,16 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   Future<void> _handleCheck() async {
     final provider = context.read<CheckInProvider>();
     final wasClockedIn = provider.hasClockedIn;
+
+    // Lần đầu (hoặc khi chính sách đổi) phải đồng ý thu thập vị trí/ảnh trước khi chấm công.
+    final messenger = ScaffoldMessenger.of(context);
+    final consented = await ensurePrivacyConsent(
+      context,
+      PrivacyService(context.read<ApiClient>()),
+      onError: (message) => messenger.showSnackBar(SnackBar(content: Text(message), backgroundColor: Colors.red)),
+    );
+    if (!consented || !mounted) return;
+
     await provider.performAction(wasClockedIn ? 'CLOCK OUT' : 'CLOCK IN');
     if (!mounted) return;
 

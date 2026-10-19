@@ -11,6 +11,52 @@ import '../widgets/utility_grid.dart';
 class UtilitiesScreen extends StatelessWidget {
   const UtilitiesScreen({super.key});
 
+  // Nhóm theo khu vực của route, cùng thứ tự với thanh bên của web: cá nhân, quản lý, nhân sự, quản trị.
+  // Chỉ hiện tiêu đề nhóm khi tài khoản có từ hai nhóm trở lên (nhân viên thường chỉ thấy một lưới như trước).
+  static const _groups = [
+    ('/employee/', 'Cá nhân'),
+    ('/manager/', 'Quản lý'),
+    ('/hr/', 'Nhân sự'),
+    ('/admin/', 'Quản trị'),
+  ];
+
+  List<Widget> _buildGroups(BuildContext context, MenuProvider menu, List<AppFeature> features) {
+    final sections = <(String, List<AppFeature>)>[];
+    for (final (prefix, label) in _groups) {
+      final inGroup = features.where((f) => f.route.startsWith(prefix)).toList();
+      if (inGroup.isNotEmpty) sections.add((label, inGroup));
+    }
+    final grouped = sections.expand((s) => s.$2).toSet();
+    final others = features.where((f) => !grouped.contains(f)).toList();
+    if (others.isNotEmpty) sections.add(('Khác', others));
+
+    final showTitles = sections.length >= 2;
+    return [
+      for (final (label, items) in sections) ...[
+        if (showTitles)
+          Padding(
+            padding: const EdgeInsets.only(top: 8, bottom: 10),
+            child: Text(
+              label.toUpperCase(),
+              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, letterSpacing: 0.5, color: Colors.black54),
+            ),
+          ),
+        UtilityGrid(
+          items: [
+            for (final feature in items)
+              UtilityItem(
+                title: menu.titleOf(feature.route) ?? feature.fallbackTitle,
+                icon: feature.icon,
+                color: feature.color,
+                onTap: () => Navigator.push(context, MaterialPageRoute(builder: feature.builder)),
+              ),
+          ],
+        ),
+        const SizedBox(height: 12),
+      ],
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
     final menu = context.watch<MenuProvider>();
@@ -35,17 +81,7 @@ class UtilitiesScreen extends StatelessWidget {
             ),
           )
         else
-          UtilityGrid(
-            items: [
-              for (final feature in features)
-                UtilityItem(
-                  title: menu.titleOf(feature.route) ?? feature.fallbackTitle,
-                  icon: feature.icon,
-                  color: feature.color,
-                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: feature.builder)),
-                ),
-            ],
-          ),
+          ..._buildGroups(context, menu, features),
       ],
     );
   }
