@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 
 import '../../../core/network/api_client.dart';
 import '../../../models/attendance_hr.dart';
+import '../../../models/leave_request.dart';
 import '../../../services/hr_service.dart';
 import '../../../shared/widgets/confirm_dialog.dart';
 import '../../../shared/widgets/state_views.dart';
@@ -13,7 +14,9 @@ import '../widgets/leave_return_ui.dart';
 
 // Màn "Đi làm lại" của nhân viên: gửi yêu cầu (ngày + buổi + lý do, có xem trước) và xem các yêu cầu của tôi.
 class LeaveReturnScreen extends StatefulWidget {
-  const LeaveReturnScreen({super.key});
+  // Đơn nghỉ đang muốn rút ngắn (mở từ thẻ đơn nghỉ): giới hạn ngày chọn trong phần còn lại của đơn.
+  final LeaveRequest? leave;
+  const LeaveReturnScreen({super.key, this.leave});
 
   @override
   State<LeaveReturnScreen> createState() => _LeaveReturnScreenState();
@@ -96,9 +99,9 @@ class _LeaveReturnScreenState extends State<LeaveReturnScreen> {
     final first = DateTime(today.year, today.month, today.day);
     final picked = await showDatePicker(
       context: context,
-      initialDate: _date ?? first,
+      initialDate: _date ?? (widget.leave != null && first.isAfter(widget.leave!.endDate) ? widget.leave!.endDate : first),
       firstDate: first,
-      lastDate: DateTime(today.year + 1, today.month, today.day),
+      lastDate: widget.leave?.endDate ?? DateTime(today.year + 1, today.month, today.day),
     );
     if (picked == null) return;
     setState(() => _date = picked);
@@ -219,8 +222,8 @@ class _LeaveReturnScreenState extends State<LeaveReturnScreen> {
                     const Text('Gửi yêu cầu rút ngắn nghỉ phép', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                     const SizedBox(height: 4),
                     const Text(
-                      'Dùng khi kỳ nghỉ đã bắt đầu nhưng bạn muốn đi làm sớm. Chỉ chọn được buổi chưa bắt đầu và không phải buổi đầu của kỳ nghỉ; '
-                      'hệ thống bỏ các buổi nghỉ còn lại của đơn đó và hoàn phép. Chưa bắt đầu nghỉ mà không đi nữa thì dùng "Xin hủy đơn" ở danh sách đơn nghỉ.',
+                      'Dùng khi kỳ nghỉ đã bắt đầu nhưng bạn muốn đi làm sớm. Chỉ rút ngắn được khi phần nghỉ còn lại từ 1 ngày trở lên; chỉ chọn được buổi chưa bắt đầu và không phải buổi đầu của kỳ nghỉ. '
+                      'Hệ thống bỏ các buổi nghỉ còn lại của đơn đó và hoàn phép. Chưa bắt đầu nghỉ mà không đi nữa thì dùng "Xin hủy đơn" ở danh sách đơn nghỉ.',
                       style: TextStyle(color: Colors.grey, fontSize: 12),
                     ),
                     const SizedBox(height: 16),

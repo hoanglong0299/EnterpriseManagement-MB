@@ -119,17 +119,6 @@ class _LeaveRecordScreenState extends State<LeaveRecordScreen> {
           title: const Text('Xin nghỉ phép'),
           backgroundColor: const Color(0xFF5A3FD8),
           foregroundColor: Colors.white,
-          actions: [
-            // Lối vào "Đi làm lại": chỉ người có quyền tự xin nghỉ.
-            PermissionGate(
-              code: 'leave.request.self',
-              child: TextButton.icon(
-                onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const LeaveReturnScreen())),
-                icon: const Icon(Icons.work_history_outlined, color: Colors.white, size: 18),
-                label: const Text('Rút ngắn phép', style: TextStyle(color: Colors.white)),
-              ),
-            ),
-          ],
           bottom: const TabBar(
             labelColor: Colors.white,
             unselectedLabelColor: Colors.white70,
@@ -351,6 +340,15 @@ class _LeaveRecordScreenState extends State<LeaveRecordScreen> {
                               child: Text('Bạn đã xin hủy đơn này, đang chờ quản lý duyệt.', style: TextStyle(color: Color(0xFFEF6C00), fontSize: 13)),
                             ),
                           ],
+                        ),
+                      );
+                    }
+                    if (provider.canShorten(r)) {
+                      return Align(
+                        alignment: Alignment.centerRight,
+                        child: TextButton(
+                          onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => LeaveReturnScreen(leave: r))),
+                          child: const Text('XIN RÚT NGẮN'),
                         ),
                       );
                     }

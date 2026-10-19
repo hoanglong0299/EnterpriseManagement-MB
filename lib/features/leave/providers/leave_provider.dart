@@ -42,6 +42,20 @@ class LeaveProvider extends ChangeNotifier {
   bool canRequestCancel(LeaveRequest r) =>
       r.status == 'Approved' && r.startDate.isAfter(DateTime.now()) && pendingCancelFor(r.id) == null;
 
+  // Đơn nhiều ngày đã duyệt, đã bắt đầu nghỉ và còn ít nhất 1 ngày làm việc (từ ngày mai tới hết đơn): cho xin rút ngắn.
+  bool canShorten(LeaveRequest r) {
+    if (r.status != 'Approved') return false;
+    final today = DateTime.now();
+    final todayDate = DateTime(today.year, today.month, today.day);
+    final start = DateTime(r.startDate.year, r.startDate.month, r.startDate.day);
+    final end = DateTime(r.endDate.year, r.endDate.month, r.endDate.day);
+    if (!end.isAfter(start) || start.isAfter(todayDate)) return false;
+    for (var d = todayDate.add(const Duration(days: 1)); !d.isAfter(end); d = d.add(const Duration(days: 1))) {
+      if (d.weekday != DateTime.saturday && d.weekday != DateTime.sunday) return true;
+    }
+    return false;
+  }
+
   // Dinh dang Map {title, value, category} la dinh dang Dashboard va LeaveStatusScreen dang doc.
   List<Map<String, dynamic>> get leaveStatusList {
     final paidByCode = {for (final t in _types) t.leaveTypeCode: t.isPaid};
