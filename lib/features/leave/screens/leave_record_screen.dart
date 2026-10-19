@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 import '../../../models/leave_balance.dart';
+import 'leave_status_screen.dart';
 import '../../../models/leave_request.dart';
 import '../../../models/leave_type.dart';
 import '../../../shared/widgets/confirm_dialog.dart';
@@ -155,22 +156,36 @@ class _LeaveRecordScreenState extends State<LeaveRecordScreen> {
     );
   }
 
-  // 3 ô tóm tắt như MetricRail bên web: ngày phép còn lại, nghỉ ngắn tháng này, đơn chờ duyệt.
+  // 2 ô tóm tắt: ngày phép còn lại (bấm để xem chi tiết tình trạng nghỉ phép từng loại) và đơn đang chờ duyệt.
   Widget _buildMetrics(LeaveProvider provider) {
     final days = provider.balances.where((b) => b.unit == 'Days').fold<double>(0, (sum, b) => sum + b.remainingTime);
-    final shorts = provider.balances.where((b) => b.unit == 'Hours').toList();
     final pending = provider.requests.where((r) => r.isPending).length;
 
-    Widget tile(String label, String value, Color color) => Expanded(
-          child: Container(
-            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
-            decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(10)),
-            child: Column(
-              children: [
-                Text(value, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: color)),
-                const SizedBox(height: 2),
-                Text(label, textAlign: TextAlign.center, style: const TextStyle(fontSize: 11, color: Colors.grey)),
-              ],
+    Widget tile(String label, String value, Color color, {VoidCallback? onTap}) => Expanded(
+          child: Material(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(10),
+            child: InkWell(
+              borderRadius: BorderRadius.circular(10),
+              onTap: onTap,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+                child: Column(
+                  children: [
+                    Text(value, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: color)),
+                    const SizedBox(height: 2),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Flexible(
+                          child: Text(label, textAlign: TextAlign.center, style: const TextStyle(fontSize: 11, color: Colors.grey)),
+                        ),
+                        if (onTap != null) const Icon(Icons.chevron_right, size: 14, color: Colors.grey),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
             ),
           ),
         );
@@ -179,12 +194,14 @@ class _LeaveRecordScreenState extends State<LeaveRecordScreen> {
       padding: const EdgeInsets.fromLTRB(12, 12, 12, 4),
       child: Row(
         children: [
-          tile('Ngày phép còn lại', '${_num(days)} ngày', const Color(0xFF5A3FD8)),
-          const SizedBox(width: 8),
           tile(
-            'Nghỉ ngắn tháng này',
-            shorts.isEmpty ? '--' : '${_num(shorts.first.remainingTime)} giờ',
+            'Ngày phép còn lại',
+            '${_num(days)} ngày',
             const Color(0xFF5A3FD8),
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => LeaveStatusScreen(leaveStatusList: provider.leaveStatusList)),
+            ),
           ),
           const SizedBox(width: 8),
           tile('Đang chờ duyệt', '$pending', pending > 0 ? StatusChip.warning : StatusChip.success),
