@@ -118,7 +118,7 @@ class _PositionsView extends StatelessWidget {
         ],
       ),
     );
-    controller.dispose();
+    // Không dispose controller ở đây: dialog còn đang chạy hiệu ứng đóng và vẫn dùng nó.
     if (value == null || !context.mounted) return;
     await runAdminAction(context, () => provider.setSalary(p, value), 'Đã cập nhật lương chuẩn.');
   }

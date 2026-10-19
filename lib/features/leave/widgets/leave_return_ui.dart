@@ -235,7 +235,7 @@ class _PendingReturnsTabState extends State<PendingReturnsTab> {
         ],
       ),
     );
-    controller.dispose();
+    // Không dispose controller ở đây: dialog còn đang chạy hiệu ứng đóng và vẫn dùng nó.
     if (reason == null || !mounted) return;
     await _run(r, () => _service.rejectReturn(r.id, reason: reason.isEmpty ? null : reason), 'Đã từ chối yêu cầu.');
   }

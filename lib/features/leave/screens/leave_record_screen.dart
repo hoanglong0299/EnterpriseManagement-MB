@@ -62,32 +62,11 @@ class _LeaveRecordScreenState extends State<LeaveRecordScreen> {
 
   // Đơn đã duyệt nhưng chưa bắt đầu: xin quản lý hủy (khác với đơn đang chờ duyệt thì hủy thẳng).
   Future<void> _requestCancel(LeaveRequest r) async {
-    final controller = TextEditingController();
+    // Controller do dialog tự giữ và hủy; hủy sớm ở đây sẽ gây lỗi khi dialog còn đang chạy hiệu ứng đóng.
     final reason = await showDialog<String>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Xin hủy đơn nghỉ phép'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('${r.leaveTypeName} (${r.dateLabel}). Quản lý duyệt thì đơn được hủy và phép được hoàn lại.'),
-            const SizedBox(height: 12),
-            TextField(
-              controller: controller,
-              autofocus: true,
-              maxLines: 3,
-              decoration: const InputDecoration(labelText: 'Lý do hủy', border: OutlineInputBorder()),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Đóng')),
-          TextButton(onPressed: () => Navigator.pop(ctx, controller.text.trim()), child: const Text('Gửi yêu cầu')),
-        ],
-      ),
+      builder: (ctx) => _CancelReasonDialog(description: '${r.leaveTypeName} (${r.dateLabel}). Quản lý duyệt thì đơn được hủy và phép được hoàn lại.'),
     );
-    controller.dispose();
     if (reason == null || !mounted) return;
 
     final provider = context.read<LeaveProvider>();
@@ -834,6 +813,49 @@ class _LeaveApplicationScreenState extends State<LeaveApplicationScreen> {
             ),
           ),
         ),
+      ],
+    );
+  }
+}
+
+class _CancelReasonDialog extends StatefulWidget {
+  final String description;
+  const _CancelReasonDialog({required this.description});
+
+  @override
+  State<_CancelReasonDialog> createState() => _CancelReasonDialogState();
+}
+
+class _CancelReasonDialogState extends State<_CancelReasonDialog> {
+  final _controller = TextEditingController();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Xin hủy đơn nghỉ phép'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(widget.description),
+          const SizedBox(height: 12),
+          TextField(
+            controller: _controller,
+            autofocus: true,
+            maxLines: 3,
+            decoration: const InputDecoration(labelText: 'Lý do hủy', border: OutlineInputBorder()),
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(onPressed: () => Navigator.pop(context), child: const Text('Đóng')),
+        TextButton(onPressed: () => Navigator.pop(context, _controller.text.trim()), child: const Text('Gửi yêu cầu')),
       ],
     );
   }
