@@ -63,6 +63,7 @@ const List<PermissionGroupDef> functionalGroups = [
       'employee.view.all',
       'leavebalance.manage',
       'timesheet.manage',
+      'timesheet.close',
       'holiday.manage',
     ],
   ),

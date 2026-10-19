@@ -14,7 +14,7 @@ const _all = [
   'page.manager.dashboard', 'page.manager.employees', 'page.manager.attendance', 'page.manager.leave', 'page.manager.organization', 'page.manager.orgtree',
   'dashboard.view.team', 'employee.view.team', 'attendance.view.team', 'attendance.adjustment.view', 'attendance.adjustment.approve', 'leave.request.view', 'leave.request.approve', 'overtime.request.view', 'overtime.request.approve',
   'page.hr.attendance', 'page.hr.attendance-notes', 'page.hr.adjustments', 'page.hr.leave-returns', 'page.hr.timesheet', 'page.hr.holidays',
-  'attendance.view.all', 'attendance.note.manage', 'attendance.adjustment.apply', 'employee.view.all', 'leavebalance.manage', 'timesheet.manage', 'holiday.manage',
+  'attendance.view.all', 'attendance.note.manage', 'attendance.adjustment.apply', 'employee.view.all', 'leavebalance.manage', 'timesheet.manage', 'timesheet.close', 'holiday.manage',
   'page.admin.employees', 'page.admin.departments', 'page.admin.positions', 'page.admin.leavetypes', 'page.admin.audit', 'page.admin.system',
   'employee.manage', 'user.manage', 'department.manage', 'position.manage', 'leavetype.manage', 'role.manage', 'permission.manage', 'menu.manage', 'audit.view',
 ];
@@ -24,10 +24,10 @@ List<String> _codes(List<SystemPermission> items) => items.map((p) => p.permissi
 void main() {
   final perms = _all.map(_p).toList();
 
-  test('xếp đủ 51 quyền vào 4 nhóm, không còn nhóm Khác', () {
+  test('xếp đủ 52 quyền vào 4 nhóm, không còn nhóm Khác', () {
     final groups = buildPermissionGroups(perms);
     expect(groups.map((g) => g.key).toList(), ['employee', 'manager', 'hr', 'admin']);
-    expect(groups.fold<int>(0, (n, g) => n + g.all.length), 51);
+    expect(groups.fold<int>(0, (n, g) => n + g.all.length), 52);
   });
 
   test('nhóm Nhân viên cơ bản gồm 4 menu và 4 quyền của chính mình', () {
