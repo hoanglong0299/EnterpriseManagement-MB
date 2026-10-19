@@ -52,6 +52,7 @@ final List<AppFeature> appFeatures = [
   // Manager
   AppFeature(route: '/manager/dashboard', fallbackTitle: 'Dashboard tổng quan', icon: Icons.insights, color: const Color(0xFF5C6BC0), builder: (_) => const ManagerDashboardScreen()),
   AppFeature(route: '/manager/employees', fallbackTitle: 'Quản lý nhân viên', icon: Icons.groups, color: const Color(0xFF26A69A), builder: (_) => const ManagerEmployeesScreen()),
+  AppFeature(route: '/manager/timesheet', fallbackTitle: 'Bảng công tháng', icon: Icons.table_view, color: const Color(0xFF3949AB), builder: (_) => const HrTimesheetScreen(team: true)),
   AppFeature(route: '/manager/attendance', fallbackTitle: 'Quản lý chấm công', icon: Icons.access_time_filled, color: const Color(0xFFE69D35), builder: (_) => const ManagerAttendanceScreen()),
   AppFeature(route: '/manager/leave', fallbackTitle: 'Duyệt đơn từ', icon: Icons.fact_check, color: const Color(0xFF3F51B5), builder: (_) => const LeaveApprovalScreen()),
   AppFeature(route: '/manager/organization', fallbackTitle: 'Phòng ban & chức vụ', icon: Icons.apartment, color: const Color(0xFF8D6E63), builder: (_) => const ManagerOrganizationScreen()),

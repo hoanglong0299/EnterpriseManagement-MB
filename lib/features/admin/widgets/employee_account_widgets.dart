@@ -65,7 +65,6 @@ class AdminEmployeeCard extends StatelessWidget {
   final VoidCallback? onEdit;
   final VoidCallback? onToggleEmployment;
   final VoidCallback? onResetPassword;
-  final VoidCallback? onToggleAccount;
 
   const AdminEmployeeCard({
     super.key,
@@ -77,7 +76,6 @@ class AdminEmployeeCard extends StatelessWidget {
     this.onEdit,
     this.onToggleEmployment,
     this.onResetPassword,
-    this.onToggleAccount,
   });
 
   @override
@@ -141,15 +139,11 @@ class AdminEmployeeCard extends StatelessWidget {
                     if (canManageEmployee) TextButton(onPressed: onEdit, child: const Text('Sửa')),
                     if (canManageAccount)
                       TextButton(onPressed: onResetPassword, child: const Text('Đặt lại mật khẩu')),
-                    if (canManageAccount)
-                      TextButton(
-                        onPressed: onToggleAccount,
-                        child: Text(e.isAccountActive ? 'Khoá tài khoản' : 'Mở tài khoản'),
-                      ),
+                    // Một nút duy nhất: khoá = cho nghỉ việc và khoá tài khoản đăng nhập; mở khoá = phục hồi cả hai.
                     if (canManageEmployee)
                       TextButton(
                         onPressed: onToggleEmployment,
-                        child: Text(e.isActive ? 'Cho nghỉ việc' : 'Phục hồi'),
+                        child: Text(e.isActive ? 'Khoá' : 'Mở khoá'),
                       ),
                   ],
                 ),

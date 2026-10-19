@@ -82,7 +82,7 @@ void main() {
             ),
           ),
         );
-        confirmDialog(ctx, title: 'Cho nhân viên nghỉ việc?', message: _longText, confirmText: 'Cho nghỉ việc', danger: true);
+        confirmDialog(ctx, title: 'Khoá nhân viên?', message: _longText, confirmText: 'Khoá', danger: true);
         await tester.pumpAndSettle();
         expect(tester.takeException(), isNull);
       });

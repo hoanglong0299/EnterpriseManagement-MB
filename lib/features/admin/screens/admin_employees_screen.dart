@@ -391,43 +391,24 @@ class _EmployeesView extends StatelessWidget {
     address.dispose();
   }
 
-  // Cho nghỉ việc / phục hồi: luôn xác nhận vì tài khoản đăng nhập bị khoá/mở theo.
+  // Khoá / mở khoá: khoá = chuyển sang Đã nghỉ việc và khoá tài khoản đăng nhập; mở khoá = phục hồi cả hai. Luôn xác nhận khi khoá.
   Future<void> _toggleEmployment(BuildContext context, AdminEmployee e) async {
     final provider = context.read<AdminEmployeesProvider>();
-    final leaving = e.isActive;
-    final ok = await confirmDialog(
-      context,
-      title: leaving ? 'Cho nhân viên nghỉ việc?' : 'Phục hồi nhân viên?',
-      message: leaving
-          ? 'Nhân viên "${e.fullName}" sẽ chuyển sang trạng thái Đã nghỉ việc và tài khoản đăng nhập "${e.username}" sẽ bị khoá.'
-          : 'Nhân viên "${e.fullName}" sẽ trở lại trạng thái Đang làm việc và tài khoản đăng nhập "${e.username}" sẽ được mở lại.',
-      confirmText: leaving ? 'Cho nghỉ việc' : 'Phục hồi',
-      danger: leaving,
-    );
-    if (!ok || !context.mounted) return;
-    await runAdminAction(
-      context,
-      () => provider.setActive(e, !leaving),
-      leaving ? 'Đã cho nghỉ việc và khoá tài khoản.' : 'Đã phục hồi nhân viên và mở tài khoản.',
-    );
-  }
-
-  Future<void> _toggleAccount(BuildContext context, AdminEmployee e) async {
-    final provider = context.read<AdminEmployeesProvider>();
-    if (e.isAccountActive) {
+    final locking = e.isActive;
+    if (locking) {
       final ok = await confirmDialog(
         context,
-        title: 'Khoá tài khoản?',
-        message: 'Tài khoản "${e.username}" sẽ không thể đăng nhập cho đến khi được mở lại. Trạng thái làm việc không đổi.',
-        confirmText: 'Khoá tài khoản',
+        title: 'Khoá nhân viên?',
+        message: 'Nhân viên "${e.fullName}" sẽ chuyển sang trạng thái Đã nghỉ việc và tài khoản đăng nhập "${e.username}" sẽ bị khoá.',
+        confirmText: 'Khoá',
         danger: true,
       );
       if (!ok || !context.mounted) return;
     }
     await runAdminAction(
       context,
-      () => provider.setAccountActive(e, !e.isAccountActive),
-      e.isAccountActive ? 'Đã khoá tài khoản.' : 'Đã mở tài khoản.',
+      () => provider.setActive(e, !locking),
+      locking ? 'Đã khoá nhân viên và tài khoản.' : 'Đã mở khoá nhân viên và tài khoản.',
     );
   }
 
@@ -570,7 +551,6 @@ class _EmployeesView extends StatelessWidget {
                               onEdit: () => _openForm(context, employee: e),
                               onToggleEmployment: () => _toggleEmployment(context, e),
                               onResetPassword: () => _resetPassword(context, e),
-                              onToggleAccount: () => _toggleAccount(context, e),
                             );
                           },
                         ),

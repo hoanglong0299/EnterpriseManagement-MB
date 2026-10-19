@@ -11,7 +11,10 @@ import '../../../services/timesheet_service.dart';
 class HrTimesheetProvider extends ChangeNotifier {
   final TimesheetService _service;
 
-  HrTimesheetProvider(this._service) {
+  // Bảng công của team (quản lý chỉ xem) thay vì toàn công ty.
+  final bool team;
+
+  HrTimesheetProvider(this._service, {this.team = false}) {
     // Mở màn hình ở tháng gần nhất đã kết thúc (tháng trước), vì chỉ chốt được tháng đã qua.
     final now = DateTime.now();
     final previous = DateTime(now.year, now.month - 1);
@@ -46,7 +49,7 @@ class HrTimesheetProvider extends ChangeNotifier {
       notifyListeners();
     }
     try {
-      sheet = await _service.getTimesheet(year, month);
+      sheet = await _service.getTimesheet(year, month, team: team);
     } catch (e) {
       if (!silent) error = e.toString().replaceFirst('Exception: ', '');
     }

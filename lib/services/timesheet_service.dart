@@ -12,9 +12,10 @@ class TimesheetService {
 
   Exception _error(DioException e, String fallback) => Exception(apiErrorMessage(e, fallback));
 
-  Future<Timesheet> getTimesheet(int year, int month) async {
+  // team = true: bảng công của team mình (quản lý chỉ xem); false: toàn công ty (timesheet.manage).
+  Future<Timesheet> getTimesheet(int year, int month, {bool team = false}) async {
     try {
-      final response = await _apiClient.dio.get('/timesheets', queryParameters: {'year': year, 'month': month});
+      final response = await _apiClient.dio.get(team ? '/timesheets/team' : '/timesheets', queryParameters: {'year': year, 'month': month});
       return Timesheet.fromJson(response.data as Map<String, dynamic>);
     } on DioException catch (e) {
       throw _error(e, 'Không tải được bảng công tháng.');

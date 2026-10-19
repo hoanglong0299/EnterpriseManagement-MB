@@ -89,8 +89,8 @@ void main() {
           ),
         );
         expect(tester.takeException(), isNull);
-        expect(find.text('Cho nghỉ việc'), findsOneWidget);
-        expect(find.text('Phục hồi'), findsOneWidget);
+        expect(find.text('Khoá'), findsOneWidget);
+        expect(find.text('Mở khoá'), findsOneWidget);
       });
 
       testWidgets('Hộp mật khẩu sinh ra không tràn ở $tag', (tester) async {

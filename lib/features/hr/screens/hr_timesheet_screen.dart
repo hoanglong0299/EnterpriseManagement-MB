@@ -14,12 +14,14 @@ import '../providers/hr_timesheet_provider.dart';
 // Bảng công tháng (route /hr/timesheet, quyền timesheet.manage): tổng hợp công của từng nhân viên trong tháng,
 // chốt kỳ công (khóa dữ liệu của tháng) hoặc mở lại, xuất CSV để tính lương.
 class HrTimesheetScreen extends StatelessWidget {
-  const HrTimesheetScreen({super.key});
+  // team = true: dùng cho quản lý (route /manager/timesheet), chỉ gồm cấp dưới của mình; chốt/mở lại bị ẩn vì thiếu quyền timesheet.manage.
+  final bool team;
+  const HrTimesheetScreen({super.key, this.team = false});
 
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (ctx) => HrTimesheetProvider(TimesheetService(ctx.read<ApiClient>()))..load(),
+      create: (ctx) => HrTimesheetProvider(TimesheetService(ctx.read<ApiClient>()), team: team)..load(),
       child: const _View(),
     );
   }

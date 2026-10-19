@@ -34,6 +34,7 @@ const List<PermissionGroupDef> functionalGroups = [
       'page.manager.dashboard',
       'page.manager.employees',
       'page.manager.attendance',
+      'page.manager.timesheet',
       'page.manager.leave',
       'page.manager.organization',
       'page.manager.orgtree',
