@@ -114,31 +114,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
     _loadMonth(_focusedMonth);
   }
 
-  Future<void> _selectDate(BuildContext context) async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: _selectedDate,
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2100),
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.light(primary: Color(0xFF5A3FD8), onPrimary: Colors.white, onSurface: Colors.black),
-          ),
-          child: child!,
-        );
-      },
-    );
-
-    if (picked != null && picked != _selectedDate) {
-      setState(() {
-        _selectedDate = picked;
-        _focusedMonth = DateTime(picked.year, picked.month, 1);
-      });
-      _loadMonth(_focusedMonth);
-    }
-  }
-
   // Gửi yêu cầu chỉnh sửa cho ngày đang chọn; thành công thì tải lại tháng.
   Future<void> _requestAdjustment() async {
     final ok = await showAdjustmentForm(context, initialDate: _selectedDate);
@@ -292,10 +267,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
                   const Text(
                     'Lịch',
                     style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFF1E293B)),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.calendar_month, color: Color(0xFF5A3FD8)),
-                    onPressed: () => _selectDate(context),
                   ),
                 ],
               ),
