@@ -14,6 +14,7 @@ import '../features/dashboard/screens/dashboard_screen.dart';
 import '../features/leave/providers/leave_approval_provider.dart';
 import '../features/leave/providers/leave_provider.dart';
 import '../features/profile/providers/profile_provider.dart';
+import '../features/utilities/providers/pending_badge_provider.dart';
 import '../services/attendance_service.dart';
 import '../services/auth_service.dart';
 import '../services/employee_service.dart';
@@ -78,6 +79,9 @@ class MyApp extends StatelessWidget {
         ),
         ChangeNotifierProvider(create: (_) => MenuProvider(menuService)),
         ChangeNotifierProvider(create: (_) => LeaveApprovalProvider(leaveService)),
+        ChangeNotifierProvider(
+          create: (context) => PendingBadgeProvider(apiClient, liveUpdates, context.read<MenuProvider>()),
+        ),
         ChangeNotifierProvider.value(value: notificationProvider),
         Provider<LiveUpdates>.value(value: liveUpdates),
         Provider<PushService>.value(value: pushService),

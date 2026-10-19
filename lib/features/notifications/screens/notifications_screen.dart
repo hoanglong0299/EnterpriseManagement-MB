@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../app/feature_registry.dart';
+import '../../leave/screens/leave_approval_screen.dart';
 import '../../../core/utils/vi_date.dart';
 import '../../../models/app_notification.dart';
 import '../../../shared/widgets/state_views.dart';
@@ -90,11 +91,21 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     final navigator = Navigator.of(context);
     provider.markRead(n);
 
-    final route = n.route;
-    if (route == null || !menu.hasRoute(route)) return;
+    final raw = n.route;
+    if (raw == null) return;
+    // Route có thể kèm ?tab=... để mở đúng tab (vd /manager/leave?tab=cancels); menu và màn hình khớp theo phần đường dẫn.
+    final uri = Uri.parse(raw);
+    final route = uri.path;
+    if (!menu.hasRoute(route)) return;
     for (final feature in appFeatures) {
       if (feature.route == route) {
-        navigator.push(MaterialPageRoute(builder: feature.builder));
+        if (route == '/manager/leave') {
+          navigator.push(MaterialPageRoute(
+            builder: (_) => LeaveApprovalScreen(initialTab: LeaveApprovalScreen.tabIndexOf(uri.queryParameters['tab'])),
+          ));
+        } else {
+          navigator.push(MaterialPageRoute(builder: feature.builder));
+        }
         return;
       }
     }

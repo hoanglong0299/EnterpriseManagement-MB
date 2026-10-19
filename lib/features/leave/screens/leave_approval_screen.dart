@@ -7,6 +7,10 @@ import '../../../models/leave_request.dart';
 import '../../../shared/widgets/permission_gate.dart';
 import '../../../shared/widgets/state_views.dart';
 import '../../auth/providers/auth_provider.dart';
+import '../../../core/network/api_client.dart';
+import '../../../services/hr_service.dart';
+import '../../../services/leave_service.dart';
+import '../../../services/overtime_service.dart';
 import '../providers/leave_approval_provider.dart';
 import '../../attendance/widgets/capped_width.dart';
 import '../../overtime/widgets/overtime_approval_tab.dart';
@@ -16,7 +20,17 @@ import '../widgets/leave_ui.dart';
 
 // Màn hình duyệt đơn từ của quản lý (tương ứng trang "Duyệt đơn từ" bên web): đơn nghỉ phép, đi làm lại và làm thêm giờ.
 class LeaveApprovalScreen extends StatefulWidget {
-  const LeaveApprovalScreen({super.key});
+  // Tab mở đầu: 0 Chờ duyệt, 1 Lịch sử, 2 Rút ngắn phép, 3 Hủy phép, 4 Làm thêm giờ (thông báo mở thẳng tab có yêu cầu mới).
+  final int initialTab;
+  const LeaveApprovalScreen({super.key, this.initialTab = 0});
+
+  static int tabIndexOf(String? name) => switch (name) {
+        'history' => 1,
+        'returns' => 2,
+        'cancels' => 3,
+        'overtime' => 4,
+        _ => 0,
+      };
 
   @override
   State<LeaveApprovalScreen> createState() => _LeaveApprovalScreenState();
@@ -26,11 +40,40 @@ class _LeaveApprovalScreenState extends State<LeaveApprovalScreen> {
   String _query = ''; // tìm theo tên/mã nhân viên
   String? _historyStatus; // lọc trạng thái ở tab Lịch sử (null = tất cả)
 
+  // Số yêu cầu đang chờ ở các tab khác (tab Chờ duyệt lấy từ LeaveApprovalProvider), để quản lý thấy ngay chỗ nào có việc.
+  int _returnCount = 0;
+  int _cancelCount = 0;
+  int _overtimeCount = 0;
+
+  Future<void> _loadCounts() async {
+    final api = context.read<ApiClient>();
+    Future<int> count(Future<List<dynamic>> Function() load) async {
+      try {
+        return (await load()).length;
+      } catch (_) {
+        return 0;
+      }
+    }
+
+    final results = await Future.wait([
+      count(() => HrService(api).getPendingReturns()),
+      count(() => LeaveService(api).getPendingCancels()),
+      count(() => OvertimeService(api).getPending()),
+    ]);
+    if (!mounted) return;
+    setState(() {
+      _returnCount = results[0];
+      _cancelCount = results[1];
+      _overtimeCount = results[2];
+    });
+  }
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<LeaveApprovalProvider>().load();
+      _loadCounts();
     });
   }
 
@@ -81,7 +124,10 @@ class _LeaveApprovalScreenState extends State<LeaveApprovalScreen> {
   @override
   Widget build(BuildContext context) {
     return AutoRefresh(
-      onRefresh: () => context.read<LeaveApprovalProvider>().load(silent: true),
+      onRefresh: () async {
+        await context.read<LeaveApprovalProvider>().load(silent: true);
+        await _loadCounts();
+      },
       types: NotificationTypes.manager,
       child: _buildContent(context),
     );
@@ -104,6 +150,7 @@ class _LeaveApprovalScreenState extends State<LeaveApprovalScreen> {
 
     return DefaultTabController(
       length: 5,
+      initialIndex: widget.initialTab.clamp(0, 4),
       child: Scaffold(
         backgroundColor: const Color(0xFFF6F4FC),
         appBar: AppBar(
@@ -119,9 +166,9 @@ class _LeaveApprovalScreenState extends State<LeaveApprovalScreen> {
             tabs: [
               Tab(text: 'Chờ duyệt (${provider.pending.length})'),
               const Tab(text: 'Lịch sử'),
-              const Tab(text: 'Rút ngắn phép'),
-              const Tab(text: 'Hủy phép'),
-              const Tab(text: 'Làm thêm giờ'),
+              Tab(text: 'Rút ngắn phép${_returnCount > 0 ? ' ($_returnCount)' : ''}'),
+              Tab(text: 'Hủy phép${_cancelCount > 0 ? ' ($_cancelCount)' : ''}'),
+              Tab(text: 'Làm thêm giờ${_overtimeCount > 0 ? ' ($_overtimeCount)' : ''}'),
             ],
           ),
         ),

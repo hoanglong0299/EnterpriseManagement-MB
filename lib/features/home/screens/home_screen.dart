@@ -38,7 +38,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    // Đến 18:00 thì tự chuyển nút sang trạng thái khoá, không cần người dùng mở lại màn hình.
+    // Đến 22:00 thì tự chuyển nút sang trạng thái khoá, không cần người dùng mở lại màn hình.
     _lockTimer = Timer.periodic(const Duration(seconds: 15), (_) {
       final locked = isPunchLocked(DateTime.now());
       if (mounted && locked != _locked) setState(() => _locked = locked);
@@ -141,7 +141,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 12),
               child: Text(
-                'Đã quá 18:00 nên chấm công bị khoá. Nếu quên chấm công, hãy gửi yêu cầu điều chỉnh chấm công (mục Tiện ích).',
+                'Đã quá 22:00 nên chấm công bị khoá. Nếu quên chấm công, hãy gửi yêu cầu điều chỉnh chấm công (mục Tiện ích).',
                 textAlign: TextAlign.center,
                 style: TextStyle(color: Colors.black54, fontSize: 12.5),
               ),

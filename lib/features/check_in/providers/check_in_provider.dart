@@ -107,8 +107,8 @@ class CheckInProvider extends ChangeNotifier {
         );
       }
 
-      // Chi check-in moi can chup anh; da check-in roi thi lan bam nay la check-out, khong chup.
-      final photo = hasClockedIn ? null : await _photoService.captureFace();
+      // Ca check-in lan check-out deu phai chup anh lam bang chung.
+      final photo = await _photoService.captureFace();
 
       _today = await _attendanceService.punch(
         latitude: position.latitude,

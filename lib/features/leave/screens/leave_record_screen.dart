@@ -416,7 +416,6 @@ class _LeaveRecordScreenState extends State<LeaveRecordScreen> {
 
   Widget _buildBalanceCard(LeaveBalance b) {
     final unit = b.unit == 'Hours' ? 'giờ' : 'ngày';
-    final ratio = b.allocatedTime <= 0 ? 0.0 : (b.usedTime / b.allocatedTime).clamp(0.0, 1.0);
     return Card(
       margin: const EdgeInsets.only(bottom: 10),
       child: Padding(
@@ -441,9 +440,7 @@ class _LeaveRecordScreenState extends State<LeaveRecordScreen> {
             ),
             const SizedBox(height: 2),
             Text(b.periodLabel, style: const TextStyle(color: Colors.grey, fontSize: 12)),
-            const SizedBox(height: 10),
-            LinearProgressIndicator(value: ratio, minHeight: 6, borderRadius: BorderRadius.circular(3)),
-            const SizedBox(height: 6),
+            const SizedBox(height: 8),
             Text('Đã dùng ${_num(b.usedTime)} $unit', style: const TextStyle(fontSize: 12, color: Colors.black54)),
             if (b.refundedTime > 0)
               Text('Đã hoàn ${_num(b.refundedTime)} $unit do rút ngắn phép',

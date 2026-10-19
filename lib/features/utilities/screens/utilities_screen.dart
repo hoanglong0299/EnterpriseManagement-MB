@@ -4,12 +4,34 @@ import 'package:provider/provider.dart';
 import '../../../app/feature_registry.dart';
 import '../../../app/theme.dart';
 import '../../dashboard/providers/menu_provider.dart';
+import '../providers/pending_badge_provider.dart';
 import '../widgets/utility_grid.dart';
 
 // Tiện ích: các chức năng của tài khoản (xin nghỉ, quản lý chấm công, duyệt đơn...) dạng lưới icon.
 // Mỗi chức năng chỉ hiện khi menu backend cấp trang tương ứng cho tài khoản (giống bản web, không dựa vào tên role).
-class UtilitiesScreen extends StatelessWidget {
+class UtilitiesScreen extends StatefulWidget {
   const UtilitiesScreen({super.key});
+
+  @override
+  State<UtilitiesScreen> createState() => _UtilitiesScreenState();
+}
+
+class _UtilitiesScreenState extends State<UtilitiesScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Mở tab Tiện ích thì đếm lại số việc chờ xử lý.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) context.read<PendingBadgeProvider>().refresh();
+    });
+  }
+
+  // Mở chức năng rồi quay lại: số chờ có thể đã đổi (vừa duyệt xong) nên đếm lại.
+  Future<void> _open(AppFeature feature) async {
+    final badges = context.read<PendingBadgeProvider>();
+    await Navigator.push(context, MaterialPageRoute(builder: feature.builder));
+    badges.refresh();
+  }
 
   // Nhóm theo khu vực của route, cùng thứ tự với thanh bên của web: cá nhân, quản lý, nhân sự, quản trị.
   // Chỉ hiện tiêu đề nhóm khi tài khoản có từ hai nhóm trở lên (nhân viên thường chỉ thấy một lưới như trước).
@@ -20,7 +42,7 @@ class UtilitiesScreen extends StatelessWidget {
     ('/admin/', 'Quản trị'),
   ];
 
-  List<Widget> _buildGroups(BuildContext context, MenuProvider menu, List<AppFeature> features) {
+  List<Widget> _buildGroups(MenuProvider menu, PendingBadgeProvider badges, List<AppFeature> features) {
     final sections = <(String, List<AppFeature>)>[];
     for (final (prefix, label) in _groups) {
       final inGroup = features.where((f) => f.route.startsWith(prefix)).toList();
@@ -48,7 +70,8 @@ class UtilitiesScreen extends StatelessWidget {
                 title: menu.titleOf(feature.route) ?? feature.fallbackTitle,
                 icon: feature.icon,
                 color: feature.color,
-                onTap: () => Navigator.push(context, MaterialPageRoute(builder: feature.builder)),
+                onTap: () => _open(feature),
+                badge: badges.countOf(feature.route),
               ),
           ],
         ),
@@ -60,6 +83,7 @@ class UtilitiesScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final menu = context.watch<MenuProvider>();
+    final badges = context.watch<PendingBadgeProvider>();
 
     final features = [
       for (final feature in appFeatures)
@@ -81,7 +105,7 @@ class UtilitiesScreen extends StatelessWidget {
             ),
           )
         else
-          ..._buildGroups(context, menu, features),
+          ..._buildGroups(menu, badges, features),
       ],
     );
   }

@@ -7,7 +7,7 @@ class CheckButton extends StatefulWidget {
   final bool checkedIn;
   final bool loading;
   final VoidCallback onPressed;
-  // Quá giờ khoá chấm công (18:00): nút xám, không bấm được, không còn vòng sáng.
+  // Quá giờ khoá chấm công (22:00): nút xám, không bấm được, không còn vòng sáng.
   final bool locked;
 
   const CheckButton({super.key, required this.checkedIn, required this.loading, required this.onPressed, this.locked = false});

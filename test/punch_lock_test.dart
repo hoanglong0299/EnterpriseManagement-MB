@@ -12,8 +12,9 @@ void main() {
       (7, 45, false),
       (17, 0, false),
       (17, 59, false),
-      (18, 0, true),
-      (18, 1, true),
+      (21, 59, false),
+      (22, 0, true),
+      (22, 1, true),
       (23, 59, true),
     ]) {
       test('lúc ${c.$1}:${c.$2} thì khoá = ${c.$3}', () {

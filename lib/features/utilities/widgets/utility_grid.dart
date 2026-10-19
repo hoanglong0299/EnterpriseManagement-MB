@@ -8,8 +8,10 @@ class UtilityItem {
   final IconData icon;
   final Color color;
   final VoidCallback onTap;
+  // Số việc đang chờ xử lý của chức năng; > 0 thì hiện chấm đỏ có số ở góc icon.
+  final int badge;
 
-  const UtilityItem({required this.title, required this.icon, required this.color, required this.onTap});
+  const UtilityItem({required this.title, required this.icon, required this.color, required this.onTap, this.badge = 0});
 }
 
 // Lưới ô chức năng co giãn theo màn hình: số cột tự đổi theo độ rộng và cỡ chữ,
@@ -75,14 +77,38 @@ class _UtilityTile extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Container(
-                width: 46,
-                height: 46,
-                decoration: BoxDecoration(
-                  color: item.color.withValues(alpha: 0.14),
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                child: Icon(item.icon, color: item.color, size: 24),
+              Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  Container(
+                    width: 46,
+                    height: 46,
+                    decoration: BoxDecoration(
+                      color: item.color.withValues(alpha: 0.14),
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    child: Icon(item.icon, color: item.color, size: 24),
+                  ),
+                  if (item.badge > 0)
+                    Positioned(
+                      top: -6,
+                      right: -8,
+                      child: Container(
+                        constraints: const BoxConstraints(minWidth: 20, minHeight: 20),
+                        padding: const EdgeInsets.symmetric(horizontal: 5),
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: Colors.red,
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: Colors.white, width: 1.5),
+                        ),
+                        child: Text(
+                          item.badge > 99 ? '99+' : '${item.badge}',
+                          style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w700, height: 1.1),
+                        ),
+                      ),
+                    ),
+                ],
               ),
               const SizedBox(height: 8),
               Text(

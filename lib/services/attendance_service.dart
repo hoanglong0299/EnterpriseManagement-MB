@@ -26,7 +26,7 @@ class AttendanceService {
         'latitude': latitude.toString(),
         'longitude': longitude.toString(),
         'isMockLocation': isMockLocation.toString(),
-        // Chỉ check-in mới gửi ảnh; check-out không cần.
+        // Cả check-in lẫn check-out đều gửi ảnh.
         if (photoBytes != null)
           'photo': MultipartFile.fromBytes(
             photoBytes,
