@@ -10,11 +10,11 @@ SystemPermission _p(String code, {String? module}) => SystemPermission(
     );
 
 const _all = [
-  'page.employee.dashboard', 'page.employee.attendance', 'page.employee.leave', 'attendance.punch', 'attendance.adjustment.self', 'leave.request.self',
+  'page.employee.dashboard', 'page.employee.attendance', 'page.employee.leave', 'page.employee.overtime', 'attendance.punch', 'attendance.adjustment.self', 'leave.request.self', 'overtime.request.self',
   'page.manager.dashboard', 'page.manager.employees', 'page.manager.attendance', 'page.manager.leave', 'page.manager.organization', 'page.manager.orgtree',
-  'dashboard.view.team', 'employee.view.team', 'attendance.view.team', 'attendance.adjustment.view', 'attendance.adjustment.approve', 'leave.request.view', 'leave.request.approve',
-  'page.hr.attendance', 'page.hr.attendance-notes', 'page.hr.adjustments', 'page.hr.leave-returns',
-  'attendance.view.all', 'attendance.note.manage', 'attendance.adjustment.apply', 'employee.view.all', 'leavebalance.manage',
+  'dashboard.view.team', 'employee.view.team', 'attendance.view.team', 'attendance.adjustment.view', 'attendance.adjustment.approve', 'leave.request.view', 'leave.request.approve', 'overtime.request.view', 'overtime.request.approve',
+  'page.hr.attendance', 'page.hr.attendance-notes', 'page.hr.adjustments', 'page.hr.leave-returns', 'page.hr.timesheet', 'page.hr.holidays',
+  'attendance.view.all', 'attendance.note.manage', 'attendance.adjustment.apply', 'employee.view.all', 'leavebalance.manage', 'timesheet.manage', 'holiday.manage',
   'page.admin.employees', 'page.admin.departments', 'page.admin.positions', 'page.admin.leavetypes', 'page.admin.audit', 'page.admin.system',
   'employee.manage', 'user.manage', 'department.manage', 'position.manage', 'leavetype.manage', 'role.manage', 'permission.manage', 'menu.manage', 'audit.view',
 ];
@@ -24,16 +24,16 @@ List<String> _codes(List<SystemPermission> items) => items.map((p) => p.permissi
 void main() {
   final perms = _all.map(_p).toList();
 
-  test('xếp đủ 43 quyền vào 4 nhóm, không còn nhóm Khác', () {
+  test('xếp đủ 51 quyền vào 4 nhóm, không còn nhóm Khác', () {
     final groups = buildPermissionGroups(perms);
     expect(groups.map((g) => g.key).toList(), ['employee', 'manager', 'hr', 'admin']);
-    expect(groups.fold<int>(0, (n, g) => n + g.all.length), 43);
+    expect(groups.fold<int>(0, (n, g) => n + g.all.length), 51);
   });
 
-  test('nhóm Nhân viên cơ bản gồm 3 menu và 3 quyền của chính mình', () {
+  test('nhóm Nhân viên cơ bản gồm 4 menu và 4 quyền của chính mình', () {
     final g = buildPermissionGroups(perms).firstWhere((x) => x.key == 'employee');
-    expect(_codes(g.menus), ['page.employee.dashboard', 'page.employee.attendance', 'page.employee.leave']);
-    expect(_codes(g.actions), ['attendance.punch', 'attendance.adjustment.self', 'leave.request.self']);
+    expect(_codes(g.menus), ['page.employee.dashboard', 'page.employee.attendance', 'page.employee.leave', 'page.employee.overtime']);
+    expect(_codes(g.actions), ['attendance.punch', 'attendance.adjustment.self', 'leave.request.self', 'overtime.request.self']);
   });
 
   test('employee.view.all thuộc nhóm HR, không thuộc Quản lý', () {
@@ -52,10 +52,10 @@ void main() {
   group('tick cả nhóm', () {
     final manager = buildPermissionGroups(perms).firstWhere((x) => x.key == 'manager');
 
-    test('chưa chọn gì: tick nhóm chọn hết 13', () {
+    test('chưa chọn gì: tick nhóm chọn hết 15', () {
       expect(triState(manager.all, {}), false);
       final next = toggleMany(manager.all, {});
-      expect(next.length, 13);
+      expect(next.length, 15);
       expect(triState(manager.all, next), true);
     });
 

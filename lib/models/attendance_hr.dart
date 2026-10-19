@@ -4,6 +4,9 @@
 class AttendanceCalendarDay {
   final DateTime date;
   final bool isWeekend;
+  final bool isHoliday;
+  final String? holidayName;
+  final int overtimeMinutes;
   final String morning;
   final String afternoon;
   final String morningSource;
@@ -17,6 +20,9 @@ class AttendanceCalendarDay {
   AttendanceCalendarDay({
     required this.date,
     required this.isWeekend,
+    this.isHoliday = false,
+    this.holidayName,
+    this.overtimeMinutes = 0,
     required this.morning,
     required this.afternoon,
     required this.morningSource,
@@ -34,6 +40,9 @@ class AttendanceCalendarDay {
     return AttendanceCalendarDay(
       date: DateTime.parse(json['date'] as String),
       isWeekend: json['isWeekend'] as bool? ?? false,
+      isHoliday: json['isHoliday'] as bool? ?? false,
+      holidayName: json['holidayName'] as String?,
+      overtimeMinutes: (json['overtimeMinutes'] as num?)?.toInt() ?? 0,
       morning: json['morning'] as String? ?? 'None',
       afternoon: json['afternoon'] as String? ?? 'None',
       morningSource: json['morningSource'] as String? ?? 'None',

@@ -11,9 +11,12 @@ import '../features/employee_dashboard/screens/employee_dashboard_screen.dart';
 import '../features/hr/screens/hr_adjustments_screen.dart';
 import '../features/hr/screens/hr_attendance_notes_screen.dart';
 import '../features/hr/screens/hr_attendance_screen.dart';
+import '../features/hr/screens/hr_holidays_screen.dart';
 import '../features/hr/screens/hr_leave_returns_screen.dart';
+import '../features/hr/screens/hr_timesheet_screen.dart';
 import '../features/leave/screens/leave_approval_screen.dart';
 import '../features/leave/screens/leave_record_screen.dart';
+import '../features/overtime/screens/overtime_screen.dart';
 import '../features/manager/screens/manager_attendance_screen.dart';
 import '../features/manager/screens/manager_dashboard_screen.dart';
 import '../features/manager/screens/manager_employees_screen.dart';
@@ -45,11 +48,12 @@ final List<AppFeature> appFeatures = [
   AppFeature(route: '/employee/dashboard', fallbackTitle: 'Tổng quan', icon: Icons.dashboard_outlined, color: const Color(0xFF5C6BC0), builder: (_) => const EmployeeDashboardScreen()),
   AppFeature(route: '/employee/attendance', fallbackTitle: 'Điều chỉnh chấm công', icon: Icons.edit_calendar_outlined, color: const Color(0xFFE69D35), builder: (_) => const EmployeeAttendanceScreen()),
   AppFeature(route: '/employee/leave', fallbackTitle: 'Xin nghỉ phép', icon: Icons.flight_takeoff, color: const Color(0xFF2FA2B1), builder: (_) => const LeaveRecordScreen()),
+  AppFeature(route: '/employee/overtime', fallbackTitle: 'Làm thêm giờ', icon: Icons.more_time, color: const Color(0xFF8E6BD8), builder: (_) => const OvertimeScreen()),
   // Manager
   AppFeature(route: '/manager/dashboard', fallbackTitle: 'Dashboard tổng quan', icon: Icons.insights, color: const Color(0xFF5C6BC0), builder: (_) => const ManagerDashboardScreen()),
   AppFeature(route: '/manager/employees', fallbackTitle: 'Quản lý nhân viên', icon: Icons.groups, color: const Color(0xFF26A69A), builder: (_) => const ManagerEmployeesScreen()),
   AppFeature(route: '/manager/attendance', fallbackTitle: 'Quản lý chấm công', icon: Icons.access_time_filled, color: const Color(0xFFE69D35), builder: (_) => const ManagerAttendanceScreen()),
-  AppFeature(route: '/manager/leave', fallbackTitle: 'Duyệt đơn xin nghỉ', icon: Icons.fact_check, color: const Color(0xFF3F51B5), builder: (_) => const LeaveApprovalScreen()),
+  AppFeature(route: '/manager/leave', fallbackTitle: 'Duyệt đơn từ', icon: Icons.fact_check, color: const Color(0xFF3F51B5), builder: (_) => const LeaveApprovalScreen()),
   AppFeature(route: '/manager/organization', fallbackTitle: 'Phòng ban & chức vụ', icon: Icons.apartment, color: const Color(0xFF8D6E63), builder: (_) => const ManagerOrganizationScreen()),
   AppFeature(route: '/manager/org-tree', fallbackTitle: 'Cây tổ chức', icon: Icons.account_tree, color: const Color(0xFF7E57C2), builder: (_) => const ManagerOrgTreeScreen()),
   // HR (permission gán cho role tuỳ ý)
@@ -57,6 +61,8 @@ final List<AppFeature> appFeatures = [
   AppFeature(route: '/hr/attendance-notes', fallbackTitle: 'Ghi nhận chấm công', icon: Icons.edit_note, color: const Color(0xFF00897B), builder: (_) => const HrAttendanceNotesScreen()),
   AppFeature(route: '/hr/adjustments', fallbackTitle: 'Xử lý điều chỉnh công', icon: Icons.rule, color: const Color(0xFFE69D35), builder: (_) => const HrAdjustmentsScreen()),
   AppFeature(route: '/hr/leave-returns', fallbackTitle: 'Xử lý đi làm lại', icon: Icons.assignment_return, color: const Color(0xFF7E57C2), builder: (_) => const HrLeaveReturnsScreen()),
+  AppFeature(route: '/hr/timesheet', fallbackTitle: 'Bảng công tháng', icon: Icons.table_view, color: const Color(0xFF3949AB), builder: (_) => const HrTimesheetScreen()),
+  AppFeature(route: '/hr/holidays', fallbackTitle: 'Ngày nghỉ lễ', icon: Icons.celebration_outlined, color: const Color(0xFFD81B60), builder: (_) => const HrHolidaysScreen()),
   // Admin
   AppFeature(route: '/admin/employees', fallbackTitle: 'Quản lý nhân viên', icon: Icons.badge, color: const Color(0xFF26A69A), builder: (_) => const AdminEmployeesScreen()),
   AppFeature(route: '/admin/departments', fallbackTitle: 'Phòng ban', icon: Icons.business, color: const Color(0xFF8D6E63), builder: (_) => const AdminDepartmentsScreen()),

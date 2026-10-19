@@ -19,6 +19,9 @@ class NotificationTypes {
   static const returnApproved = 'ReturnApproved';
   static const returnRejected = 'ReturnRejected';
   static const returnSubmitted = 'ReturnSubmitted';
+  static const overtimeSubmitted = 'OvertimeSubmitted';
+  static const overtimeApproved = 'OvertimeApproved';
+  static const overtimeRejected = 'OvertimeRejected';
   // Sự kiện cục bộ (không từ backend): dữ liệu chấm công của chính mình vừa đổi (chấm công vào/ra).
   static const localAttendanceChanged = 'LocalAttendanceChanged';
 
@@ -26,8 +29,13 @@ class NotificationTypes {
   static const employeeLeave = {leaveApproved, leaveRejected, returnApproved, returnRejected, leaveSubmitted};
   // Nhân viên: yêu cầu điều chỉnh chấm công của tôi.
   static const employeeAdjustment = {adjustmentManagerApproved, adjustmentApplied, adjustmentRejected, localAttendanceChanged};
+  // Nhân viên: đơn làm thêm giờ của tôi.
+  static const employeeOvertime = {overtimeApproved, overtimeRejected, overtimeSubmitted};
+  // Quản lý: đơn làm thêm giờ chờ duyệt.
+  static const managerOvertime = {overtimeSubmitted, overtimeApproved, overtimeRejected};
   // Quản lý: đơn chờ duyệt và kết quả xử lý.
   static const manager = {
+    overtimeSubmitted,
     leaveSubmitted,
     returnSubmitted,
     adjustmentSubmitted,
@@ -63,6 +71,9 @@ class NotificationTypes {
     returnApproved,
     returnRejected,
     returnSubmitted,
+    overtimeApproved,
+    overtimeRejected,
+    overtimeSubmitted,
     localAttendanceChanged,
   };
 }

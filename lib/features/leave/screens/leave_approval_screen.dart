@@ -9,10 +9,11 @@ import '../../../shared/widgets/state_views.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../providers/leave_approval_provider.dart';
 import '../../attendance/widgets/capped_width.dart';
+import '../../overtime/widgets/overtime_approval_tab.dart';
 import '../widgets/leave_return_ui.dart';
 import '../widgets/leave_ui.dart';
 
-// Màn hình duyệt đơn nghỉ phép của quản lý (tương ứng trang "Duyệt đơn xin nghỉ" bên web).
+// Màn hình duyệt đơn từ của quản lý (tương ứng trang "Duyệt đơn từ" bên web): đơn nghỉ phép, đi làm lại và làm thêm giờ.
 class LeaveApprovalScreen extends StatefulWidget {
   const LeaveApprovalScreen({super.key});
 
@@ -92,7 +93,7 @@ class _LeaveApprovalScreenState extends State<LeaveApprovalScreen> {
     if (!context.watch<AuthProvider>().can('leave.request.view')) {
       return Scaffold(
         appBar: AppBar(
-          title: const Text('Duyệt đơn xin nghỉ'),
+          title: const Text('Duyệt đơn từ'),
           backgroundColor: const Color(0xFF5A3FD8),
           foregroundColor: Colors.white,
         ),
@@ -101,11 +102,11 @@ class _LeaveApprovalScreenState extends State<LeaveApprovalScreen> {
     }
 
     return DefaultTabController(
-      length: 3,
+      length: 4,
       child: Scaffold(
         backgroundColor: const Color(0xFFF6F4FC),
         appBar: AppBar(
-          title: const Text('Duyệt đơn xin nghỉ'),
+          title: const Text('Duyệt đơn từ'),
           backgroundColor: const Color(0xFF5A3FD8),
           foregroundColor: Colors.white,
           bottom: TabBar(
@@ -116,6 +117,7 @@ class _LeaveApprovalScreenState extends State<LeaveApprovalScreen> {
               Tab(text: 'Chờ duyệt (${provider.pending.length})'),
               const Tab(text: 'Lịch sử'),
               const Tab(text: 'Đi làm lại'),
+              const Tab(text: 'Làm thêm giờ'),
             ],
           ),
         ),
@@ -124,6 +126,7 @@ class _LeaveApprovalScreenState extends State<LeaveApprovalScreen> {
             _buildList(provider, provider.pending, pending: true),
             _buildList(provider, provider.history, pending: false),
             const PendingReturnsTab(),
+            const OvertimeApprovalTab(),
           ],
         ),
       ),

@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/utils/vi_date.dart';
 import '../../../models/attendance_hr.dart';
+import '../../../models/overtime.dart';
 import '../../../services/hr_service.dart';
 import '../../../services/live_updates.dart';
 import '../../../shared/widgets/auto_refresh.dart';
@@ -151,7 +152,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
   bool get _canRequestAdjustment {
     final today = DateTime.now();
     final d = DateTime(_selectedDate.year, _selectedDate.month, _selectedDate.day);
-    return d.weekday < DateTime.saturday && !d.isAfter(DateTime(today.year, today.month, today.day));
+    return d.weekday < DateTime.saturday && !_isHoliday(d) && !d.isAfter(DateTime(today.year, today.month, today.day));
   }
 
   static bool _sameDay(DateTime a, DateTime b) => a.year == b.year && a.month == b.month && a.day == b.day;
@@ -159,6 +160,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
   static bool _isWeekend(DateTime d) => d.weekday == DateTime.saturday || d.weekday == DateTime.sunday;
 
   AttendanceCalendarDay? _dayData(DateTime date) => _monthCache[_monthKey(date)]?[_dayKey(date)];
+
+  // Ngày nghỉ lễ của công ty (backend trả về cùng dữ liệu tháng): hiển thị như ngày nghỉ, kèm tên ngày lễ.
+  bool _isHoliday(DateTime date) => _dayData(date)?.isHoliday ?? false;
 
   // Ánh xạ trạng thái buổi của backend sang vạch màu.
   static DayPartStatus _part(String s) => switch (s) {
@@ -234,9 +238,15 @@ class _CalendarScreenState extends State<CalendarScreen> {
   // Nội dung chi tiết của ngày đang chọn, lấy từ dữ liệu backend.
   List<Widget> _detailRows(DateTime date) {
     final off = dayPartColor(DayPartStatus.off)!;
-    if (_isWeekend(date)) return [_detailRow(Icons.weekend, off, 'NGÀY NGHỈ (cuối tuần)')];
-
     final d = _dayData(date);
+    final overtime = d != null && d.overtimeMinutes > 0
+        ? [_detailRow(Icons.more_time, const Color(0xFF5A3FD8), 'Làm thêm giờ: ${overtimeDurationLabel(d.overtimeMinutes)} (đã duyệt)')]
+        : <Widget>[];
+    if (d != null && d.isHoliday && !_isWeekend(date)) {
+      return [_detailRow(Icons.celebration_outlined, off, 'NGÀY LỄ: ${d.holidayName ?? ''}'), ...overtime];
+    }
+    if (_isWeekend(date)) return [_detailRow(Icons.weekend, off, 'NGÀY NGHỈ (cuối tuần)'), ...overtime];
+
     if (d == null) {
       return [_detailRow(Icons.circle_outlined, Colors.grey, _loading ? 'Đang tải...' : 'Chưa có dữ liệu chấm công')];
     }
@@ -246,6 +256,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
       ..._sessionRows('Buổi chiều', d.afternoon, d.afternoonSource, d, d.afternoonNote),
       if (d.checkInTime != null) _detailRow(Icons.login, Colors.blueGrey, 'Vào: ${timeFormat.format(d.checkInTime!.toLocal())}'),
       if (d.checkOutTime != null) _detailRow(Icons.logout, Colors.blueGrey, 'Ra: ${timeFormat.format(d.checkOutTime!.toLocal())}'),
+      ...overtime,
     ];
   }
 
@@ -400,7 +411,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                     attendance: _attendanceOf(currentDate),
                     isToday: _sameDay(DateTime.now(), currentDate),
                     isSelected: _sameDay(_selectedDate, currentDate),
-                    isWeekend: _isWeekend(currentDate),
+                    isWeekend: _isWeekend(currentDate) || _isHoliday(currentDate),
                     onTap: () => setState(() => _selectedDate = currentDate),
                   );
                 },
