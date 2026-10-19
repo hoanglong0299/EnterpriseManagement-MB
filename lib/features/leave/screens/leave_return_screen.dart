@@ -112,6 +112,16 @@ class _LeaveReturnScreenState extends State<LeaveReturnScreen> {
     if (reason.isEmpty) return showMessage(context, 'Vui lòng nhập lý do rút ngắn phép.', error: true);
     if (_submitting) return;
 
+    final preview = _preview!;
+    final confirmed = await confirmDialog(
+      context,
+      title: 'Rút ngắn nghỉ phép?',
+      message: 'Bạn sẽ đi làm lại từ ${sessionName(_session).toLowerCase()} ${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}: bỏ ${preview.sessionCount} buổi nghỉ còn lại '
+          'và được hoàn ${_num(preview.refundDays)} ngày phép.\nLý do: $reason\n\nYêu cầu sẽ gửi tới quản lý để duyệt.',
+      confirmText: 'Gửi yêu cầu',
+    );
+    if (!confirmed || !mounted) return;
+
     setState(() => _submitting = true);
     String? error;
     try {

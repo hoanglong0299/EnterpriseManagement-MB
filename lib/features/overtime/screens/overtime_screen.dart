@@ -76,6 +76,14 @@ class _ViewState extends State<_View> {
   Future<void> _submit() async {
     final messenger = ScaffoldMessenger.of(context);
     final provider = context.read<OvertimeProvider>();
+    final confirmed = await confirmDialog(
+      context,
+      title: 'Gửi đơn làm thêm giờ?',
+      message: '${_weekday(_date)}, ${DateFormat('dd/MM/yyyy').format(_date)}, ${_hhmm(_start)} - ${_hhmm(_end)}.\n'
+          'Lý do: ${_reason.text.trim().isEmpty ? '(chưa nhập)' : _reason.text.trim()}\n\nĐơn sẽ được gửi tới quản lý để duyệt.',
+      confirmText: 'Gửi đơn',
+    );
+    if (!confirmed || !mounted) return;
     final err = await provider.submit(date: _date, start: _start, end: _end, reason: _reason.text);
     if (!mounted) return;
     messenger.showSnackBar(SnackBar(

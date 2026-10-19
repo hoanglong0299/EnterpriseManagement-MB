@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import '../../../shared/widgets/confirm_dialog.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
@@ -73,6 +74,18 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       onError: (message) => messenger.showSnackBar(SnackBar(content: Text(message), backgroundColor: Colors.red)),
     );
     if (!consented || !mounted) return;
+
+    // Chấm công ra ghi đè giờ ra cũ nên hỏi lại cho chắc.
+    if (wasClockedIn) {
+      final now = DateFormat('HH:mm').format(DateTime.now());
+      final out = await confirmDialog(
+        context,
+        title: 'Chấm công ra?',
+        message: 'Ghi nhận giờ ra lúc $now. Lần chấm công ra sau sẽ ghi đè giờ ra này.',
+        confirmText: 'Chấm công ra',
+      );
+      if (!out || !mounted) return;
+    }
 
     await provider.performAction(wasClockedIn ? 'CLOCK OUT' : 'CLOCK IN');
     if (!mounted) return;

@@ -104,6 +104,15 @@ class _FormTabState extends State<_FormTab> {
       return;
     }
     final provider = context.read<HrNotesProvider>();
+    final range = _start == _end ? formatDate(_start) : '${formatDate(_start)} - ${formatDate(_end)}';
+    final confirmed = await confirmDialog(
+      context,
+      title: 'Ghi nhận chấm công?',
+      message: 'Nhân viên $_employeeCode, $range, ${_multiDay ? 'cả ngày' : sessionName(_session).toLowerCase()}: '
+          '${sessionStatusLabel(_status)}.\nGhi chú: $note\n\nGhi nhận này thay đổi công của nhân viên.',
+      confirmText: 'Ghi nhận',
+    );
+    if (!confirmed || !mounted) return;
     final err = await provider.create(
       employeeCode: _employeeCode!,
       startDate: _start,

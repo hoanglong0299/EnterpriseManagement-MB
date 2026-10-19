@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../shared/widgets/confirm_dialog.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/network/api_client.dart';
@@ -77,6 +78,18 @@ class AdjustmentFormState extends State<AdjustmentForm> {
       setState(() => _error = 'Hãy đề xuất ít nhất một giờ vào hoặc giờ ra.');
       return;
     }
+    final times = [
+      if (_checkIn != null) 'giờ vào ${_checkIn!.format(context)}',
+      if (_checkOut != null) 'giờ ra ${_checkOut!.format(context)}',
+    ].join(', ');
+    final confirmed = await confirmDialog(
+      context,
+      title: 'Gửi yêu cầu điều chỉnh công?',
+      message: 'Ngày ${_date.day.toString().padLeft(2, '0')}/${_date.month.toString().padLeft(2, '0')}/${_date.year}: đề xuất $times.\n'
+          'Yêu cầu đi qua quản lý duyệt rồi nhân sự áp dụng.',
+      confirmText: 'Gửi yêu cầu',
+    );
+    if (!confirmed || !mounted) return;
     setState(() {
       _sending = true;
       _error = null;
