@@ -1,8 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../../../app/theme.dart';
+import '../../../core/utils/punch_lock.dart';
 import '../../../core/utils/vi_date.dart';
 import '../../../services/live_updates.dart';
 import '../../../shared/widgets/auto_refresh.dart';
@@ -25,10 +28,18 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
+  Timer? _lockTimer;
+  bool _locked = isPunchLocked(DateTime.now());
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    // Đến 18:00 thì tự chuyển nút sang trạng thái khoá, không cần người dùng mở lại màn hình.
+    _lockTimer = Timer.periodic(const Duration(seconds: 15), (_) {
+      final locked = isPunchLocked(DateTime.now());
+      if (mounted && locked != _locked) setState(() => _locked = locked);
+    });
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<CheckInProvider>().loadToday();
     });
@@ -36,6 +47,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   @override
   void dispose() {
+    _lockTimer?.cancel();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
@@ -110,8 +122,17 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           WorkSummaryCard(record: provider.today),
           const SizedBox(height: 12),
           Center(
-            child: CheckButton(checkedIn: provider.hasClockedIn, loading: provider.isLoading, onPressed: _handleCheck),
+            child: CheckButton(checkedIn: provider.hasClockedIn, loading: provider.isLoading, onPressed: _handleCheck, locked: _locked),
           ),
+          if (_locked)
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 12),
+              child: Text(
+                'Đã quá 18:00 nên chấm công bị khoá. Nếu quên chấm công, hãy gửi yêu cầu điều chỉnh chấm công (mục Tiện ích).',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Colors.black54, fontSize: 12.5),
+              ),
+            ),
           const SizedBox(height: 8),
           if (office != null)
             Row(
